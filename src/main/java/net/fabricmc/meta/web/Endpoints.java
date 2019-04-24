@@ -80,7 +80,7 @@ public class Endpoints {
 		}
 		if (mappings == null) {
 			context.status(400);
-			return "no mappings version found for " + gameVersion;
+			return "no mappings version found for " + mappings;
 		}
 		return new LoaderInfo(loader, mappings);
 	}
@@ -94,6 +94,10 @@ public class Endpoints {
 		MavenBuildGameVersion mappings = FabricMeta.database.mappings.stream()
 			.filter(t -> t.test(gameVersion))
 			.findFirst().orElse(null);
+
+		if(mappings == null){
+			return Collections.emptyList();
+		}
 
 		List<LoaderInfo> infoList = new ArrayList<>();
 
