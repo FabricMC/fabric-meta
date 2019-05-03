@@ -2,7 +2,9 @@
 
 Fabric Meta ia a json HTTP api that can be used to query meta data about fabrics projects. It is updated every 5 mins.
 
-I can be used by tools or launchers that wish to query version infomation about fabric
+I can be used by tools or launchers that wish to query version infomation about fabric.
+
+Hosted at [https://meta.fabricmc.net/](https://meta.fabricmc.net/)
 
 ## Endpoints
 
