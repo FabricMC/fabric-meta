@@ -16,10 +16,13 @@
 
 package net.fabricmc.meta.web;
 
+import com.google.gson.JsonObject;
 import io.javalin.Context;
 import net.fabricmc.meta.FabricMeta;
+import net.fabricmc.meta.utils.LoaderMeta;
 import net.fabricmc.meta.web.models.MavenBuildGameVersion;
 import net.fabricmc.meta.web.models.MavenBuildVersion;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -82,7 +85,7 @@ public class Endpoints {
 			context.status(400);
 			return "no mappings version found for " + mappings;
 		}
-		return new LoaderInfo(loader, mappings);
+		return new LoaderInfo(loader, mappings).populateMeta();
 	}
 
 	private static Object getLoaderInfoAll(Context context) {
@@ -112,9 +115,21 @@ public class Endpoints {
 		MavenBuildVersion loader;
 		MavenBuildGameVersion mappings;
 
+		@Nullable
+		JsonObject launcherMeta;
+
 		public LoaderInfo(MavenBuildVersion loader, MavenBuildGameVersion mappings) {
 			this.loader = loader;
 			this.mappings = mappings;
+		}
+
+		public LoaderInfo populateMeta(){
+			launcherMeta = LoaderMeta.getMeta(this);
+			return this;
+		}
+
+		public MavenBuildVersion getLoader() {
+			return loader;
 		}
 	}
 

@@ -29,4 +29,7 @@ public class MavenVersion extends BaseVersion {
 		this(maven, false);
 	}
 
+	public String getMaven() {
+		return maven;
+	}
 }
