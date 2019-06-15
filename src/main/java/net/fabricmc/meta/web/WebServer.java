@@ -35,7 +35,8 @@ public class WebServer {
 			.disableStartupBanner()
 			.start(5555);
 
-		Endpoints.setup();
+		EndpointsV1.setup();
+		EndpointsV2.setup();
 	}
 
 	public static <T> void jsonGet(String route, Supplier<T> supplier) {

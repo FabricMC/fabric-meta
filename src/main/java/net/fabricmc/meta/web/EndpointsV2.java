@@ -16,13 +16,9 @@
 
 package net.fabricmc.meta.web;
 
-import com.google.gson.JsonObject;
 import io.javalin.Context;
 import net.fabricmc.meta.FabricMeta;
-import net.fabricmc.meta.utils.LoaderMeta;
-import net.fabricmc.meta.web.models.MavenBuildGameVersion;
-import net.fabricmc.meta.web.models.MavenBuildVersion;
-import org.jetbrains.annotations.Nullable;
+import net.fabricmc.meta.web.models.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,21 +28,24 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-public class Endpoints {
+public class EndpointsV2 {
 
 	public static void setup() {
 
-		WebServer.jsonGet("/v1/versions", (Supplier<Object>) () -> FabricMeta.database);
+		WebServer.jsonGet("/v2/versions", (Supplier<Object>) () -> FabricMeta.database);
 
-		WebServer.jsonGet("/v1/versions/game", (Supplier<Object>) () -> FabricMeta.database.game);
-		WebServer.jsonGet("/v1/versions/game/:game_version", (Function<Context, List<MavenBuildGameVersion>>) context -> filter(context, FabricMeta.database.game));
+		WebServer.jsonGet("/v2/versions/game", (Supplier<Object>) () -> FabricMeta.database.game);
+		WebServer.jsonGet("/v2/versions/game/:game_version", (Function<Context, List<MavenBuildGameVersion>>) context -> filter(context, FabricMeta.database.game));
 
-		WebServer.jsonGet("/v1/versions/mappings", (Supplier<Object>) () -> FabricMeta.database.mappings);
-		WebServer.jsonGet("/v1/versions/mappings/:game_version", (Function<Context, List<MavenBuildGameVersion>>) context -> filter(context, FabricMeta.database.mappings));
+		WebServer.jsonGet("/v2/versions/yarn", (Supplier<Object>) () -> FabricMeta.database.mappings);
+		WebServer.jsonGet("/v2/versions/yarn/:game_version", (Function<Context, List<MavenBuildGameVersion>>) context -> filter(context, FabricMeta.database.mappings));
 
-		WebServer.jsonGet("/v1/versions/loader", (Supplier<Object>) () -> FabricMeta.database.loader);
-		WebServer.jsonGet("/v1/versions/loader/:game_version", Endpoints::getLoaderInfoAll);
-		WebServer.jsonGet("/v1/versions/loader/:game_version/:loader_version", Endpoints::getLoaderInfo);
+		WebServer.jsonGet("/v2/versions/intermediary", (Supplier<Object>) () -> FabricMeta.database.intermedairy);
+		WebServer.jsonGet("/v2/versions/intermediary/:game_version", (Function<Context, List<MavenBuildGameVersion>>) context -> filter(context, FabricMeta.database.intermedairy));
+
+		WebServer.jsonGet("/v2/versions/loader", (Supplier<Object>) () -> FabricMeta.database.loader);
+		WebServer.jsonGet("/v2/versions/loader/:game_version", EndpointsV2::getLoaderInfoAll);
+		WebServer.jsonGet("/v2/versions/loader/:game_version/:loader_version", EndpointsV2::getLoaderInfo);
 
 	}
 
@@ -73,7 +72,7 @@ public class Endpoints {
 			.filter(mavenBuildVersion -> loaderVersion.equals(mavenBuildVersion.getVersion()))
 			.findFirst().orElse(null);
 
-		MavenBuildGameVersion mappings = FabricMeta.database.mappings.stream()
+		MavenVersion mappings = FabricMeta.database.intermedairy.stream()
 			.filter(t -> t.test(gameVersion))
 			.findFirst().orElse(null);
 
@@ -85,7 +84,7 @@ public class Endpoints {
 			context.status(400);
 			return "no mappings version found for " + mappings;
 		}
-		return new LoaderInfo(loader, mappings).populateMeta();
+		return new LoaderInfoV2(loader, mappings).populateMeta();
 	}
 
 	private static Object getLoaderInfoAll(Context context) {
@@ -94,7 +93,7 @@ public class Endpoints {
 		}
 		String gameVersion = context.pathParam("game_version");
 
-		MavenBuildGameVersion mappings = FabricMeta.database.mappings.stream()
+		MavenVersion mappings = FabricMeta.database.intermedairy.stream()
 			.filter(t -> t.test(gameVersion))
 			.findFirst().orElse(null);
 
@@ -102,35 +101,14 @@ public class Endpoints {
 			return Collections.emptyList();
 		}
 
-		List<LoaderInfo> infoList = new ArrayList<>();
+		List<LoaderInfoV2> infoList = new ArrayList<>();
 
 		for(MavenBuildVersion loader : FabricMeta.database.loader){
-			infoList.add(new LoaderInfo(loader, mappings));
+			infoList.add(new LoaderInfoV2(loader, mappings));
 		}
 		return infoList;
 	}
 
-	public static class LoaderInfo {
 
-		MavenBuildVersion loader;
-		MavenBuildGameVersion mappings;
-
-		@Nullable
-		JsonObject launcherMeta;
-
-		public LoaderInfo(MavenBuildVersion loader, MavenBuildGameVersion mappings) {
-			this.loader = loader;
-			this.mappings = mappings;
-		}
-
-		public LoaderInfo populateMeta(){
-			launcherMeta = LoaderMeta.getMeta(this);
-			return this;
-		}
-
-		public MavenBuildVersion getLoader() {
-			return loader;
-		}
-	}
 
 }

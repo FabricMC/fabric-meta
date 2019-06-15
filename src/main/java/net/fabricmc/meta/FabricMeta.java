@@ -31,20 +31,24 @@ public class FabricMeta {
 
 	public static void main(String[] args) {
 
+		update();
+
 		ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
-		executorService.scheduleAtFixedRate(() -> {
-			try {
-				database = VersionDatabase.generate();
-			} catch (IOException | XMLStreamException e) {
-				if(database == null){
-					throw new RuntimeException(e);
-				} else {
-					e.printStackTrace();
-				}
-			}
-		}, 0, 5, TimeUnit.MINUTES);
+		executorService.scheduleAtFixedRate(FabricMeta::update, 1, 1, TimeUnit.MINUTES);
 
 		WebServer.start();
+	}
+
+	private static void update(){
+		try {
+			database = VersionDatabase.generate();
+		} catch (IOException | XMLStreamException e) {
+			if(database == null){
+				throw new RuntimeException(e);
+			} else {
+				e.printStackTrace();
+			}
+		}
 	}
 
 }

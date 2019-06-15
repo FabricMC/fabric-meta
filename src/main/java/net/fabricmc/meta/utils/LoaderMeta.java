@@ -17,8 +17,8 @@
 package net.fabricmc.meta.utils;
 
 import com.google.gson.JsonObject;
-import net.fabricmc.meta.web.Endpoints;
 import net.fabricmc.meta.web.WebServer;
+import net.fabricmc.meta.web.models.LoaderInfoBase;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -32,7 +32,7 @@ public class LoaderMeta {
 	public static final File BASE_DIR = new File("metadata");
 	public static final String MAVEN_URL = "https://maven.fabricmc.net/";
 
-	public static JsonObject getMeta(Endpoints.LoaderInfo loaderInfo){
+	public static JsonObject getMeta(LoaderInfoBase loaderInfo){
 		String loaderMaven = loaderInfo.getLoader().getMaven();
 		String[] split = loaderMaven.split(":");
 		String path = String.format("%s/%s/%s", split[0].replaceAll("\\.","/"), split[1], split[2]);
