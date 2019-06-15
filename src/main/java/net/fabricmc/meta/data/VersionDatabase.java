@@ -64,7 +64,7 @@ public class VersionDatabase {
 		//Sorts in the order of minecraft release dates
 		intermediary = new ArrayList<>(intermediary);
 		intermediary.sort(Comparator.comparingInt(o -> launcherMeta.getIndex(o.getVersion())));
-		intermediary.forEach(version -> version.setStable(launcherMeta.isStable(version.getVersion())));
+		intermediary.forEach(version -> version.setStable(true));
 
 		List<String> minecraftVersions = new ArrayList<>();
 		for (MavenVersion gameVersion : intermediary) {
