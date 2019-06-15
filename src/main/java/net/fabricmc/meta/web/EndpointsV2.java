@@ -40,8 +40,8 @@ public class EndpointsV2 {
 		WebServer.jsonGet("/v2/versions/yarn", (Supplier<Object>) () -> FabricMeta.database.mappings);
 		WebServer.jsonGet("/v2/versions/yarn/:game_version", (Function<Context, List<MavenBuildGameVersion>>) context -> filter(context, FabricMeta.database.mappings));
 
-		WebServer.jsonGet("/v2/versions/intermediary", (Supplier<Object>) () -> FabricMeta.database.intermedairy);
-		WebServer.jsonGet("/v2/versions/intermediary/:game_version", (Function<Context, List<MavenBuildGameVersion>>) context -> filter(context, FabricMeta.database.intermedairy));
+		WebServer.jsonGet("/v2/versions/intermediary", (Supplier<Object>) () -> FabricMeta.database.intermediary);
+		WebServer.jsonGet("/v2/versions/intermediary/:game_version", (Function<Context, List<MavenBuildGameVersion>>) context -> filter(context, FabricMeta.database.intermediary));
 
 		WebServer.jsonGet("/v2/versions/loader", (Supplier<Object>) () -> FabricMeta.database.loader);
 		WebServer.jsonGet("/v2/versions/loader/:game_version", EndpointsV2::getLoaderInfoAll);
@@ -72,7 +72,7 @@ public class EndpointsV2 {
 			.filter(mavenBuildVersion -> loaderVersion.equals(mavenBuildVersion.getVersion()))
 			.findFirst().orElse(null);
 
-		MavenVersion mappings = FabricMeta.database.intermedairy.stream()
+		MavenVersion mappings = FabricMeta.database.intermediary.stream()
 			.filter(t -> t.test(gameVersion))
 			.findFirst().orElse(null);
 
@@ -93,7 +93,7 @@ public class EndpointsV2 {
 		}
 		String gameVersion = context.pathParam("game_version");
 
-		MavenVersion mappings = FabricMeta.database.intermedairy.stream()
+		MavenVersion mappings = FabricMeta.database.intermediary.stream()
 			.filter(t -> t.test(gameVersion))
 			.findFirst().orElse(null);
 
@@ -104,7 +104,7 @@ public class EndpointsV2 {
 		List<LoaderInfoV2> infoList = new ArrayList<>();
 
 		for(MavenBuildVersion loader : FabricMeta.database.loader){
-			infoList.add(new LoaderInfoV2(loader, mappings));
+			infoList.add(new LoaderInfoV2(loader, mappings).populateMeta());
 		}
 		return infoList;
 	}

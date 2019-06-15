@@ -38,7 +38,7 @@ public class VersionDatabase {
 
 	public List<BaseVersion> game;
 	public List<MavenBuildGameVersion> mappings;
-	public List<MavenVersion> intermedairy;
+	public List<MavenVersion> intermediary;
 	public List<MavenBuildVersion> loader;
 
 	private VersionDatabase() {
@@ -48,7 +48,7 @@ public class VersionDatabase {
 		long start = System.currentTimeMillis();
 		VersionDatabase database = new VersionDatabase();
 		database.mappings = MAPPINGS_PARSER.getMeta(MavenBuildGameVersion.class, "net.fabricmc:yarn:");
-		database.intermedairy = INTERMEDIARY_PARSER.getMeta(MavenVersion.class, "net.fabricmc:intermediary:");
+		database.intermediary = INTERMEDIARY_PARSER.getMeta(MavenVersion.class, "net.fabricmc:intermediary:");
 		database.loader = LOADER_PARSER.getMeta(MavenBuildVersion.class, "net.fabricmc:fabric-loader:");
 		database.loadMcData();
 		System.out.println("DB update took " + (System.currentTimeMillis() - start) + "ms");
@@ -56,18 +56,18 @@ public class VersionDatabase {
 	}
 
 	private void loadMcData() throws IOException {
-		if (mappings == null || intermedairy == null) {
+		if (mappings == null || intermediary == null) {
 			throw new RuntimeException("Mappings are null");
 		}
 		MinecraftLauncherMeta launcherMeta = MinecraftLauncherMeta.getMeta();
 
 		//Sorts in the order of minecraft release dates
-		intermedairy = new ArrayList<>(intermedairy);
-		intermedairy.sort(Comparator.comparingInt(o -> launcherMeta.getIndex(o.getVersion())));
-		intermedairy.forEach(version -> version.setStable(launcherMeta.isStable(version.getVersion())));
+		intermediary = new ArrayList<>(intermediary);
+		intermediary.sort(Comparator.comparingInt(o -> launcherMeta.getIndex(o.getVersion())));
+		intermediary.forEach(version -> version.setStable(launcherMeta.isStable(version.getVersion())));
 
 		List<String> minecraftVersions = new ArrayList<>();
-		for (MavenVersion gameVersion : intermedairy) {
+		for (MavenVersion gameVersion : intermediary) {
 			if (!minecraftVersions.contains(gameVersion.getVersion())) {
 				minecraftVersions.add(gameVersion.getVersion());
 			}
