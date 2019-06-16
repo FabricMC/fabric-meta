@@ -59,7 +59,7 @@ public class WebServer {
 			ctx.status(400);
 		}
 		String response = GSON.toJson(object);
-		ctx.result(response);
+		ctx.contentType("application/json").result(response);
 	}
 
 }
