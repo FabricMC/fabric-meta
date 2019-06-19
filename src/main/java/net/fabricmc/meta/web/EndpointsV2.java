@@ -25,32 +25,32 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("Duplicates")
 public class EndpointsV2 {
 
 	public static void setup() {
 
-		WebServer.jsonGet("/v2/versions", (Supplier<Object>) () -> FabricMeta.database);
+		WebServer.jsonGet("/v2/versions", () -> FabricMeta.database);
 
-		WebServer.jsonGet("/v2/versions/game", (Supplier<Object>) () -> FabricMeta.database.game);
+		WebServer.jsonGet("/v2/versions/game", () -> FabricMeta.database.game);
 		WebServer.jsonGet("/v2/versions/game/yarn", () -> compatibleGameVersions(FabricMeta.database.mappings, MavenBuildGameVersion::getGameVersion, v -> new BaseVersion(v.getGameVersion(), v.isStable())));
 		WebServer.jsonGet("/v2/versions/game/intermediary", () -> compatibleGameVersions(FabricMeta.database.intermediary, BaseVersion::getVersion, v -> new BaseVersion(v.getVersion(), v.isStable())));
 
-		WebServer.jsonGet("/v2/versions/yarn", (Supplier<Object>) () -> FabricMeta.database.mappings);
-		WebServer.jsonGet("/v2/versions/yarn/:game_version", (Function<Context, List<MavenBuildGameVersion>>) context -> filter(context, FabricMeta.database.mappings));
+		WebServer.jsonGet("/v2/versions/yarn", () -> FabricMeta.database.mappings);
+		WebServer.jsonGet("/v2/versions/yarn/:game_version", context -> filter(context, FabricMeta.database.mappings));
 
-		WebServer.jsonGet("/v2/versions/intermediary", (Supplier<Object>) () -> FabricMeta.database.intermediary);
-		WebServer.jsonGet("/v2/versions/intermediary/:game_version", (Function<Context, List<MavenBuildGameVersion>>) context -> filter(context, FabricMeta.database.intermediary));
+		WebServer.jsonGet("/v2/versions/intermediary", () -> FabricMeta.database.intermediary);
+		WebServer.jsonGet("/v2/versions/intermediary/:game_version", context -> filter(context, FabricMeta.database.intermediary));
 
-		WebServer.jsonGet("/v2/versions/loader", (Supplier<Object>) () -> FabricMeta.database.loader);
+		WebServer.jsonGet("/v2/versions/loader", () -> FabricMeta.database.loader);
 		WebServer.jsonGet("/v2/versions/loader/:game_version", EndpointsV2::getLoaderInfoAll);
 		WebServer.jsonGet("/v2/versions/loader/:game_version/:loader_version", EndpointsV2::getLoaderInfo);
 
 	}
 
-	private static <T extends Predicate> List filter(Context context, List<T> versionList) {
+	private static <T extends Predicate<String>> List filter(Context context, List<T> versionList) {
 		if (!context.pathParamMap().containsKey("game_version")) {
 			return Collections.emptyList();
 		}
@@ -83,7 +83,7 @@ public class EndpointsV2 {
 		}
 		if (mappings == null) {
 			context.status(400);
-			return "no mappings version found for " + mappings;
+			return "no mappings version found for " + gameVersion;
 		}
 		return new LoaderInfoV2(loader, mappings).populateMeta();
 	}

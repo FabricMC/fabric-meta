@@ -25,30 +25,29 @@ import net.fabricmc.meta.web.models.MavenBuildVersion;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("Duplicates")
 public class EndpointsV1 {
 
 	public static void setup() {
 
-		WebServer.jsonGet("/v1/versions", (Supplier<Object>) () -> FabricMeta.database);
+		WebServer.jsonGet("/v1/versions", () -> FabricMeta.database);
 
-		WebServer.jsonGet("/v1/versions/game", (Supplier<Object>) () -> FabricMeta.database.game);
-		WebServer.jsonGet("/v1/versions/game/:game_version", (Function<Context, List<MavenBuildGameVersion>>) context -> filter(context, FabricMeta.database.game));
+		WebServer.jsonGet("/v1/versions/game", () -> FabricMeta.database.game);
+		WebServer.jsonGet("/v1/versions/game/:game_version",  context -> filter(context, FabricMeta.database.game));
 
-		WebServer.jsonGet("/v1/versions/mappings", (Supplier<Object>) () -> FabricMeta.database.mappings);
-		WebServer.jsonGet("/v1/versions/mappings/:game_version", (Function<Context, List<MavenBuildGameVersion>>) context -> filter(context, FabricMeta.database.mappings));
+		WebServer.jsonGet("/v1/versions/mappings", () -> FabricMeta.database.mappings);
+		WebServer.jsonGet("/v1/versions/mappings/:game_version", context -> filter(context, FabricMeta.database.mappings));
 
-		WebServer.jsonGet("/v1/versions/loader", (Supplier<Object>) () -> FabricMeta.database.loader);
+		WebServer.jsonGet("/v1/versions/loader", () -> FabricMeta.database.loader);
 		WebServer.jsonGet("/v1/versions/loader/:game_version", EndpointsV1::getLoaderInfoAll);
 		WebServer.jsonGet("/v1/versions/loader/:game_version/:loader_version", EndpointsV1::getLoaderInfo);
 
 	}
 
-	private static <T extends Predicate> List filter(Context context, List<T> versionList) {
+	private static <T extends Predicate<String>> List filter(Context context, List<T> versionList) {
 		if (!context.pathParamMap().containsKey("game_version")) {
 			return Collections.emptyList();
 		}
@@ -81,7 +80,7 @@ public class EndpointsV1 {
 		}
 		if (mappings == null) {
 			context.status(400);
-			return "no mappings version found for " + mappings;
+			return "no mappings version found for " + gameVersion;
 		}
 		return new LoaderInfoV1(loader, mappings).populateMeta();
 	}
