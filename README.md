@@ -35,16 +35,35 @@ Lists all of the supported game versions
 ]
 ```
 
-### /v2/versions/game/:game_version
+### /v2/versions/game/yarn
 
-Lists the version information for the game version provided
-
-`stable` is true for release versions of the game, and false for snapshots
+Lists all of the compatible game versions for yarn
 
 ```json
 [
   {
-    "version": "1.14",
+    "version": "1.14.3-pre2",
+    "stable": true
+  },
+  {
+    "version": "1.14.3-pre1",
+    "stable": false
+  }
+]
+```
+
+### /v2/versions/game/intermediary
+
+Lists all of the compatible game versions for intermediary
+
+```json
+[
+  {
+    "version": "1.14.3-pre3",
+    "stable": true
+  },
+  {
+    "version": "1.14.3-pre2",
     "stable": true
   }
 ]

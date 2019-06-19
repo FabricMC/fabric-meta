@@ -35,7 +35,8 @@ public class EndpointsV2 {
 		WebServer.jsonGet("/v2/versions", (Supplier<Object>) () -> FabricMeta.database);
 
 		WebServer.jsonGet("/v2/versions/game", (Supplier<Object>) () -> FabricMeta.database.game);
-		WebServer.jsonGet("/v2/versions/game/:game_version", (Function<Context, List<MavenBuildGameVersion>>) context -> filter(context, FabricMeta.database.game));
+		WebServer.jsonGet("/v2/versions/game/yarn", () -> compatibleGameVersions(FabricMeta.database.mappings, MavenBuildGameVersion::getGameVersion, v -> new BaseVersion(v.getGameVersion(), v.isStable())));
+		WebServer.jsonGet("/v2/versions/game/intermediary", () -> compatibleGameVersions(FabricMeta.database.intermediary, BaseVersion::getVersion, v -> new BaseVersion(v.getVersion(), v.isStable())));
 
 		WebServer.jsonGet("/v2/versions/yarn", (Supplier<Object>) () -> FabricMeta.database.mappings);
 		WebServer.jsonGet("/v2/versions/yarn/:game_version", (Function<Context, List<MavenBuildGameVersion>>) context -> filter(context, FabricMeta.database.mappings));
@@ -107,6 +108,19 @@ public class EndpointsV2 {
 			infoList.add(new LoaderInfoV2(loader, mappings).populateMeta());
 		}
 		return infoList;
+	}
+
+	private static <T extends BaseVersion> List<BaseVersion> compatibleGameVersions(List<T> list, Function<T, String> gameVersionSupplier, Function<T, BaseVersion> baseVersionSupplier){
+		List<BaseVersion> versions = new ArrayList<>();
+		Predicate<String> contains = s -> versions.stream().anyMatch(baseVersion -> baseVersion.getVersion().equals(s));
+
+		for(T entry : list){
+			if (!contains.test(gameVersionSupplier.apply(entry))){
+				versions.add(baseVersionSupplier.apply(entry));
+			}
+		}
+
+		return versions;
 	}
 
 
