@@ -58,7 +58,12 @@ public class PomParser {
 	}
 
 	public <T extends BaseVersion> List<T> getMeta(Class<T> type, String prefix) throws IOException, XMLStreamException {
-		load();
+		try {
+			load();
+		} catch (IOException e){
+			throw new IOException("Failed to load " + path, e);
+		}
+
 		List<T> list = new ArrayList<>();
 		Constructor<T> constructor;
 		try {
