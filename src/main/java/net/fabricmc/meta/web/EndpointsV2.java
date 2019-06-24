@@ -46,11 +46,14 @@ public class EndpointsV2 {
 		WebServer.jsonGet("/v2/versions/intermediary/:game_version", context -> filter(context, FabricMeta.database.intermediary));
 
 		WebServer.jsonGet("/v2/versions/loader", context -> withLimitSkip(context, FabricMeta.database.loader));
-		WebServer.jsonGet("/v2/versions/loader/:game_version", context -> withLimitSkip(EndpointsV2::getLoaderInfoAll()));
+		WebServer.jsonGet("/v2/versions/loader/:game_version", context -> withLimitSkip(context, EndpointsV2.getLoaderInfoAll(context)));
 		WebServer.jsonGet("/v2/versions/loader/:game_version/:loader_version", EndpointsV2::getLoaderInfo);
 	}
 
-	private static <T extends Predicate<String>> List withLimitSkip(Context context, List<T> list) {
+	private static <T> List<T> withLimitSkip(Context context, List<T> list) {
+		if(list == null){
+			return Collections.emptyList();
+		}
 		int limit = context.queryParam("limit", Integer.class, "0").check(i -> i >= 0).get();
 		int skip = context.queryParam("skip", Integer.class, "0").check(i -> i >= 0).get();
 
@@ -63,7 +66,7 @@ public class EndpointsV2 {
 		return listStream.collect(Collectors.toList());
 	}
 
-	private static <T extends Predicate<String>> List filter(Context context, List<T> versionList) {
+	private static <T extends Predicate<String>> List<T> filter(Context context, List<T> versionList) {
 		if (!context.pathParamMap().containsKey("game_version")) {
 			return Collections.emptyList();
 		}
@@ -101,7 +104,7 @@ public class EndpointsV2 {
 		return new LoaderInfoV2(loader, mappings).populateMeta();
 	}
 
-	private static Object getLoaderInfoAll(Context context) {
+	private static List<?> getLoaderInfoAll(Context context) {
 		if (!context.pathParamMap().containsKey("game_version")) {
 			return null;
 		}
