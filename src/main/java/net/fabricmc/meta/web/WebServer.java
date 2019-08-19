@@ -33,6 +33,7 @@ public class WebServer {
 		javalin = Javalin.create()
 			.enableRouteOverview("/")
 			.disableStartupBanner()
+			.enableCorsForAllOrigins()
 			.start(5555);
 
 		EndpointsV1.setup();
