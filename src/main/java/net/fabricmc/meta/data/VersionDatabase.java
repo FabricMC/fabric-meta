@@ -73,6 +73,17 @@ public class VersionDatabase {
 			}
 		}
 
+		//1.14_combat-0 was floating around the list as it doesnt have an official release date, this forces it to the bottom of the list.
+		String oldMcVersion = "1.14_combat-0";
+		minecraftVersions.sort((o1, o2) -> {
+			if (o1.contains(oldMcVersion) && !o2.contains(oldMcVersion)) {
+				return 1;
+			} else if (!o1.contains(oldMcVersion) && o2.contains(oldMcVersion)) {
+				return -1;
+			}
+			return 0;
+		});
+
 		game = minecraftVersions.stream().map(s -> new BaseVersion(s, launcherMeta.isStable(s))).collect(Collectors.toList());
 	}
 
