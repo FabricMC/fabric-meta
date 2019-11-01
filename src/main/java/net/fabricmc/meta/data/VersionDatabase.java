@@ -73,8 +73,8 @@ public class VersionDatabase {
 			}
 		}
 
-		//1.14_combat-0 was floating around the list as it doesnt have an official release date, this forces it to the bottom of the list.
-		String oldMcVersion = "1.14_combat-0";
+		//1.14_combat-0/1.14_combat-3 was floating around the list as it doesnt have an official release date, this forces it to the bottom of the list.
+		String oldMcVersion = "combat";
 		minecraftVersions.sort((o1, o2) -> {
 			if (o1.contains(oldMcVersion) && !o2.contains(oldMcVersion)) {
 				return 1;
