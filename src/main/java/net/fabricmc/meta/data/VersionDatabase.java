@@ -18,10 +18,7 @@ package net.fabricmc.meta.data;
 
 import net.fabricmc.meta.utils.MinecraftLauncherMeta;
 import net.fabricmc.meta.utils.PomParser;
-import net.fabricmc.meta.web.models.BaseVersion;
-import net.fabricmc.meta.web.models.MavenBuildGameVersion;
-import net.fabricmc.meta.web.models.MavenBuildVersion;
-import net.fabricmc.meta.web.models.MavenVersion;
+import net.fabricmc.meta.web.models.*;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
@@ -32,14 +29,18 @@ import java.util.stream.Collectors;
 
 public class VersionDatabase {
 
-	public static final PomParser MAPPINGS_PARSER = new PomParser("https://maven.fabricmc.net/net/fabricmc/yarn/maven-metadata.xml");
-	public static final PomParser INTERMEDIARY_PARSER = new PomParser("https://maven.fabricmc.net/net/fabricmc/intermediary/maven-metadata.xml");
-	public static final PomParser LOADER_PARSER = new PomParser("https://maven.fabricmc.net/net/fabricmc/fabric-loader/maven-metadata.xml");
+	public static final String MAVEN_URL = "https://maven.fabricmc.net/";
+
+	public static final PomParser MAPPINGS_PARSER = new PomParser(MAVEN_URL + "net/fabricmc/yarn/maven-metadata.xml");
+	public static final PomParser INTERMEDIARY_PARSER = new PomParser(MAVEN_URL + "net/fabricmc/intermediary/maven-metadata.xml");
+	public static final PomParser LOADER_PARSER = new PomParser(MAVEN_URL + "net/fabricmc/fabric-loader/maven-metadata.xml");
+	public static final PomParser INSTALLER_PARSER = new PomParser(MAVEN_URL + "net/fabricmc/fabric-installer/maven-metadata.xml");
 
 	public List<BaseVersion> game;
 	public List<MavenBuildGameVersion> mappings;
 	public List<MavenVersion> intermediary;
 	public List<MavenBuildVersion> loader;
+	public List<MavenUrlVersion> installer;
 
 	private VersionDatabase() {
 	}
@@ -50,6 +51,7 @@ public class VersionDatabase {
 		database.mappings = MAPPINGS_PARSER.getMeta(MavenBuildGameVersion.class, "net.fabricmc:yarn:");
 		database.intermediary = INTERMEDIARY_PARSER.getMeta(MavenVersion.class, "net.fabricmc:intermediary:");
 		database.loader = LOADER_PARSER.getMeta(MavenBuildVersion.class, "net.fabricmc:fabric-loader:");
+		database.installer = INSTALLER_PARSER.getMeta(MavenUrlVersion.class, "net.fabricmc:fabric-installer:");
 		database.loadMcData();
 		System.out.println("DB update took " + (System.currentTimeMillis() - start) + "ms");
 		return database;
