@@ -42,4 +42,13 @@ public class LoaderInfoV2 implements LoaderInfoBase {
 	public MavenBuildVersion getLoader() {
 		return loader;
 	}
+
+	public MavenVersion getIntermediary() {
+		return intermediary;
+	}
+
+	@Nullable
+	public JsonObject getLauncherMeta() {
+		return launcherMeta;
+	}
 }
