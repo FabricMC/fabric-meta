@@ -16,7 +16,7 @@
 
 package net.fabricmc.meta.web;
 
-import io.javalin.Context;
+import io.javalin.http.Context;
 import net.fabricmc.meta.FabricMeta;
 import net.fabricmc.meta.web.models.*;
 
