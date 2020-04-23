@@ -300,6 +300,14 @@ Since version 0.1.1 `launcherMeta` is now included, this can be used to get the 
 }
 ```
 
+### /v2/versions/loader/:game_version/:loader_version/profile/json
+
+Returns the json file that should be used in the standard minecraft launcher
+
+### /v2/versions/loader/:game_version/:loader_version/profile/zip
+
+Downloads a zip file with the launcher's profile json, and the dummy jar. TO be extracted into .minecraft/versions
+
 # V1
 
 ### /v1/versions

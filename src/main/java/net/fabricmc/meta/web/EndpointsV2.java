@@ -16,13 +16,16 @@
 
 package net.fabricmc.meta.web;
 
-import io.javalin.Context;
+import io.javalin.core.util.Header;
+import io.javalin.http.Context;
 import net.fabricmc.meta.FabricMeta;
 import net.fabricmc.meta.web.models.*;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -50,6 +53,8 @@ public class EndpointsV2 {
 		WebServer.jsonGet("/v2/versions/loader/:game_version/:loader_version", EndpointsV2::getLoaderInfo);
 
 		WebServer.jsonGet("/v2/versions/installer", context -> withLimitSkip(context, FabricMeta.database.installer));
+
+		ProfileHandler.setup();
 	}
 
 	private static <T> List<T> withLimitSkip(Context context, List<T> list) {
@@ -141,6 +146,33 @@ public class EndpointsV2 {
 		return versions;
 	}
 
+	public static void fileDownload(String ext, Function<LoaderInfoV2, String> fileNameFunction, Function<LoaderInfoV2, CompletableFuture<InputStream>> streamSupplier) {
+		WebServer.javalin.get("/v2/versions/loader/:game_version/:loader_version/profile/" + ext, ctx -> {
+			Object obj = getLoaderInfo(ctx);
 
+			if (obj instanceof String) {
+				ctx.result((String) obj);
+			} else if (obj instanceof LoaderInfoV2) {
+				LoaderInfoV2 versionInfo = (LoaderInfoV2) obj;
 
+				CompletableFuture<InputStream> streamFuture = streamSupplier.apply(versionInfo);
+
+				if (ext.equals("zip")) {
+					//Set the filename to download
+					ctx.header(Header.CONTENT_DISPOSITION, String.format("attachment; filename=\"%s\"", fileNameFunction.apply(versionInfo)));
+
+					ctx.contentType("application/zip");
+				} else {
+					ctx.contentType("application/json");
+				}
+
+				//Cache for a day
+				ctx.header(Header.CACHE_CONTROL, "public, max-age=86400");
+
+				ctx.result(streamFuture);
+			} else {
+				ctx.result("An internal error occurred");
+			}
+		});
+	}
 }
