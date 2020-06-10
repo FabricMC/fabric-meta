@@ -23,12 +23,12 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class PomParser {
 
@@ -57,29 +57,17 @@ public class PomParser {
 		latestVersion = versions.get(0);
 	}
 
-	public <T extends BaseVersion> List<T> getMeta(Class<T> type, String prefix) throws IOException, XMLStreamException {
+	public <T extends BaseVersion> List<T> getMeta(Function<String, T> function, String prefix) throws IOException, XMLStreamException {
 		try {
 			load();
 		} catch (IOException e){
 			throw new IOException("Failed to load " + path, e);
 		}
 
-		List<T> list = new ArrayList<>();
-		Constructor<T> constructor;
-		try {
-			constructor = type.getConstructor(String.class);
-		} catch (NoSuchMethodException e) {
-			throw new RuntimeException(e);
-		}
-
-		for (String version : versions) {
-			try {
-				T versionType = constructor.newInstance(prefix + version);
-				list.add(versionType);
-			} catch (InstantiationException | InvocationTargetException | IllegalAccessException e) {
-				throw new RuntimeException(e);
-			}
-		}
+		List<T> list = versions.stream()
+				.map((version) -> prefix + version)
+				.map(function)
+				.collect(Collectors.toList());
 
 		if(list.get(0) != null){
 			list.get(0).setStable(true);
