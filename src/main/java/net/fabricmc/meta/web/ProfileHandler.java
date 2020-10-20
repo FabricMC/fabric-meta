@@ -42,8 +42,10 @@ public class ProfileHandler {
 	private static final DateFormat ISO_8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
 
 	public static void setup() {
-		EndpointsV2.fileDownload("json", ProfileHandler::getJsonFileName, ProfileHandler::profileJson);
-		EndpointsV2.fileDownload("zip", ProfileHandler::getZipFileName, ProfileHandler::profileZip);
+		EndpointsV2.fileDownload("profile", "json", ProfileHandler::getJsonFileName, ProfileHandler::profileJson);
+		EndpointsV2.fileDownload("profile", "zip", ProfileHandler::getZipFileName, ProfileHandler::profileZip);
+
+		EndpointsV2.fileDownload("server", "json", ProfileHandler::getJsonFileName, ProfileHandler::serverJson);
 	}
 
 	private static String getJsonFileName(LoaderInfoV2 info) {
@@ -59,7 +61,11 @@ public class ProfileHandler {
 	}
 
 	private static CompletableFuture<InputStream> profileJson(LoaderInfoV2 info) {
-		return CompletableFuture.supplyAsync(() -> getProfileJsonStream(info), EXECUTOR);
+		return CompletableFuture.supplyAsync(() -> getProfileJsonStream(info, "client"), EXECUTOR);
+	}
+
+	private static CompletableFuture<InputStream> serverJson(LoaderInfoV2 info) {
+		return CompletableFuture.supplyAsync(() -> getProfileJsonStream(info, "server"), EXECUTOR);
 	}
 
 	private static CompletableFuture<InputStream> profileZip(LoaderInfoV2 info) {
@@ -91,13 +97,13 @@ public class ProfileHandler {
 		}
 	}
 
-	private static InputStream getProfileJsonStream(LoaderInfoV2 info) {
-		JsonObject jsonObject = buildProfileJson(info);
+	private static InputStream getProfileJsonStream(LoaderInfoV2 info, String side) {
+		JsonObject jsonObject = buildProfileJson(info, side);
 		return new ByteArrayInputStream(jsonObject.toString().getBytes());
 	}
 
 	//This is based of the installer code.
-	private static JsonObject buildProfileJson(LoaderInfoV2 info) {
+	private static JsonObject buildProfileJson(LoaderInfoV2 info, String side) {
 		JsonObject launcherMeta = info.getLauncherMeta();
 
 		String profileName = String.format("fabric-loader-%s-%s", info.getLoader().getVersion(), info.getIntermediary().getVersion());
@@ -116,7 +122,7 @@ public class ProfileHandler {
 		profile.addProperty("time", currentTime);
 		profile.addProperty("type", "release");
 
-		profile.addProperty("mainClass", launcherMeta.get("mainClass").getAsJsonObject().get("client").getAsString());
+		profile.addProperty("mainClass", launcherMeta.get("mainClass").getAsJsonObject().get(side).getAsString());
 
 		// I believe this is required to stop the launcher from complaining
 		JsonObject arguments = new JsonObject();

@@ -308,6 +308,10 @@ Returns the json file that should be used in the standard minecraft launcher
 
 Downloads a zip file with the launcher's profile json, and the dummy jar. TO be extracted into .minecraft/versions
 
+### /v2/versions/loader/:game_version/:loader_version/server/json
+
+Returns the json file in format of the launcher json, but with the server's main class.
+
 # V1
 
 ### /v1/versions
