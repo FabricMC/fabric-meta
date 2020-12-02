@@ -76,11 +76,13 @@ Lists all of the intermediary versions, stable is based of the minecraft version
 ```json
 [
   {
+    "url": "https://maven.fabricmc.net/net/fabricmc/intermediary/1.14.3-pre3/intermediary-1.14.3-pre3.jar",
     "maven": "net.fabricmc:intermediary:1.14.3-pre3",
     "version": "1.14.3-pre3",
     "stable": false
   },
   {
+    "url": "https://maven.fabricmc.net/net/fabricmc/intermediary/1.14.3-pre2/intermediary-1.14.3-pre2.jar",
     "maven": "net.fabricmc:intermediary:1.14.3-pre2",
     "version": "1.14.3-pre2",
     "stable": false
@@ -96,6 +98,7 @@ Lists all of the intermediary for the provided game version, there will only eve
 ```json
 [
   {
+    "url": "https://maven.fabricmc.net/net/fabricmc/intermediary/1.14/intermediary-1.14.jar",
     "maven": "net.fabricmc:intermediary:1.14",
     "version": "1.14",
     "stable": true
@@ -193,6 +196,7 @@ This returns a list of all the compatible loader versions for a given version of
       "stable": true
     },
     "intermediary": {
+      "url": "https://maven.fabricmc.net/net/fabricmc/intermediary/1.14/intermediary-1.14.jar",
       "maven": "net.fabricmc:intermediary:1.14",
       "version": "1.14",
       "stable": true
@@ -207,6 +211,7 @@ This returns a list of all the compatible loader versions for a given version of
       "stable": false
     },
     "intermediary": {
+      "url": "https://maven.fabricmc.net/net/fabricmc/intermediary/1.14/intermediary-1.14.jar",
       "maven": "net.fabricmc:intermediary:1.14",
       "version": "1.14",
       "stable": true
@@ -232,6 +237,7 @@ Since version 0.1.1 `launcherMeta` is now included, this can be used to get the 
     "stable": true
   },
   "intermediary": {
+    "url": "https://maven.fabricmc.net/net/fabricmc/intermediary/1.14/intermediary-1.14.jar",
     "maven": "net.fabricmc:intermediary:1.14",
     "version": "1.14",
     "stable": true
