@@ -49,7 +49,7 @@ public class VersionDatabase {
 		long start = System.currentTimeMillis();
 		VersionDatabase database = new VersionDatabase();
 		database.mappings = MAPPINGS_PARSER.getMeta(MavenBuildGameVersion::new, "net.fabricmc:yarn:");
-		database.intermediary = INTERMEDIARY_PARSER.getMeta(MavenVersion::new, "net.fabricmc:intermediary:");
+		database.intermediary = INTERMEDIARY_PARSER.getMeta(MavenUrlVersion::new, "net.fabricmc:intermediary:");
 		database.loader = LOADER_PARSER.getMeta(MavenBuildVersion::new, "net.fabricmc:fabric-loader:");
 		database.installer = INSTALLER_PARSER.getMeta(MavenUrlVersion::new, "net.fabricmc:fabric-installer:");
 		database.loadMcData();
