@@ -2,9 +2,12 @@ package net.fabricmc.meta.web.models;
 
 import net.fabricmc.meta.utils.ApiVersionParser;
 
+import java.util.List;
+
 public class MavenBuildApiGameVersion extends MavenBuildVersion{
 
-    String gameVersion;
+    String gameMajorVersion;
+    List<String> gameVersions;
 
     public MavenBuildApiGameVersion(String maven) {
         super(maven);
@@ -12,19 +15,19 @@ public class MavenBuildApiGameVersion extends MavenBuildVersion{
         String[] mavenP = maven.split(":");
         String version = mavenP[mavenP.length-1];
         ApiVersionParser parser = new ApiVersionParser(version);
-        gameVersion = parser.getMinecraftVersion();
+        gameMajorVersion = parser.getMinecraftVersion();
         this.build = parser.getBuild();
-        System.out.println(version);
-        this.version = version.substring(0, version.lastIndexOf(gameVersion.charAt(0)) != -1 ? version.lastIndexOf(gameVersion.charAt(0)) : version.length() - 1);
-        this.gameVersion = gameVersion.replaceAll("[+-]", ""); // Remove prefix character
+        this.version = parser.getVersion();
+        this.gameMajorVersion = gameMajorVersion.replaceAll("[+-]", ""); // Remove prefix character
+        this.gameVersions = parser.getMinecraftVersions();
     }
 
-    public String getGameVersion() {
-        return gameVersion;
+    public String getGameMajorVersion() {
+        return gameMajorVersion;
     }
 
     @Override
     public boolean test(String s) {
-        return getGameVersion().equals(s);
+        return this.gameVersions.contains(s);
     }
 }
