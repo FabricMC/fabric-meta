@@ -15,7 +15,7 @@ public class MavenBuildApiGameVersion extends MavenBuildVersion{
         String[] mavenP = maven.split(":");
         String version = mavenP[mavenP.length-1];
         ApiVersionParser parser = new ApiVersionParser(version);
-        gameMajorVersion = parser.getMinecraftVersion();
+        gameMajorVersion = parser.getMajorMinecraftVersion();
         this.build = parser.getBuild();
         this.version = parser.getVersion();
         this.gameMajorVersion = gameMajorVersion.replaceAll("[+-]", ""); // Remove prefix character

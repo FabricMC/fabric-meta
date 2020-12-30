@@ -8,7 +8,7 @@ import java.util.*;
 public class ApiVersionParser {
 
     private String apiVersion;
-    private String minecraftVersion;
+    private String majorMinecraftVersion;
     private List<String> minecraftVersions = new ArrayList<>();
 
     private String version;
@@ -34,11 +34,11 @@ public class ApiVersionParser {
 
         if (version.contains("+build.")) {
             //TODO legacy remove when no longer needed
-            this.minecraftVersion = version.substring(version.lastIndexOf('-'));
+            this.majorMinecraftVersion = version.substring(version.lastIndexOf('-'));
             this.apiVersion = version.substring(0, version.lastIndexOf('+') - 1);
             this.build = Integer.parseInt(version.substring(version.lastIndexOf("+build.")+7, version.lastIndexOf('-')));
         } else {
-            this.minecraftVersion = version.substring(version.lastIndexOf('+'));
+            this.majorMinecraftVersion = version.substring(version.lastIndexOf('+'));
             this.apiVersion = version.substring(0, version.lastIndexOf('+') - 1);
             this.build = 999; // Build number is no longer appended to versions, use dummy version
         }
@@ -63,15 +63,15 @@ public class ApiVersionParser {
     }
 
     public String getVersion() {
-        return this.version.substring(0, this.version.lastIndexOf(this.minecraftVersion.charAt(0)) != -1 ? version.lastIndexOf(this.minecraftVersion.charAt(0)) : this.version.length() - 1);
+        return this.version.substring(0, this.version.lastIndexOf(this.majorMinecraftVersion.charAt(0)) != -1 ? version.lastIndexOf(this.majorMinecraftVersion.charAt(0)) : this.version.length() - 1);
     }
 
     public String getApiVersion() {
         return apiVersion;
     }
 
-    public String getMinecraftVersion() {
-        return minecraftVersion;
+    public String getMajorMinecraftVersion() {
+        return majorMinecraftVersion;
     }
 
     @Override
