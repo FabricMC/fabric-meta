@@ -71,6 +71,8 @@ public class VersionDatabase {
 		intermediary.sort(Comparator.comparingInt(o -> launcherMeta.getIndex(o.getVersion())));
 		intermediary.forEach(version -> version.setStable(true));
 
+		api.forEach(version -> version.setStable(true));
+
 		List<String> minecraftVersions = new ArrayList<>();
 		for (MavenVersion gameVersion : intermediary) {
 			if (!minecraftVersions.contains(gameVersion.getVersion())) {
