@@ -23,14 +23,20 @@ public class MavenBuildVersion extends MavenVersion {
 
 	public MavenBuildVersion(String maven) {
 		super(maven);
-		String version = maven.split(":")[2];
+		String[] mavenP = maven.split(":");
+		String version = mavenP[mavenP.length-1];
 
 		if (version.contains("+build.")) {
 			separator = "+build.";
 		} else {
 			separator = ".";
 		}
-		build = Integer.parseInt(version.substring(version.lastIndexOf(".") + 1));
+		// Fix parser for oddball 20w14infinite api version (0.5.7+build.2-20w14infinite)
+		if (version.contains("+build.2-20w14infinite")) {
+			build = Integer.parseInt(version.substring(version.lastIndexOf(".") + 1, version.lastIndexOf('-')));
+		} else {
+			build = Integer.parseInt(version.substring(version.lastIndexOf(".") + 1));
+		}
 
 	}
 

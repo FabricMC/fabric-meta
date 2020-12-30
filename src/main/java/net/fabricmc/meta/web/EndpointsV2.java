@@ -52,6 +52,9 @@ public class EndpointsV2 {
 		WebServer.jsonGet("/v2/versions/loader/:game_version", context -> withLimitSkip(context, EndpointsV2.getLoaderInfoAll(context)));
 		WebServer.jsonGet("/v2/versions/loader/:game_version/:loader_version", EndpointsV2::getLoaderInfo);
 
+		WebServer.jsonGet("/v2/versions/fabric-api", context -> withLimitSkip(context, FabricMeta.database.api));
+		WebServer.jsonGet("/v2/versions/fabric-api/:game_version", context -> withLimitSkip(context, filter(context, FabricMeta.database.api)));
+
 		WebServer.jsonGet("/v2/versions/installer", context -> withLimitSkip(context, FabricMeta.database.installer));
 
 		ProfileHandler.setup();

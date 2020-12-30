@@ -35,12 +35,14 @@ public class VersionDatabase {
 	public static final PomParser INTERMEDIARY_PARSER = new PomParser(MAVEN_URL + "net/fabricmc/intermediary/maven-metadata.xml");
 	public static final PomParser LOADER_PARSER = new PomParser(MAVEN_URL + "net/fabricmc/fabric-loader/maven-metadata.xml");
 	public static final PomParser INSTALLER_PARSER = new PomParser(MAVEN_URL + "net/fabricmc/fabric-installer/maven-metadata.xml");
+	public static final PomParser API_PARSER = new PomParser(MAVEN_URL + "net/fabricmc/fabric-api/fabric-api/maven-metadata.xml");
 
 	public List<BaseVersion> game;
 	public List<MavenBuildGameVersion> mappings;
 	public List<MavenVersion> intermediary;
 	public List<MavenBuildVersion> loader;
 	public List<MavenUrlVersion> installer;
+	public List<MavenBuildApiGameVersion> api;
 
 	private VersionDatabase() {
 	}
@@ -52,6 +54,7 @@ public class VersionDatabase {
 		database.intermediary = INTERMEDIARY_PARSER.getMeta(MavenVersion::new, "net.fabricmc:intermediary:");
 		database.loader = LOADER_PARSER.getMeta(MavenBuildVersion::new, "net.fabricmc:fabric-loader:");
 		database.installer = INSTALLER_PARSER.getMeta(MavenUrlVersion::new, "net.fabricmc:fabric-installer:");
+		database.api = API_PARSER.getMeta(MavenBuildApiGameVersion::new, "net.fabricmc:fabric-api:fabric-api:");
 		database.loadMcData();
 		System.out.println("DB update took " + (System.currentTimeMillis() - start) + "ms");
 		return database;
