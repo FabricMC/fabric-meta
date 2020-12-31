@@ -6,6 +6,7 @@ import java.util.List;
 
 public class MavenBuildApiGameVersion extends MavenBuildVersion{
 
+    private List<String[]> hashes;
     String gameMajorVersion;
     List<String> gameVersions;
 
@@ -16,6 +17,9 @@ public class MavenBuildApiGameVersion extends MavenBuildVersion{
         String version = mavenP[mavenP.length-1];
         ApiVersionParser parser = new ApiVersionParser(version);
         gameMajorVersion = parser.getMajorMinecraftVersion();
+
+        this.hashes = parser.getHashes();
+
         this.build = parser.getBuild();
         this.version = parser.getVersion();
         this.gameMajorVersion = gameMajorVersion.replaceAll("[+-]", ""); // Remove prefix character
@@ -29,5 +33,9 @@ public class MavenBuildApiGameVersion extends MavenBuildVersion{
     @Override
     public boolean test(String s) {
         return this.gameVersions.contains(s);
+    }
+
+    public List<String[]> getHashes() {
+        return hashes;
     }
 }

@@ -1,5 +1,7 @@
 package net.fabricmc.meta.utils;
 
+import net.fabricmc.meta.data.VersionDatabase;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -7,6 +9,7 @@ import java.util.*;
 
 public class ApiVersionParser {
 
+    private List<String[]> hashes;
     private String apiVersion;
     private String majorMinecraftVersion;
     private List<String> minecraftVersions = new ArrayList<>();
@@ -15,6 +18,9 @@ public class ApiVersionParser {
     private int build;
 
     private URL versionMetaUrl;
+
+    private static final String[] hashTypes =  new String[]{"md5", "sha1", "sha256", "sha512"};
+    private HashParser hashParser = new HashParser(VersionDatabase.MAVEN_URL, "net/fabricmc/fabric-api/fabric-api/");
 
     public ApiVersionParser(String version) {
         this.version = version;
@@ -42,6 +48,8 @@ public class ApiVersionParser {
             this.apiVersion = version.substring(0, version.lastIndexOf('+') - 1);
             this.build = 999; // Build number is no longer appended to versions, use dummy version
         }
+
+        this.hashes = this.hashParser.getHashes(this.version, "/fabric-api-", ".jar", hashTypes);
 
         Properties mc2Api = new Properties();
         try {
@@ -84,7 +92,10 @@ public class ApiVersionParser {
     }
 
     public List<String> getMinecraftVersions() {
-        //System.out.println(this.minecraftVersions);
         return minecraftVersions;
+    }
+
+    public List<String[]> getHashes() {
+        return hashes;
     }
 }
