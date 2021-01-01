@@ -27,7 +27,7 @@ public class ApiVersionParser {
 
         try {
             // TODO use official url
-            versionMetaUrl = new URL("https://gist.githubusercontent.com/dexman545/478d9ca5598a48ed2960fbb5d06ef0be/raw/apiversions.properties");
+            versionMetaUrl = new URL("https://raw.githubusercontent.com/dexman545/fabric-api-version-map/HEAD/apiVersions.properties");
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
