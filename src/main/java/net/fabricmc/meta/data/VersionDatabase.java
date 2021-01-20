@@ -17,6 +17,7 @@
 package net.fabricmc.meta.data;
 
 import net.fabricmc.meta.utils.MinecraftLauncherMeta;
+import net.fabricmc.meta.utils.MinecraftSemverConverter;
 import net.fabricmc.meta.utils.PomParser;
 import net.fabricmc.meta.web.models.*;
 
@@ -86,7 +87,7 @@ public class VersionDatabase {
 			return 0;
 		});
 
-		game = minecraftVersions.stream().map(s -> new BaseVersion(s, launcherMeta.isStable(s))).collect(Collectors.toList());
+		game = minecraftVersions.stream().map(s -> new BaseVersion(s, launcherMeta.isStable(s), MinecraftSemverConverter.convert(launcherMeta.majorVersion(s), s))).collect(Collectors.toList());
 	}
 
 }

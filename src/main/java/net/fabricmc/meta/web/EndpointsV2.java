@@ -39,6 +39,7 @@ public class EndpointsV2 {
 		WebServer.jsonGet("/v2/versions", () -> FabricMeta.database);
 
 		WebServer.jsonGet("/v2/versions/game", () -> FabricMeta.database.game);
+		WebServer.jsonGet("/v2/versions/game/:game_version", context -> withLimitSkip(context, filter(context, FabricMeta.database.game)));
 		WebServer.jsonGet("/v2/versions/game/yarn", () -> compatibleGameVersions(FabricMeta.database.mappings, MavenBuildGameVersion::getGameVersion, v -> new BaseVersion(v.getGameVersion(), v.isStable())));
 		WebServer.jsonGet("/v2/versions/game/intermediary", () -> compatibleGameVersions(FabricMeta.database.intermediary, BaseVersion::getVersion, v -> new BaseVersion(v.getVersion(), v.isStable())));
 
