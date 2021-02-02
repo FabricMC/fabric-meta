@@ -47,12 +47,16 @@ public class EndpointsV2 {
 
 		WebServer.jsonGet("/v2/versions/intermediary", () -> FabricMeta.database.intermediary);
 		WebServer.jsonGet("/v2/versions/intermediary/:game_version", context -> filter(context, FabricMeta.database.intermediary));
+		
+		WebServer.jsonGet("/v2/versions/guavaloader", context -> withLimitSkip(context, FabricMeta.database.guavaLoader));
+		WebServer.jsonGet("/v2/versions/guavaloader/:game_version", context -> withLimitSkip(context, EndpointsV2.getLoaderInfoAll(context, true)));
+		WebServer.jsonGet("/v2/versions/guavaloader/:game_version/:loader_version", context -> getLoaderInfo(context, true));
 
 		WebServer.jsonGet("/v2/versions/loader", context -> withLimitSkip(context, FabricMeta.database.loader));
 		WebServer.jsonGet("/v2/versions/loader/:game_version", context -> withLimitSkip(context, EndpointsV2.getLoaderInfoAll(context)));
 		WebServer.jsonGet("/v2/versions/loader/:game_version/:loader_version", EndpointsV2::getLoaderInfo);
 
-		WebServer.jsonGet("/v2/versions/installer", context -> withLimitSkip(context, FabricMeta.database.installer));
+		// WebServer.jsonGet("/v2/versions/installer", context -> withLimitSkip(context, FabricMeta.database.installer));
 
 		ProfileHandler.setup();
 	}
@@ -80,8 +84,13 @@ public class EndpointsV2 {
 		return versionList.stream().filter(t -> t.test(context.pathParam("game_version"))).collect(Collectors.toList());
 
 	}
-
-	private static Object getLoaderInfo(Context context) {
+	
+	private static Object getLoaderInfo(Context context)
+	{
+		return getLoaderInfo(context, false);
+	}
+	
+	private static Object getLoaderInfo(Context context, boolean guava) {
 		if (!context.pathParamMap().containsKey("game_version")) {
 			return null;
 		}
@@ -91,8 +100,9 @@ public class EndpointsV2 {
 
 		String gameVersion = context.pathParam("game_version");
 		String loaderVersion = context.pathParam("loader_version");
-
-		MavenBuildVersion loader = FabricMeta.database.loader.stream()
+		
+		List<MavenBuildVersion> loaders = guava ? FabricMeta.database.guavaLoader : FabricMeta.database.loader;
+		MavenBuildVersion loader = loaders.stream()
 			.filter(mavenBuildVersion -> loaderVersion.equals(mavenBuildVersion.getVersion()))
 			.findFirst().orElse(null);
 
@@ -110,8 +120,13 @@ public class EndpointsV2 {
 		}
 		return new LoaderInfoV2(loader, mappings).populateMeta();
 	}
-
-	private static List<?> getLoaderInfoAll(Context context) {
+	
+	private static List<?> getLoaderInfoAll(Context context)
+	{
+		return getLoaderInfoAll(context, false);
+	}
+	
+	private static List<?> getLoaderInfoAll(Context context, boolean guava) {
 		if (!context.pathParamMap().containsKey("game_version")) {
 			return null;
 		}
@@ -127,7 +142,8 @@ public class EndpointsV2 {
 
 		List<LoaderInfoV2> infoList = new ArrayList<>();
 
-		for(MavenBuildVersion loader : FabricMeta.database.loader){
+		List<MavenBuildVersion> loaders = guava ? FabricMeta.database.guavaLoader : FabricMeta.database.loader;
+		for(MavenBuildVersion loader : loaders){
 			infoList.add(new LoaderInfoV2(loader, mappings).populateMeta());
 		}
 		return infoList;
@@ -145,9 +161,15 @@ public class EndpointsV2 {
 
 		return versions;
 	}
-
-	public static void fileDownload(String ext, Function<LoaderInfoV2, String> fileNameFunction, Function<LoaderInfoV2, CompletableFuture<InputStream>> streamSupplier) {
-		WebServer.javalin.get("/v2/versions/loader/:game_version/:loader_version/profile/" + ext, ctx -> {
+	
+	public static void fileDownload(String ext, Function<LoaderInfoV2, String> fileNameFunction, Function<LoaderInfoV2, CompletableFuture<InputStream>> streamSupplier)
+	{
+		fileDownload(ext, fileNameFunction, streamSupplier, false);
+	}
+	
+	public static void fileDownload(String ext, Function<LoaderInfoV2, String> fileNameFunction, Function<LoaderInfoV2, CompletableFuture<InputStream>> streamSupplier, boolean guava) {
+		String loader = guava ? "guavaloader" : "loader";
+		WebServer.javalin.get("/v2/versions/" + loader + "/:game_version/:loader_version/profile/" + ext, ctx -> {
 			Object obj = getLoaderInfo(ctx);
 
 			if (obj instanceof String) {

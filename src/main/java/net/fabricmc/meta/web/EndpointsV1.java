@@ -40,6 +40,10 @@ public class EndpointsV1 {
 
 		WebServer.jsonGet("/v1/versions/mappings", () -> FabricMeta.database.mappings);
 		WebServer.jsonGet("/v1/versions/mappings/:game_version", context -> filter(context, FabricMeta.database.mappings));
+		
+		WebServer.jsonGet("/v1/versions/guavaloader", () -> FabricMeta.database.guavaLoader);
+		WebServer.jsonGet("/v1/versions/guavaloader/:game_version", context -> getLoaderInfoAll(context, true));
+		WebServer.jsonGet("/v1/versions/guavaloader/:game_version/:loader_version", context -> getLoaderInfo(context, true));
 
 		WebServer.jsonGet("/v1/versions/loader", () -> FabricMeta.database.loader);
 		WebServer.jsonGet("/v1/versions/loader/:game_version", EndpointsV1::getLoaderInfoAll);
@@ -55,7 +59,12 @@ public class EndpointsV1 {
 
 	}
 
-	private static Object getLoaderInfo(Context context) {
+	private static Object getLoaderInfo(Context context)
+	{
+		return getLoaderInfo(context, false);
+	}
+	
+	private static Object getLoaderInfo(Context context, boolean guava) {
 		if (!context.pathParamMap().containsKey("game_version")) {
 			return null;
 		}
@@ -65,8 +74,9 @@ public class EndpointsV1 {
 
 		String gameVersion = context.pathParam("game_version");
 		String loaderVersion = context.pathParam("loader_version");
-
-		MavenBuildVersion loader = FabricMeta.database.loader.stream()
+		
+		List<MavenBuildVersion> loaders = guava ? FabricMeta.database.guavaLoader : FabricMeta.database.loader;
+		MavenBuildVersion loader = loaders.stream()
 			.filter(mavenBuildVersion -> loaderVersion.equals(mavenBuildVersion.getVersion()))
 			.findFirst().orElse(null);
 
@@ -84,8 +94,13 @@ public class EndpointsV1 {
 		}
 		return new LoaderInfoV1(loader, mappings).populateMeta();
 	}
+	
+	private static Object getLoaderInfoAll(Context context)
+	{
+		return getLoaderInfoAll(context, false);
+	}
 
-	private static Object getLoaderInfoAll(Context context) {
+	private static Object getLoaderInfoAll(Context context, boolean guava) {
 		if (!context.pathParamMap().containsKey("game_version")) {
 			return null;
 		}
@@ -100,8 +115,9 @@ public class EndpointsV1 {
 		}
 
 		List<LoaderInfoV1> infoList = new ArrayList<>();
-
-		for(MavenBuildVersion loader : FabricMeta.database.loader){
+		
+		List<MavenBuildVersion> loaders = guava ? FabricMeta.database.guavaLoader : FabricMeta.database.loader;
+		for(MavenBuildVersion loader : loaders){
 			infoList.add(new LoaderInfoV1(loader, mappings));
 		}
 		return infoList;

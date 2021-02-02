@@ -19,7 +19,7 @@ package net.fabricmc.meta.web.models;
 public class MavenBuildVersion extends MavenVersion {
 
 	String separator;
-	int build;
+	long build;
 
 	public MavenBuildVersion(String maven) {
 		super(maven);
@@ -30,7 +30,7 @@ public class MavenBuildVersion extends MavenVersion {
 		} else {
 			separator = ".";
 		}
-		build = Integer.parseInt(version.substring(version.lastIndexOf(".") + 1));
+		build = Long.parseLong(version.substring(version.lastIndexOf(".") + 1));
 
 	}
 
@@ -38,7 +38,7 @@ public class MavenBuildVersion extends MavenVersion {
 		return separator;
 	}
 
-	public int getBuild() {
+	public long getBuild() {
 		return build;
 	}
 }

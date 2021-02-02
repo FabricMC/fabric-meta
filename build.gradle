@@ -14,7 +14,7 @@ if (ENV.BUILD_NUMBER) {
 
 
 sourceCompatibility = 1.8
-archivesBaseName = "fabric-meta"
+archivesBaseName = "legacy-meta"
 
 repositories {
     mavenCentral()
