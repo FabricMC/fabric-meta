@@ -42,33 +42,38 @@ public class ProfileHandler {
 	private static final DateFormat ISO_8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
 
 	public static void setup() {
-		EndpointsV2.fileDownload("json", ProfileHandler::getJsonFileName, ProfileHandler::profileJson);
-		EndpointsV2.fileDownload("zip", ProfileHandler::getZipFileName, ProfileHandler::profileZip);
+		EndpointsV2.fileDownload("json", ProfileHandler::getJsonFileName, info -> profileJson(info, false));
+		EndpointsV2.fileDownload("zip", ProfileHandler::getZipFileName, info -> profileZip(info, false));
+		
+		EndpointsV2.fileDownload("json", info -> getJsonFileName(info, "json", true), info -> profileJson(info, true), true);
+		EndpointsV2.fileDownload("zip", info -> getJsonFileName(info, "zip", true), info -> profileZip(info, true), true);
 	}
 
 	private static String getJsonFileName(LoaderInfoV2 info) {
-		return getJsonFileName(info, "json");
+		return getJsonFileName(info, "json", false);
 	}
 
 	private static String getZipFileName(LoaderInfoV2 info) {
-		return getJsonFileName(info, "zip");
+		return getJsonFileName(info, "zip", false);
 	}
 
-	private static String getJsonFileName(LoaderInfoV2 info, String ext) {
-		return String.format("fabric-loader-%s-%s.%s", info.getLoader().getVersion(), info.getIntermediary().getVersion(), ext);
+	private static String getJsonFileName(LoaderInfoV2 info, String ext, boolean guava) {
+		String loader = guava ? "fabric-loader-1.8.9-%s-%s.%s" : "fabric-loader-%s-%s.%s";
+		return String.format(loader, info.getLoader().getVersion(), info.getIntermediary().getVersion(), ext);
 	}
 
-	private static CompletableFuture<InputStream> profileJson(LoaderInfoV2 info) {
-		return CompletableFuture.supplyAsync(() -> getProfileJsonStream(info), EXECUTOR);
+	private static CompletableFuture<InputStream> profileJson(LoaderInfoV2 info, boolean guava) {
+		return CompletableFuture.supplyAsync(() -> getProfileJsonStream(info, guava), EXECUTOR);
 	}
 
-	private static CompletableFuture<InputStream> profileZip(LoaderInfoV2 info) {
-		return profileJson(info)
-				.thenApply(inputStream -> packageZip(info, inputStream));
+	private static CompletableFuture<InputStream> profileZip(LoaderInfoV2 info, boolean guava) {
+		return profileJson(info, guava)
+				.thenApply(inputStream -> packageZip(info, inputStream, guava));
 	}
 
-	private static InputStream packageZip(LoaderInfoV2 info, InputStream profileJson)  {
-		String profileName = String.format("fabric-loader-%s-%s", info.getLoader().getVersion(), info.getIntermediary().getVersion());
+	private static InputStream packageZip(LoaderInfoV2 info, InputStream profileJson, boolean guava)  {
+		String loader = guava ? "fabric-loader-1.8.9-%s-%s" : "fabric-loader-%s-%s";
+		String profileName = String.format(loader, info.getLoader().getVersion(), info.getIntermediary().getVersion());
 
 		try {
 			ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -91,21 +96,23 @@ public class ProfileHandler {
 		}
 	}
 
-	private static InputStream getProfileJsonStream(LoaderInfoV2 info) {
-		JsonObject jsonObject = buildProfileJson(info);
+	private static InputStream getProfileJsonStream(LoaderInfoV2 info, boolean guava) {
+		JsonObject jsonObject = buildProfileJson(info, guava);
 		return new ByteArrayInputStream(jsonObject.toString().getBytes());
 	}
 
 	//This is based of the installer code.
-	private static JsonObject buildProfileJson(LoaderInfoV2 info) {
+	private static JsonObject buildProfileJson(LoaderInfoV2 info, boolean guava) {
 		JsonObject launcherMeta = info.getLauncherMeta();
 
-		String profileName = String.format("fabric-loader-%s-%s", info.getLoader().getVersion(), info.getIntermediary().getVersion());
+		String loader = guava ? "fabric-loader-1.8.9-%s-%s" : "fabric-loader-%s-%s";
+		String profileName = String.format(loader, info.getLoader().getVersion(), info.getIntermediary().getVersion());
 
 		// Build the libraries array with the existing libs + loader and intermediary
 		JsonArray libraries = (JsonArray) launcherMeta.get("libraries").getAsJsonObject().get("common");
-		libraries.add(getLibrary(info.getIntermediary().getMaven(), LoaderMeta.MAVEN_URL));
-		libraries.add(getLibrary(info.getLoader().getMaven(), LoaderMeta.MAVEN_URL));
+		String maven = guava ? LoaderMeta.LEGACY_MAVEN_URL : LoaderMeta.MAVEN_URL;
+		libraries.add(getLibrary(info.getIntermediary().getMaven(), maven));
+		libraries.add(getLibrary(info.getLoader().getMaven(), maven));
 
 		String currentTime = ISO_8601.format(new Date());
 

@@ -65,6 +65,9 @@ public class EndpointsV1 {
 	}
 	
 	private static Object getLoaderInfo(Context context, boolean guava) {
+		if (context.pathParam("game_version").equals("1.8.9") && !guava) {
+			return null;
+		}
 		if (!context.pathParamMap().containsKey("game_version")) {
 			return null;
 		}
@@ -92,7 +95,7 @@ public class EndpointsV1 {
 			context.status(400);
 			return "no mappings version found for " + gameVersion;
 		}
-		return new LoaderInfoV1(loader, mappings).populateMeta();
+		return new LoaderInfoV1(loader, mappings).populateMeta(guava);
 	}
 	
 	private static Object getLoaderInfoAll(Context context)
@@ -101,6 +104,9 @@ public class EndpointsV1 {
 	}
 
 	private static Object getLoaderInfoAll(Context context, boolean guava) {
+		if (context.pathParam("game_version").equals("1.8.9") && !guava) {
+			return null;
+		}
 		if (!context.pathParamMap().containsKey("game_version")) {
 			return null;
 		}

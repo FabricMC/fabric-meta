@@ -91,6 +91,9 @@ public class EndpointsV2 {
 	}
 	
 	private static Object getLoaderInfo(Context context, boolean guava) {
+		if (context.pathParam("game_version").equals("1.8.9") && !guava) {
+			return null;
+		}
 		if (!context.pathParamMap().containsKey("game_version")) {
 			return null;
 		}
@@ -118,7 +121,7 @@ public class EndpointsV2 {
 			context.status(400);
 			return "no mappings version found for " + gameVersion;
 		}
-		return new LoaderInfoV2(loader, mappings).populateMeta();
+		return new LoaderInfoV2(loader, mappings).populateMeta(guava);
 	}
 	
 	private static List<?> getLoaderInfoAll(Context context)
@@ -127,6 +130,9 @@ public class EndpointsV2 {
 	}
 	
 	private static List<?> getLoaderInfoAll(Context context, boolean guava) {
+		if (context.pathParam("game_version").equals("1.8.9") && !guava) {
+			return null;
+		}
 		if (!context.pathParamMap().containsKey("game_version")) {
 			return null;
 		}
@@ -144,7 +150,7 @@ public class EndpointsV2 {
 
 		List<MavenBuildVersion> loaders = guava ? FabricMeta.database.guavaLoader : FabricMeta.database.loader;
 		for(MavenBuildVersion loader : loaders){
-			infoList.add(new LoaderInfoV2(loader, mappings).populateMeta());
+			infoList.add(new LoaderInfoV2(loader, mappings).populateMeta(guava));
 		}
 		return infoList;
 	}
@@ -170,7 +176,7 @@ public class EndpointsV2 {
 	public static void fileDownload(String ext, Function<LoaderInfoV2, String> fileNameFunction, Function<LoaderInfoV2, CompletableFuture<InputStream>> streamSupplier, boolean guava) {
 		String loader = guava ? "guavaloader" : "loader";
 		WebServer.javalin.get("/v2/versions/" + loader + "/:game_version/:loader_version/profile/" + ext, ctx -> {
-			Object obj = getLoaderInfo(ctx);
+			Object obj = getLoaderInfo(ctx, guava);
 
 			if (obj instanceof String) {
 				ctx.result((String) obj);
