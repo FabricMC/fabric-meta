@@ -33,8 +33,8 @@ public class LoaderInfoV2 implements LoaderInfoBase {
 		this.intermediary = intermediary;
 	}
 
-	public LoaderInfoV2 populateMeta(boolean guava) {
-		launcherMeta = LoaderMeta.getMeta(this, guava);
+	public LoaderInfoV2 populateMeta() {
+		launcherMeta = LoaderMeta.getMeta(this);
 		return this;
 	}
 

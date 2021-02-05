@@ -18,11 +18,13 @@ package net.fabricmc.meta.web.models;
 
 public class MavenBuildVersion extends MavenVersion {
 
+	String name;
 	String separator;
 	long build;
 
 	public MavenBuildVersion(String maven) {
 		super(maven);
+		name = maven.split(":")[1];
 		String version = maven.split(":")[2];
 
 		if (version.contains("+build.")) {
@@ -34,6 +36,10 @@ public class MavenBuildVersion extends MavenVersion {
 
 	}
 
+	public String getName() {
+		return name;
+	}
+	
 	public String getSeparator() {
 		return separator;
 	}

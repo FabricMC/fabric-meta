@@ -33,8 +33,8 @@ public class LoaderInfoV1 implements LoaderInfoBase {
 		this.mappings = mappings;
 	}
 
-	public LoaderInfoV1 populateMeta(boolean guava) {
-		launcherMeta = LoaderMeta.getMeta(this, guava);
+	public LoaderInfoV1 populateMeta() {
+		launcherMeta = LoaderMeta.getMeta(this);
 		return this;
 	}
 

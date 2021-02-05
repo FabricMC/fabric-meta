@@ -42,37 +42,34 @@ public class ProfileHandler {
 	private static final DateFormat ISO_8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
 
 	public static void setup() {
-		EndpointsV2.fileDownload("json", ProfileHandler::getJsonFileName, info -> profileJson(info, false));
-		EndpointsV2.fileDownload("zip", ProfileHandler::getZipFileName, info -> profileZip(info, false));
-		
-		EndpointsV2.fileDownload("json", info -> getJsonFileName(info, "json", true), info -> profileJson(info, true), true);
-		EndpointsV2.fileDownload("zip", info -> getJsonFileName(info, "zip", true), info -> profileZip(info, true), true);
+		EndpointsV2.fileDownload("json", ProfileHandler::getJsonFileName, ProfileHandler::profileJson);
+		EndpointsV2.fileDownload("zip", ProfileHandler::getZipFileName, ProfileHandler::profileZip);
 	}
 
 	private static String getJsonFileName(LoaderInfoV2 info) {
-		return getJsonFileName(info, "json", false);
+		return getJsonFileName(info, "json");
 	}
 
 	private static String getZipFileName(LoaderInfoV2 info) {
-		return getJsonFileName(info, "zip", false);
+		return getJsonFileName(info, "zip");
 	}
 
-	private static String getJsonFileName(LoaderInfoV2 info, String ext, boolean guava) {
-		String loader = guava ? "fabric-loader-1.8.9-%s-%s.%s" : "fabric-loader-%s-%s.%s";
+	private static String getJsonFileName(LoaderInfoV2 info, String ext) {
+		String loader = info.getLoader().getName() + "-%s-%s.%s";
 		return String.format(loader, info.getLoader().getVersion(), info.getIntermediary().getVersion(), ext);
 	}
 
-	private static CompletableFuture<InputStream> profileJson(LoaderInfoV2 info, boolean guava) {
-		return CompletableFuture.supplyAsync(() -> getProfileJsonStream(info, guava), EXECUTOR);
+	private static CompletableFuture<InputStream> profileJson(LoaderInfoV2 info) {
+		return CompletableFuture.supplyAsync(() -> getProfileJsonStream(info), EXECUTOR);
 	}
 
-	private static CompletableFuture<InputStream> profileZip(LoaderInfoV2 info, boolean guava) {
-		return profileJson(info, guava)
-				.thenApply(inputStream -> packageZip(info, inputStream, guava));
+	private static CompletableFuture<InputStream> profileZip(LoaderInfoV2 info) {
+		return profileJson(info)
+				.thenApply(inputStream -> packageZip(info, inputStream));
 	}
 
-	private static InputStream packageZip(LoaderInfoV2 info, InputStream profileJson, boolean guava)  {
-		String loader = guava ? "fabric-loader-1.8.9-%s-%s" : "fabric-loader-%s-%s";
+	private static InputStream packageZip(LoaderInfoV2 info, InputStream profileJson)  {
+		String loader = info.getLoader().getName() + "-%s-%s";
 		String profileName = String.format(loader, info.getLoader().getVersion(), info.getIntermediary().getVersion());
 
 		try {
@@ -96,21 +93,21 @@ public class ProfileHandler {
 		}
 	}
 
-	private static InputStream getProfileJsonStream(LoaderInfoV2 info, boolean guava) {
-		JsonObject jsonObject = buildProfileJson(info, guava);
+	private static InputStream getProfileJsonStream(LoaderInfoV2 info) {
+		JsonObject jsonObject = buildProfileJson(info);
 		return new ByteArrayInputStream(jsonObject.toString().getBytes());
 	}
 
 	//This is based of the installer code.
-	private static JsonObject buildProfileJson(LoaderInfoV2 info, boolean guava) {
+	private static JsonObject buildProfileJson(LoaderInfoV2 info) {
 		JsonObject launcherMeta = info.getLauncherMeta();
 
-		String loader = guava ? "fabric-loader-1.8.9-%s-%s" : "fabric-loader-%s-%s";
-		String profileName = String.format(loader, info.getLoader().getVersion(), info.getIntermediary().getVersion());
+		String loader = info.getLoader().getName();
+		String profileName = String.format(loader + "-%s-%s", info.getLoader().getVersion(), info.getIntermediary().getVersion());
 
 		// Build the libraries array with the existing libs + loader and intermediary
 		JsonArray libraries = (JsonArray) launcherMeta.get("libraries").getAsJsonObject().get("common");
-		String maven = guava ? LoaderMeta.LEGACY_MAVEN_URL : LoaderMeta.MAVEN_URL;
+		String maven = loader.equals("fabric-loader-1.8.9") ? LoaderMeta.LEGACY_MAVEN_URL : LoaderMeta.MAVEN_URL;
 		libraries.add(getLibrary(info.getIntermediary().getMaven(), maven));
 		libraries.add(getLibrary(info.getLoader().getMaven(), maven));
 

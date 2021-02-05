@@ -33,7 +33,7 @@ public class LoaderMeta {
 	public static final String MAVEN_URL = "https://maven.fabricmc.net/";
 	public static final String LEGACY_MAVEN_URL = "https://dl.bintray.com/legacy-fabric/Legacy-Fabric-Maven/";
 
-	public static JsonObject getMeta(LoaderInfoBase loaderInfo, boolean guava){
+	public static JsonObject getMeta(LoaderInfoBase loaderInfo){
 		String loaderMaven = loaderInfo.getLoader().getMaven();
 		String[] split = loaderMaven.split(":");
 		String path = String.format("%s/%s/%s", split[0].replaceAll("\\.","/"), split[1], split[2]);
@@ -42,7 +42,7 @@ public class LoaderMeta {
 		File launcherMetaFile = new File(BASE_DIR, path + "/" + filename);
 		if(!launcherMetaFile.exists()){
 			try {
-				String maven = guava ? LEGACY_MAVEN_URL : MAVEN_URL;
+				String maven = loaderInfo.getLoader().getName().equals("fabric-loader-1.8.9") ? LEGACY_MAVEN_URL : MAVEN_URL;
 				String url = String.format("%s%s/%s", maven, path, filename);
 				System.out.println("Downloading " + url);
 				FileUtils.copyURLToFile(new URL(url), launcherMetaFile);

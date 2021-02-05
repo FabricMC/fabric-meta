@@ -47,10 +47,6 @@ public class EndpointsV2 {
 
 		WebServer.jsonGet("/v2/versions/intermediary", () -> FabricMeta.database.intermediary);
 		WebServer.jsonGet("/v2/versions/intermediary/:game_version", context -> filter(context, FabricMeta.database.intermediary));
-		
-		WebServer.jsonGet("/v2/versions/guavaloader", context -> withLimitSkip(context, FabricMeta.database.guavaLoader));
-		WebServer.jsonGet("/v2/versions/guavaloader/:game_version", context -> withLimitSkip(context, EndpointsV2.getLoaderInfoAll(context, true)));
-		WebServer.jsonGet("/v2/versions/guavaloader/:game_version/:loader_version", context -> getLoaderInfo(context, true));
 
 		WebServer.jsonGet("/v2/versions/loader", context -> withLimitSkip(context, FabricMeta.database.loader));
 		WebServer.jsonGet("/v2/versions/loader/:game_version", context -> withLimitSkip(context, EndpointsV2.getLoaderInfoAll(context)));
@@ -85,15 +81,7 @@ public class EndpointsV2 {
 
 	}
 	
-	private static Object getLoaderInfo(Context context)
-	{
-		return getLoaderInfo(context, false);
-	}
-	
-	private static Object getLoaderInfo(Context context, boolean guava) {
-		if (context.pathParam("game_version").equals("1.8.9") && !guava) {
-			return null;
-		}
+	private static Object getLoaderInfo(Context context) {
 		if (!context.pathParamMap().containsKey("game_version")) {
 			return null;
 		}
@@ -104,8 +92,7 @@ public class EndpointsV2 {
 		String gameVersion = context.pathParam("game_version");
 		String loaderVersion = context.pathParam("loader_version");
 		
-		List<MavenBuildVersion> loaders = guava ? FabricMeta.database.guavaLoader : FabricMeta.database.loader;
-		MavenBuildVersion loader = loaders.stream()
+		MavenBuildVersion loader = FabricMeta.database.loader.stream()
 			.filter(mavenBuildVersion -> loaderVersion.equals(mavenBuildVersion.getVersion()))
 			.findFirst().orElse(null);
 
@@ -121,18 +108,10 @@ public class EndpointsV2 {
 			context.status(400);
 			return "no mappings version found for " + gameVersion;
 		}
-		return new LoaderInfoV2(loader, mappings).populateMeta(guava);
+		return new LoaderInfoV2(loader, mappings).populateMeta();
 	}
 	
-	private static List<?> getLoaderInfoAll(Context context)
-	{
-		return getLoaderInfoAll(context, false);
-	}
-	
-	private static List<?> getLoaderInfoAll(Context context, boolean guava) {
-		if (context.pathParam("game_version").equals("1.8.9") && !guava) {
-			return null;
-		}
+	private static List<?> getLoaderInfoAll(Context context) {
 		if (!context.pathParamMap().containsKey("game_version")) {
 			return null;
 		}
@@ -147,10 +126,9 @@ public class EndpointsV2 {
 		}
 
 		List<LoaderInfoV2> infoList = new ArrayList<>();
-
-		List<MavenBuildVersion> loaders = guava ? FabricMeta.database.guavaLoader : FabricMeta.database.loader;
-		for(MavenBuildVersion loader : loaders){
-			infoList.add(new LoaderInfoV2(loader, mappings).populateMeta(guava));
+		
+		for(MavenBuildVersion loader : FabricMeta.database.loader){
+			infoList.add(new LoaderInfoV2(loader, mappings).populateMeta());
 		}
 		return infoList;
 	}
@@ -168,15 +146,9 @@ public class EndpointsV2 {
 		return versions;
 	}
 	
-	public static void fileDownload(String ext, Function<LoaderInfoV2, String> fileNameFunction, Function<LoaderInfoV2, CompletableFuture<InputStream>> streamSupplier)
-	{
-		fileDownload(ext, fileNameFunction, streamSupplier, false);
-	}
-	
-	public static void fileDownload(String ext, Function<LoaderInfoV2, String> fileNameFunction, Function<LoaderInfoV2, CompletableFuture<InputStream>> streamSupplier, boolean guava) {
-		String loader = guava ? "guavaloader" : "loader";
-		WebServer.javalin.get("/v2/versions/" + loader + "/:game_version/:loader_version/profile/" + ext, ctx -> {
-			Object obj = getLoaderInfo(ctx, guava);
+	public static void fileDownload(String ext, Function<LoaderInfoV2, String> fileNameFunction, Function<LoaderInfoV2, CompletableFuture<InputStream>> streamSupplier) {
+		WebServer.javalin.get("/v2/versions/loader/:game_version/:loader_version/profile/" + ext, ctx -> {
+			Object obj = getLoaderInfo(ctx);
 
 			if (obj instanceof String) {
 				ctx.result((String) obj);

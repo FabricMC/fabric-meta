@@ -23,9 +23,12 @@ import net.fabricmc.meta.web.models.*;
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class VersionDatabase {
 
@@ -54,7 +57,9 @@ public class VersionDatabase {
 		database.mappings = MAPPINGS_PARSER.getMeta(MavenBuildGameVersion::new, "net.fabricmc:yarn:");
 		database.intermediary = INTERMEDIARY_PARSER.getMeta(MavenVersion::new, "net.fabricmc:intermediary:");
 		database.guavaLoader = GUAVA_LOADER_PARSER.getMeta(MavenBuildVersion::new, "net.fabricmc:fabric-loader-1.8.9:");
-		database.loader = LOADER_PARSER.getMeta(MavenBuildVersion::new, "net.fabricmc:fabric-loader:");
+		database.loader = Collections.unmodifiableList(Stream.of(LOADER_PARSER.getMeta(MavenBuildVersion::new, "net.fabricmc:fabric-loader:"), database.guavaLoader)
+															   .flatMap(Collection::stream)
+															   .collect(Collectors.toList()));
 		// database.installer = INSTALLER_PARSER.getMeta(MavenUrlVersion::new, "net.fabricmc:fabric-installer:");
 		database.loadMcData();
 		System.out.println("DB update took " + (System.currentTimeMillis() - start) + "ms");
