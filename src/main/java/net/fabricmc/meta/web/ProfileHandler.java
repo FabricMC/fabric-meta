@@ -108,10 +108,15 @@ public class ProfileHandler {
 
 		String profileName = String.format("fabric-loader-%s-%s", info.getLoader().getVersion(), info.getIntermediary().getVersion());
 
+		JsonObject librariesObject = launcherMeta.get("libraries").getAsJsonObject();
 		// Build the libraries array with the existing libs + loader and intermediary
-		JsonArray libraries = (JsonArray) launcherMeta.get("libraries").getAsJsonObject().get("common");
+		JsonArray libraries = (JsonArray) librariesObject.get("common");
 		libraries.add(getLibrary(info.getIntermediary().getMaven(), LoaderMeta.MAVEN_URL));
 		libraries.add(getLibrary(info.getLoader().getMaven(), LoaderMeta.MAVEN_URL));
+
+		if (librariesObject.has(side)) {
+			libraries.addAll(librariesObject.get(side).getAsJsonArray());
+		}
 
 		String currentTime = ISO_8601.format(new Date());
 
