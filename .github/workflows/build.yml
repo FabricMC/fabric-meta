@@ -12,4 +12,5 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - uses: gradle/wrapper-validation-action@v1
+      - run: chmod +x ./gradlew
       - run: ./gradlew build --stacktrace
