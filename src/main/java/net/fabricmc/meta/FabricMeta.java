@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 
 public class FabricMeta {
 
-	public static VersionDatabase database;
+	public static volatile VersionDatabase database;
 
 	public static void main(String[] args) {
 
