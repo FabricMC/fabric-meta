@@ -24,6 +24,9 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -69,8 +72,23 @@ public class PomParser {
 				.map(function)
 				.collect(Collectors.toList());
 
-		if(list.get(0) != null){
-			list.get(0).setStable(true);
+		Path unstableVersionsPath = Paths.get(prefix
+												.replace(":", "_")
+												.replace(".", "_")
+												.replaceFirst(".$","")
+												+ ".txt");
+
+		if (Files.exists(unstableVersionsPath)) {
+			// Read a file containing a new line separated list of versions that should not be marked as stable.
+			List<String> unstableVersions = Files.readAllLines(unstableVersionsPath);
+			list.stream()
+					.filter(v -> !unstableVersions.contains(v.getVersion()))
+					.findFirst()
+					.ifPresent(v -> v.setStable(true));
+		} else {
+			if(list.get(0) != null){
+				list.get(0).setStable(true);
+			}
 		}
 
 		return Collections.unmodifiableList(list);

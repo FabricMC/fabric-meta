@@ -2,18 +2,18 @@ plugins {
     id 'java'
 	id 'maven'
 	id 'maven-publish'
+	id 'org.cadixdev.licenser' version '0.5.0'
 }
 
 group 'net.fabricmc'
-version '1.1.0'
+version '1.2.2'
 
 def ENV = System.getenv()
-if (ENV.BUILD_NUMBER) {
-	version = version + "." + "${System.getenv().BUILD_NUMBER}"
-}
-
+version = version + (ENV.GITHUB_ACTIONS ? "" : "+local")
 
 sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
 archivesBaseName = "fabric-meta"
 
 repositories {
@@ -37,7 +37,20 @@ jar {
 	manifest {
 		attributes "Main-Class": "net.fabricmc.meta.FabricMeta"
 	}
-	from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+	from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
+}
+
+tasks.withType(JavaCompile).configureEach {
+	it.options.encoding = "UTF-8"
+
+	if (JavaVersion.current().isJava9Compatible()) {
+		it.options.release = 8
+	}
+}
+
+license {
+	header file('HEADER')
+	include '**/*.java'
 }
 
 publishing {
@@ -47,20 +60,32 @@ publishing {
 			artifactId project.archivesBaseName
 			version project.version
 
-			artifact (jar)
+			artifact jar
 		}
 	}
 	repositories {
-		maven {
-			url "http://mavenupload.modmuss50.me/"
-			if (project.hasProperty('mavenPass')) {
+		if (ENV.MAVEN_URL) {
+			maven {
+				url ENV.MAVEN_URL
 				credentials {
-					username 'buildslave'
-					password project.getProperty('mavenPass')
+					username ENV.MAVEN_USERNAME
+					password ENV.MAVEN_PASSWORD
 				}
 			}
 		}
 	}
 }
 
-apply from: 'https://github.com/FabricMC/fabric-docs/raw/master/gradle/license.gradle'
+// A task to ensure that the version being released has not already been released.
+task checkVersion {
+	doFirst {
+		def xml = new URL("https://maven.fabricmc.net/net/fabricmc/fabric-meta/maven-metadata.xml").text
+		def metadata = new XmlSlurper().parseText(xml)
+		def versions = metadata.versioning.versions.version*.text();
+		if (versions.contains(version)) {
+			throw new RuntimeException("${version} has already been released!")
+		}
+	}
+}
+
+publish.mustRunAfter checkVersion
