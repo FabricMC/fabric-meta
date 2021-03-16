@@ -92,7 +92,7 @@ public class VersionDatabase {
 	private List<BaseVersion> getGameVersion(List<String> minecraftVersions, MinecraftLauncherMeta launcherMeta) {
 		List<BaseVersion> game = new ArrayList<>();
 		for (String s : minecraftVersions) {
-			game.add(new BaseVersion(s, launcherMeta.isStable(s),
+			game.add(new MinecraftVersion(s, launcherMeta.isStable(s),
 					McVersionLookup.getVersion(s).normalized));
 		}
 

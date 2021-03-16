@@ -22,17 +22,10 @@ public class BaseVersion implements Predicate<String> {
 
 	String version;
 	boolean stable = false;
-	String semver;
 
 	public BaseVersion(String version, boolean stable) {
 		this.version = version;
 		this.stable = stable;
-	}
-
-	public BaseVersion(String version, boolean stable, String semver) {
-		this.version = version;
-		this.stable = stable;
-		this.semver = semver;
 	}
 
 	public String getVersion() {
@@ -45,10 +38,6 @@ public class BaseVersion implements Predicate<String> {
 
 	public void setStable(boolean stable) {
 		this.stable = stable;
-	}
-
-	public String getSemver() {
-		return semver;
 	}
 
 	@Override
