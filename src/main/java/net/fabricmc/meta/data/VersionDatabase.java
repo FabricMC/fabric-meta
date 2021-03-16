@@ -16,8 +16,8 @@
 
 package net.fabricmc.meta.data;
 
+import net.fabricmc.loader.minecraft.McVersionLookup;
 import net.fabricmc.meta.utils.MinecraftLauncherMeta;
-import net.fabricmc.meta.utils.MinecraftSemverConverter;
 import net.fabricmc.meta.utils.PomParser;
 import net.fabricmc.meta.web.models.*;
 
@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class VersionDatabase {
 
@@ -87,7 +86,17 @@ public class VersionDatabase {
 			return 0;
 		});
 
-		game = minecraftVersions.stream().map(s -> new BaseVersion(s, launcherMeta.isStable(s), MinecraftSemverConverter.convert(launcherMeta.majorVersion(s), s))).collect(Collectors.toList());
+		game = getGameVersion(minecraftVersions, launcherMeta);
+	}
+
+	private List<BaseVersion> getGameVersion(List<String> minecraftVersions, MinecraftLauncherMeta launcherMeta) {
+		List<BaseVersion> game = new ArrayList<>();
+		for (String s : minecraftVersions) {
+			game.add(new BaseVersion(s, launcherMeta.isStable(s),
+					McVersionLookup.getVersion(s).normalized));
+		}
+
+		return game;
 	}
 
 }

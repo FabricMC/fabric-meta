@@ -18,6 +18,10 @@ archivesBaseName = "fabric-meta"
 
 repositories {
     mavenCentral()
+	maven {
+		name = 'Fabric'
+		url = 'https://maven.fabricmc.net/'
+	}
 }
 
 dependencies {
@@ -25,6 +29,8 @@ dependencies {
 	compile group: 'io.javalin', name: 'javalin', version: '3.8.0'
 	compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.30'
 	compile group: 'commons-io', name: 'commons-io', version: '2.6'
+	compile group: 'net.fabricmc', name: 'fabric-loader', version: '0.11.3'
+	compile group: 'org.ow2.asm', name: 'asm', version: '7.0'
 }
 
 jar {
