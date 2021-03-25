@@ -24,7 +24,9 @@ jar {
 	manifest {
 		attributes "Main-Class": "net.fabricmc.meta.FabricMeta"
 	}
-	from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+	from {
+		configurations.runtimeClasspath.filter{ it.exists() }.collect { it.isDirectory() ? it : zipTree(it) }
+	}
 }
 
 apply from: 'https://github.com/FabricMC/fabric-docs/raw/master/gradle/license.gradle'
