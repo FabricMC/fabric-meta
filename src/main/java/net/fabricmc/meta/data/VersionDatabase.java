@@ -35,9 +35,9 @@ public class VersionDatabase {
 	public static final String MAVEN_URL = "https://maven.fabricmc.net/";
 	public static final String LEGACY_MAVEN_URL = "https://dl.bintray.com/legacy-fabric/Legacy-Fabric-Maven/";
 
-	public static final PomParser MAPPINGS_PARSER = new PomParser(LEGACY_MAVEN_URL + "net/fabricmc/yarn/maven-metadata.xml");
-	public static final PomParser INTERMEDIARY_PARSER = new PomParser(LEGACY_MAVEN_URL + "net/fabricmc/intermediary/maven-metadata.xml");
-	public static final PomParser GUAVA_LOADER_PARSER = new PomParser(LEGACY_MAVEN_URL + "net/fabricmc/fabric-loader-1.8.9/maven-metadata.xml");
+	public static final PomParser MAPPINGS_PARSER = new PomParser(MAVEN_URL + "net/fabricmc/yarn/maven-metadata.xml");
+	public static final PomParser INTERMEDIARY_PARSER = new PomParser(MAVEN_URL + "net/fabricmc/intermediary/maven-metadata.xml");
+	public static final PomParser GUAVA_LOADER_PARSER = new PomParser(MAVEN_URL + "net/fabricmc/fabric-loader-1.8.9/maven-metadata.xml");
 	public static final PomParser LOADER_PARSER = new PomParser(MAVEN_URL + "net/fabricmc/fabric-loader/maven-metadata.xml");
 	public static final PomParser INSTALLER_PARSER = new PomParser(MAVEN_URL + "net/fabricmc/fabric-installer/maven-metadata.xml");
 

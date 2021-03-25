@@ -25,7 +25,7 @@ public class MavenUrlVersion extends MavenVersion {
     public MavenUrlVersion(String maven) {
         super(maven);
         String[] split = maven.split(":");
-        this.url = String.format("%s%s/%s/%s/%s-%s.jar", VersionDatabase.LEGACY_MAVEN_URL,
+        this.url = String.format("%s%s/%s/%s/%s-%s.jar", VersionDatabase.MAVEN_URL,
                 split[0].replaceAll("\\.", "/"),
                 split[1],
                 split[2],
