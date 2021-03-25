@@ -32,7 +32,7 @@ import java.util.stream.Stream;
 
 public class VersionDatabase {
 
-	public static final String MAVEN_URL = "https://maven.fabricmc.net/";
+	public static final String MAVEN_URL = "https://maven.legacyfabric.net/";
 	public static final String LEGACY_MAVEN_URL = "https://dl.bintray.com/legacy-fabric/Legacy-Fabric-Maven/";
 
 	public static final PomParser MAPPINGS_PARSER = new PomParser(MAVEN_URL + "net/fabricmc/yarn/maven-metadata.xml");
