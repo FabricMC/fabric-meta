@@ -298,7 +298,7 @@ Since version 0.1.1 `launcherMeta` is now included, this can be used to get the 
 
 ### /v2/versions/loader/:game_version/:loader_version/profile/json
 
-Returns the JSON file that should be used in the standard minecraft launcher.
+Returns the JSON file that should be used in the standard Minecraft launcher.
 
 ### /v2/versions/loader/:game_version/:loader_version/profile/zip
 
