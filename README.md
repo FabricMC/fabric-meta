@@ -312,7 +312,7 @@ Returns the JSON file in format of the launcher JSON, but with the server's main
 
 ### /v1/versions
 
-Full database, includes all the data. Warning, large JSON.
+Full database, includes all the data. **Warning**: large JSON.
 
 ### /v1/versions/game
 
