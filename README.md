@@ -16,7 +16,7 @@ The versions are in order, the newest versions appear first.
 
 ### /v2/versions
 
-Full database, includes all the data. Warning, large JSON.
+Full database, includes all the data. **Warning**: large JSON.
 
 ### /v2/versions/game
 
