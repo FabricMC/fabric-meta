@@ -16,12 +16,6 @@
 
 package net.fabricmc.meta.web;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import net.fabricmc.meta.utils.LoaderMeta;
-import net.fabricmc.meta.web.models.LoaderInfoV2;
-import org.apache.commons.io.IOUtils;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -35,6 +29,13 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import org.apache.commons.io.IOUtils;
+
+import net.fabricmc.meta.utils.LoaderMeta;
+import net.fabricmc.meta.web.models.LoaderInfoV2;
 
 public class ProfileHandler {
 
@@ -129,9 +130,16 @@ public class ProfileHandler {
 
 		profile.addProperty("mainClass", launcherMeta.get("mainClass").getAsJsonObject().get(side).getAsString());
 
-		// I believe this is required to stop the launcher from complaining
 		JsonObject arguments = new JsonObject();
+
+		// I believe this is required to stop the launcher from complaining
 		arguments.add("game", new JsonArray());
+
+		// add '-DFabricMakeNVidiaHappy= net.minecraft.client.main.Main ' for hybrid notebook solutions and similar assume it's MC
+		JsonArray jvmArgs = new JsonArray();
+		jvmArgs.add("-DFabricMakeNVidiaHappy= net.minecraft.client.main.Main ");
+		arguments.add("jvm", jvmArgs);
+
 		profile.add("arguments", arguments);
 
 		profile.add("libraries", libraries);
