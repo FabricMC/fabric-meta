@@ -135,10 +135,12 @@ public class ProfileHandler {
 		// I believe this is required to stop the launcher from complaining
 		arguments.add("game", new JsonArray());
 
-		// add '-DFabricMakeNVidiaHappy= net.minecraft.client.main.Main ' for hybrid notebook solutions and similar assume it's MC
-		JsonArray jvmArgs = new JsonArray();
-		jvmArgs.add("-DFabricMakeNVidiaHappy= net.minecraft.client.main.Main ");
-		arguments.add("jvm", jvmArgs);
+		if (side.equals("client")) {
+			// add '-DFabricMakeNVidiaHappy= net.minecraft.client.main.Main ' for hybrid notebook solutions and similar assume it's MC
+			JsonArray jvmArgs = new JsonArray();
+			jvmArgs.add("-DFabricMakeNVidiaHappy= net.minecraft.client.main.Main ");
+			arguments.add("jvm", jvmArgs);
+		}
 
 		profile.add("arguments", arguments);
 
