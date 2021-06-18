@@ -136,9 +136,9 @@ public class ProfileHandler {
 		arguments.add("game", new JsonArray());
 
 		if (side.equals("client")) {
-			// add '-DFabricMakeNVidiaHappy= net.minecraft.client.main.Main ' for hybrid notebook solutions and similar assume it's MC
+			// add '-DFabricMcEmu= net.minecraft.client.main.Main ' to emulate vanilla MC presence for programs that check the process command line (discord, nvidia hybrid gpu, ..)
 			JsonArray jvmArgs = new JsonArray();
-			jvmArgs.add("-DFabricMakeNVidiaHappy= net.minecraft.client.main.Main ");
+			jvmArgs.add("-DFabricMcEmu= net.minecraft.client.main.Main ");
 			arguments.add("jvm", jvmArgs);
 		}
 
