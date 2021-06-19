@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2021 LegacyFabric
  * Copyright (c) 2019 FabricMC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,6 +19,7 @@ package net.fabricmc.meta.web;
 
 import io.javalin.http.Context;
 import net.fabricmc.meta.FabricMeta;
+import net.fabricmc.meta.utils.LoaderMeta;
 import net.fabricmc.meta.web.models.LoaderInfoV1;
 import net.fabricmc.meta.web.models.MavenBuildGameVersion;
 import net.fabricmc.meta.web.models.MavenBuildVersion;
@@ -102,7 +104,9 @@ public class EndpointsV1 {
 		List<LoaderInfoV1> infoList = new ArrayList<>();
 		
 		for(MavenBuildVersion loader : FabricMeta.database.loader){
-			infoList.add(new LoaderInfoV1(loader, mappings));
+			if (LoaderMeta.canUse(gameVersion, loader)) {
+				infoList.add(new LoaderInfoV1(loader, mappings));
+			}
 		}
 		return infoList;
 	}
