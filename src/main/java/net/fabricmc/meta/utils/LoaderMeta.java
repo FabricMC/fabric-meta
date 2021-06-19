@@ -17,6 +17,7 @@
 package net.fabricmc.meta.utils;
 
 import com.google.gson.JsonObject;
+import net.fabricmc.meta.data.VersionDatabase;
 import net.fabricmc.meta.web.WebServer;
 import net.fabricmc.meta.web.models.LoaderInfoBase;
 import org.apache.commons.io.FileUtils;
@@ -31,7 +32,7 @@ public class LoaderMeta {
 
 	public static final File BASE_DIR = new File("metadata");
 	public static final String MAVEN_URL = "https://maven.fabricmc.net/";
-	public static final String LEGACY_MAVEN_URL = "https://dl.bintray.com/legacy-fabric/Legacy-Fabric-Maven/";
+	public static final String LEGACY_MAVEN_URL = VersionDatabase.MAVEN_URL;
 
 	public static JsonObject getMeta(LoaderInfoBase loaderInfo){
 		String loaderMaven = loaderInfo.getLoader().getMaven();
