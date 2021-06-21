@@ -8,31 +8,31 @@ FabricMC. (https://fabricmc.net/)
 Portions of this software are modified by the
 LegacyFabric organization. (https://legacyfabric.net/)
 
-net/fabricmc/meta/data/VersionDatabase.java
+src/main/java/net/fabricmc/meta/data/VersionDatabase.java
     Copyright (c) 2021 LegacyFabric
     Licensed under the Apache License, Version 2.0 (the "License");
     https://github.com/Legacy-Fabric/legacy-meta/tree/master/src/main/java/net/fabricmc/meta/data/VersionDatabase.java
     Modifications: Add custom fabric-loader for 1.8.9 (fabric-loader-1.8.9) to the loader database.
 
-net/fabricmc/meta/utils/LoaderMeta.java
+src/main/java/net/fabricmc/meta/utils/LoaderMeta.java
     Copyright (c) 2021 LegacyFabric
     Licensed under the Apache License, Version 2.0 (the "License");
     https://github.com/Legacy-Fabric/legacy-meta/tree/master/src/main/java/net/fabricmc/meta/utils/LoaderMeta.java
     Modifications: Make use of the legacy-fabric maven url with fabric-loader-1.8.9.
 
-net/fabricmc/meta/web/models/MavenBuildVersion.java
+src/main/java/net/fabricmc/meta/web/models/MavenBuildVersion.java
     Copyright (c) 2021 LegacyFabric
     Licensed under the Apache License, Version 2.0 (the "License");
     https://github.com/Legacy-Fabric/legacy-meta/tree/master/src/main/java/net/fabricmc/meta/web/models/MavenBuildVersion.java
     Modifications: Fetch the loader name from maven.
 
-net/fabricmc/meta/web/models/MavenUrlVersion.java
+src/main/java/net/fabricmc/meta/web/models/MavenUrlVersion.java
     Copyright (c) 2021 LegacyFabric
     Licensed under the Apache License, Version 2.0 (the "License");
     https://github.com/Legacy-Fabric/legacy-meta/tree/master/src/main/java/net/fabricmc/meta/web/models/MavenUrlVersion.java
     Modifications: Make use of the legacy-fabric maven url (https://maven.legacyfabric.net/) instead of the FabricMC one.
 
-net/fabricmc/meta/web/ProfileHandler.java
+src/main/java/net/fabricmc/meta/web/ProfileHandler.java
     Copyright (c) 2021 LegacyFabric
     Licensed under the Apache License, Version 2.0 (the "License");
     https://github.com/Legacy-Fabric/legacy-meta/tree/master/src/main/java/net/fabricmc/meta/web/ProfileHandler.java
