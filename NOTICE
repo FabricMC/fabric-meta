@@ -37,3 +37,21 @@ net/fabricmc/meta/web/ProfileHandler.java
     Licensed under the Apache License, Version 2.0 (the "License");
     https://github.com/Legacy-Fabric/legacy-meta/tree/master/src/main/java/net/fabricmc/meta/web/ProfileHandler.java
     Modifications: Add support for fabric-loader-1.8.9.
+
+src/main/java/net/fabricmc/meta/utils/LoaderMeta.java
+    Copyright (c) 2021 LegacyFabric
+    Licensed under the Apache License, Version 2.0 (the "License");
+    https://github.com/Legacy-Fabric/legacy-meta/tree/master/src/main/java/net/fabricmc/meta/web/ProfileHandler.java
+    Modifications: Add support for fabric-loader-1.8.9.
+
+src/main/java/net/fabricmc/meta/web/EndpointsV1.java
+    Copyright (c) 2021 LegacyFabric
+    Licensed under the Apache License, Version 2.0 (the "License");
+    https://github.com/Legacy-Fabric/legacy-meta/tree/master/src/main/java/net/fabricmc/meta/web/ProfileHandler.java
+    Modifications: Add support for fabric-loader-1.8.9.
+
+src/main/java/net/fabricmc/meta/web/EndpointsV2.java
+    Copyright (c) 2021 LegacyFabric
+    Licensed under the Apache License, Version 2.0 (the "License");
+    https://github.com/Legacy-Fabric/legacy-meta/tree/master/src/main/java/net/fabricmc/meta/web/ProfileHandler.java
+    Modifications: Add support for fabric-loader-1.8.9.
