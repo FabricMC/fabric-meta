@@ -31,6 +31,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.apache.commons.io.IOUtils;
 
@@ -128,7 +129,16 @@ public class ProfileHandler {
 		profile.addProperty("time", currentTime);
 		profile.addProperty("type", "release");
 
-		profile.addProperty("mainClass", launcherMeta.get("mainClass").getAsJsonObject().get(side).getAsString());
+		JsonElement mainClassElement = launcherMeta.get("mainClass");
+		String mainClass;
+
+		if (mainClassElement.isJsonObject()) {
+			mainClass = mainClassElement.getAsJsonObject().get(side).getAsString();
+		} else {
+			mainClass = mainClassElement.getAsString();
+		}
+
+		profile.addProperty("mainClass", mainClass);
 
 		JsonObject arguments = new JsonObject();
 
