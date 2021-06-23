@@ -1,14 +1,14 @@
 # fabric-meta
 
-Fabric Meta ia a json HTTP api that can be used to query meta data about fabrics projects. It is updated every 5 mins.
+Fabric Meta is a JSON HTTP API that can be used to query meta data about Fabric's projects. It is updated every 5 mins.
 
-I can be used by tools or launchers that wish to query version infomation about fabric.
+It can be used by tools or launchers that wish to query version information about Fabric.
 
 Hosted at [https://meta.fabricmc.net/](https://meta.fabricmc.net/)
 
 ## Endpoints
 
-The versions are in order, the newest versions appear first
+The versions are in order, the newest versions appear first.
 
 `game_version` and `loader_version` should be url encoded to allow for special characters. For example `1.14 Pre-Release 5` becomes `1.14%20Pre-Release%205`
 
@@ -16,11 +16,11 @@ The versions are in order, the newest versions appear first
 
 ### /v2/versions
 
-full database, includes all the data, warning large json
+Full database, includes all the data. **Warning**: large JSON.
 
 ### /v2/versions/game
 
-Lists all of the supported game versions
+Lists all of the supported game versions.
 
 ```json
 [
@@ -37,7 +37,7 @@ Lists all of the supported game versions
 
 ### /v2/versions/game/yarn
 
-Lists all of the compatible game versions for yarn
+Lists all of the compatible game versions for yarn.
 
 ```json
 [
@@ -54,7 +54,7 @@ Lists all of the compatible game versions for yarn
 
 ### /v2/versions/game/intermediary
 
-Lists all of the compatible game versions for intermediary
+Lists all of the compatible game versions for intermediary.
 
 ```json
 [
@@ -71,7 +71,7 @@ Lists all of the compatible game versions for intermediary
 
 ### /v2/versions/intermediary
 
-Lists all of the intermediary versions, stable is based of the minecraft version
+Lists all of the intermediary versions, stable is based of the Minecraft version.
 
 ```json
 [
@@ -90,8 +90,7 @@ Lists all of the intermediary versions, stable is based of the minecraft version
 
 ### /v2/versions/intermediary/:game_version
 
-Lists all of the intermediary for the provided game version, there will only ever be 1
-
+Lists all of the intermediary for the provided game version, there will only ever be 1.
 
 ```json
 [
@@ -105,7 +104,7 @@ Lists all of the intermediary for the provided game version, there will only eve
 
 ### /v2/versions/yarn
 
-Lists all of the yarn versions, stable is based of the minecraft version
+Lists all of the yarn versions, stable is based on the Minecraft version.
 
 ```json
 [
@@ -130,8 +129,7 @@ Lists all of the yarn versions, stable is based of the minecraft version
 
 ### /v2/versions/yarn/:game_version
 
-Lists all of the yarn versions for the provided game version
-
+Lists all of the yarn versions for the provided game version.
 
 ```json
 [
@@ -156,8 +154,7 @@ Lists all of the yarn versions for the provided game version
 
 ### /v2/versions/loader
 
-Lists all of the loader versions
-
+Lists all of the loader versions.
 
 ```json
 [
@@ -180,7 +177,7 @@ Lists all of the loader versions
 
 ### /v2/versions/loader/:game_version
 
-This returns a list of all the compatible loader versions for a given version of the game, along with the best version of intermediary to use for that version
+This returns a list of all the compatible loader versions for a given version of the game, along with the best version of intermediary to use for that version.
 
 ```json
 [
@@ -215,12 +212,11 @@ This returns a list of all the compatible loader versions for a given version of
 ]
 ```
 
-
 ### /v2/versions/loader/:game_version/:loader_version
 
-This returns the best intermediary for the supplied minecraft version, as well as the details for the supplied loader version. This should be used if you want to install a specific version of loader along with some intermediary for a specific game version.
+This returns the best intermediary for the supplied Minecraft version, as well as the details for the supplied loader version. This should be used if you want to install a specific version of loader along with some intermediary for a specific game version.
 
-Since version 0.1.1 `launcherMeta` is now included, this can be used to get the library's required by fabric-loader as well as the main class for each side.
+Since version 0.1.1 `launcherMeta` is now included, this can be used to get the libraries required by fabric-loader as well as the main class for each side.
 
 ```json
 {
@@ -302,25 +298,25 @@ Since version 0.1.1 `launcherMeta` is now included, this can be used to get the 
 
 ### /v2/versions/loader/:game_version/:loader_version/profile/json
 
-Returns the json file that should be used in the standard minecraft launcher
+Returns the JSON file that should be used in the standard Minecraft launcher.
 
 ### /v2/versions/loader/:game_version/:loader_version/profile/zip
 
-Downloads a zip file with the launcher's profile json, and the dummy jar. TO be extracted into .minecraft/versions
+Downloads a zip file with the launcher's profile json, and the dummy jar. To be extracted into .minecraft/versions
 
 ### /v2/versions/loader/:game_version/:loader_version/server/json
 
-Returns the json file in format of the launcher json, but with the server's main class.
+Returns the JSON file in format of the launcher JSON, but with the server's main class.
 
 # V1
 
 ### /v1/versions
 
-full database, includes all the data, warning large json
+Full database, includes all the data. **Warning**: large JSON.
 
 ### /v1/versions/game
 
-Lists all of the supported game versions
+Lists all of the supported game versions.
 
 ```json
 [
@@ -337,7 +333,7 @@ Lists all of the supported game versions
 
 ### /v1/versions/game/:game_version
 
-Lists the version information for the game version provided
+Lists the version information for the game version provided.
 
 `stable` is true for release versions of the game, and false for snapshots
 
@@ -352,7 +348,7 @@ Lists the version information for the game version provided
 
 ### /v1/versions/mappings
 
-Lists all of the mappings versions
+Lists all of the mappings versions.
 
 ```json
 [
@@ -377,7 +373,7 @@ Lists all of the mappings versions
 
 ### /v1/versions/mappings/:game_version
 
-Lists all of the mappings for the provided game version
+Lists all of the mappings for the provided game version.
 
 
 ```json
@@ -395,8 +391,7 @@ Lists all of the mappings for the provided game version
 
 ### /v1/versions/loader
 
-Lists all of the loader versions
-
+Lists all of the loader versions.
 
 ```json
 [
@@ -419,7 +414,7 @@ Lists all of the loader versions
 
 ### /v1/versions/loader/:game_version
 
-This returns a list of all the compatible loader versions for a given version of the game, along with the best version of yarn to use for that version
+This returns a list of all the compatible loader versions for a given version of the game, along with the best version of yarn to use for that version.
 
 ```json
 [
@@ -460,12 +455,11 @@ This returns a list of all the compatible loader versions for a given version of
 ]
 ```
 
-
 ### /v1/versions/loader/:game_version/:loader_version
 
-This returns the best mappings for the supplied minecraft version, as well as the details for the supplied loader version. This should be used if you want to install a specific version of loader along with some mappings for a specific game version.
+This returns the best mappings for the supplied Minecraft version, as well as the details for the supplied loader version. This should be used if you want to install a specific version of loader along with some mappings for a specific game version.
 
-Since version 0.1.1 `launcherMeta` is now included, this can be used to get the library's required by fabric-loader as well as the main class for each side.
+Since version 0.1.1 `launcherMeta` is now included, this can be used to get the libraries required by fabric-loader as well as the main class for each side.
 
 ```json
 {
