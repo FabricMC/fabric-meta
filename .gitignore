@@ -4,6 +4,7 @@
 # Folders
 !/gradle
 !/src
+!/.github
 
 # Files
 !/.gitignore
@@ -12,7 +13,6 @@
 !/gradlew
 !/gradlew.bat
 !/HEADER
-!/Jenkinsfile
 !/LICENSE
 !/NOTICE
 !/README.md
