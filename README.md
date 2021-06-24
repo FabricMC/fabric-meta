@@ -2,7 +2,7 @@
 
 Legacy Meta is a JSON HTTP API that can be used to query meta data about Legacy-Fabric's projects. It is updated every 5 mins.
 
-It can be used by tools or launchers that wish to query version information about Fabric.
+It can be used by tools or launchers that wish to query version information about Legacy-Fabric.
 
 Hosted at [https://meta.legacyfabric.net/](https://meta.legacyfabric.net/)
 
