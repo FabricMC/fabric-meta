@@ -41,7 +41,7 @@ license {
 	matching(includes: ['**/VersionDatabase.java', '**/LoaderMeta.java', '**/MavenBuildVersion.java',
 						'**/MavenUrlVersion.java', '**/ProfileHandler.java', '**/EndpointsV1.java',
 						'**/EndpointsV2.java']) {
-		header = file('LF-HEADER')
+		header = file('LFQ-HEADER')
 	}
 	header file('HEADER')
 	include '**/*.java'
