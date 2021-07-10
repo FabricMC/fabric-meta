@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2021 Legacy Fabric/Quilt
  * Copyright (c) 2019 FabricMC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -148,9 +149,9 @@ public class EndpointsV2 {
 
 		return versions;
 	}
-	
-	public static void fileDownload(String ext, Function<LoaderInfoV2, String> fileNameFunction, Function<LoaderInfoV2, CompletableFuture<InputStream>> streamSupplier) {
-		WebServer.javalin.get("/v2/versions/loader/:game_version/:loader_version/profile/" + ext, ctx -> {
+
+	public static void fileDownload(String path, String ext, Function<LoaderInfoV2, String> fileNameFunction, Function<LoaderInfoV2, CompletableFuture<InputStream>> streamSupplier) {
+		WebServer.javalin.get("/v2/versions/loader/:game_version/:loader_version/" + path + "/" + ext, ctx -> {
 			Object obj = getLoaderInfo(ctx);
 
 			if (obj instanceof String) {

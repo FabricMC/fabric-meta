@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2021 Legacy Fabric/Quilt
  * Copyright (c) 2019 FabricMC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,12 +17,6 @@
 
 package net.fabricmc.meta.web;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import net.fabricmc.meta.utils.LoaderMeta;
-import net.fabricmc.meta.web.models.LoaderInfoV2;
-import org.apache.commons.io.IOUtils;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -36,14 +31,24 @@ import java.util.concurrent.Executors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import org.apache.commons.io.IOUtils;
+
+import net.fabricmc.meta.utils.LoaderMeta;
+import net.fabricmc.meta.web.models.LoaderInfoV2;
+
 public class ProfileHandler {
 
 	private static final Executor EXECUTOR = Executors.newFixedThreadPool(2);
 	private static final DateFormat ISO_8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
 
 	public static void setup() {
-		EndpointsV2.fileDownload("json", ProfileHandler::getJsonFileName, ProfileHandler::profileJson);
-		EndpointsV2.fileDownload("zip", ProfileHandler::getZipFileName, ProfileHandler::profileZip);
+		EndpointsV2.fileDownload("profile", "json", ProfileHandler::getJsonFileName, ProfileHandler::profileJson);
+		EndpointsV2.fileDownload("profile", "zip", ProfileHandler::getZipFileName, ProfileHandler::profileZip);
+
+		EndpointsV2.fileDownload("server", "json", ProfileHandler::getJsonFileName, ProfileHandler::serverJson);
 	}
 
 	private static String getJsonFileName(LoaderInfoV2 info) {
@@ -60,7 +65,11 @@ public class ProfileHandler {
 	}
 
 	private static CompletableFuture<InputStream> profileJson(LoaderInfoV2 info) {
-		return CompletableFuture.supplyAsync(() -> getProfileJsonStream(info), EXECUTOR);
+		return CompletableFuture.supplyAsync(() -> getProfileJsonStream(info, "client"), EXECUTOR);
+	}
+
+	private static CompletableFuture<InputStream> serverJson(LoaderInfoV2 info) {
+		return CompletableFuture.supplyAsync(() -> getProfileJsonStream(info, "server"), EXECUTOR);
 	}
 
 	private static CompletableFuture<InputStream> profileZip(LoaderInfoV2 info) {
@@ -93,23 +102,28 @@ public class ProfileHandler {
 		}
 	}
 
-	private static InputStream getProfileJsonStream(LoaderInfoV2 info) {
-		JsonObject jsonObject = buildProfileJson(info);
+	private static InputStream getProfileJsonStream(LoaderInfoV2 info, String side) {
+		JsonObject jsonObject = buildProfileJson(info, side);
 		return new ByteArrayInputStream(jsonObject.toString().getBytes());
 	}
 
 	//This is based of the installer code.
-	private static JsonObject buildProfileJson(LoaderInfoV2 info) {
+	private static JsonObject buildProfileJson(LoaderInfoV2 info, String side) {
 		JsonObject launcherMeta = info.getLauncherMeta();
 
 		String loader = info.getLoader().getName();
 		String profileName = String.format(loader + "-%s-%s", info.getLoader().getVersion(), info.getIntermediary().getVersion());
 
+		JsonObject librariesObject = launcherMeta.get("libraries").getAsJsonObject();
 		// Build the libraries array with the existing libs + loader and intermediary
-		JsonArray libraries = (JsonArray) launcherMeta.get("libraries").getAsJsonObject().get("common");
+		JsonArray libraries = (JsonArray) librariesObject.get("common");
 		String maven = loader.equals("fabric-loader-1.8.9") ? LoaderMeta.LEGACY_MAVEN_URL : LoaderMeta.MAVEN_URL;
 		libraries.add(getLibrary(info.getIntermediary().getMaven(), maven));
 		libraries.add(getLibrary(info.getLoader().getMaven(), maven));
+
+		if (librariesObject.has(side)) {
+			libraries.addAll(librariesObject.get(side).getAsJsonArray());
+		}
 
 		String currentTime = ISO_8601.format(new Date());
 
@@ -120,11 +134,29 @@ public class ProfileHandler {
 		profile.addProperty("time", currentTime);
 		profile.addProperty("type", "release");
 
-		profile.addProperty("mainClass", launcherMeta.get("mainClass").getAsJsonObject().get("client").getAsString());
+		JsonElement mainClassElement = launcherMeta.get("mainClass");
+		String mainClass;
+
+		if (mainClassElement.isJsonObject()) {
+			mainClass = mainClassElement.getAsJsonObject().get(side).getAsString();
+		} else {
+			mainClass = mainClassElement.getAsString();
+		}
+
+		profile.addProperty("mainClass", mainClass);
+
+		JsonObject arguments = new JsonObject();
 
 		// I believe this is required to stop the launcher from complaining
-		JsonObject arguments = new JsonObject();
 		arguments.add("game", new JsonArray());
+
+		if (side.equals("client")) {
+			// add '-DFabricMcEmu= net.minecraft.client.main.Main ' to emulate vanilla MC presence for programs that check the process command line (discord, nvidia hybrid gpu, ..)
+			JsonArray jvmArgs = new JsonArray();
+			jvmArgs.add("-DFabricMcEmu= net.minecraft.client.main.Main ");
+			arguments.add("jvm", jvmArgs);
+		}
+
 		profile.add("arguments", arguments);
 
 		profile.add("libraries", libraries);
