@@ -21,7 +21,6 @@ public class MavenBuildVersion extends MavenVersion {
 
 	String name;
 	String separator;
-	long build;
 
 	public MavenBuildVersion(String maven) {
 		super(maven);
@@ -33,19 +32,9 @@ public class MavenBuildVersion extends MavenVersion {
 		} else {
 			separator = ".";
 		}
-		build = Long.parseLong(version.substring(version.lastIndexOf(".") + 1));
-
 	}
 
 	public String getName() {
 		return name;
-	}
-	
-	public String getSeparator() {
-		return separator;
-	}
-
-	public long getBuild() {
-		return build;
 	}
 }
