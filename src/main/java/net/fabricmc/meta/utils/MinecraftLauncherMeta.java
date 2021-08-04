@@ -28,6 +28,7 @@ import java.util.List;
 public class MinecraftLauncherMeta {
 
 	public static final Gson GSON = new GsonBuilder().create();
+	public static String json = "";
 
 	List<Version> versions;
 
@@ -36,12 +37,19 @@ public class MinecraftLauncherMeta {
 
 	public static MinecraftLauncherMeta getMeta() throws IOException {
 		String url = "https://launchermeta.mojang.com/mc/game/version_manifest.json";
-		String json = IOUtils.toString(new URL(url), StandardCharsets.UTF_8);
+		if (json.isEmpty()) json = IOUtils.toString(new URL(url), StandardCharsets.UTF_8);
 		return GSON.fromJson(json, MinecraftLauncherMeta.class);
 	}
 
 	public boolean isStable(String id) {
 		return versions.stream().anyMatch(version -> version.id.equals(id) && version.type.equals("release"));
+	}
+
+	public String majorVersion(String id) {
+		for (Version version : versions) {
+			if (version.id.equals(id)) return version.getTargetVersion();
+		}
+		return "";
 	}
 
 	public int getIndex(String version){
@@ -79,6 +87,26 @@ public class MinecraftLauncherMeta {
 
 		public String getReleaseTime() {
 			return releaseTime;
+		}
+
+		public String getTargetVersion() {
+			String json = null;
+			try {
+				json = IOUtils.toString(new URL(url), StandardCharsets.UTF_8);
+				return GSON.fromJson(json, Meta.class).getAssets();
+			} catch (IOException e) {
+				e.printStackTrace();
+				return "";
+			}
+		}
+	}
+
+	public static class Meta {
+
+		String assets;
+
+		public String getAssets() {
+			return assets;
 		}
 	}
 
