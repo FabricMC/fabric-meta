@@ -21,12 +21,17 @@ public class MavenVersion extends BaseVersion {
 	String maven;
 
 	public MavenVersion(String maven, boolean stable) {
-		super(maven.split(":")[2], stable);
+		super(getMavenParsed(maven), stable);
 		this.maven = maven;
 	}
 
 	public MavenVersion(String maven) {
 		this(maven, false);
+	}
+
+	private static String getMavenParsed(String maven) {
+		String[] mavenP = maven.split(":");
+		return mavenP[mavenP.length-1];
 	}
 
 	public String getMaven() {
