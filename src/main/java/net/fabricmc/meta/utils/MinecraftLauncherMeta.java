@@ -23,7 +23,7 @@ import org.apache.commons.io.IOUtils;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
+import java.util.*;
 
 public class MinecraftLauncherMeta {
 
@@ -34,10 +34,31 @@ public class MinecraftLauncherMeta {
 	private MinecraftLauncherMeta() {
 	}
 
+	private MinecraftLauncherMeta(List<Version> versions) {
+		this.versions = versions;
+	}
+
 	public static MinecraftLauncherMeta getMeta() throws IOException {
 		String url = "https://launchermeta.mojang.com/mc/game/version_manifest.json";
 		String json = IOUtils.toString(new URL(url), StandardCharsets.UTF_8);
 		return GSON.fromJson(json, MinecraftLauncherMeta.class);
+	}
+
+	public static MinecraftLauncherMeta getExperimentalMeta() throws IOException {
+		String url = "https://maven.fabricmc.net/net/minecraft/experimental_versions.json";
+		String json = IOUtils.toString(new URL(url), StandardCharsets.UTF_8);
+		return GSON.fromJson(json, MinecraftLauncherMeta.class);
+	}
+
+	public static MinecraftLauncherMeta getAllMeta() throws IOException {
+		List<Version> versions = new ArrayList<>();
+		versions.addAll(getMeta().versions);
+		versions.addAll(getExperimentalMeta().versions);
+
+		// Order by release time
+		versions.sort(Comparator.comparing(Version::getReleaseTime).reversed());
+
+		return new MinecraftLauncherMeta(versions);
 	}
 
 	public boolean isStable(String id) {
@@ -51,6 +72,10 @@ public class MinecraftLauncherMeta {
 			}
 		}
 		return 0;
+	}
+
+	public List<Version> getVersions() {
+		return Collections.unmodifiableList(versions);
 	}
 
 	public static class Version {
