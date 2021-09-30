@@ -23,6 +23,7 @@ import net.fabricmc.meta.web.models.*;
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -39,7 +40,7 @@ public class VersionDatabase {
 	public List<BaseVersion> game;
 	public List<MavenBuildGameVersion> mappings;
 	public List<MavenVersion> intermediary;
-	public List<MavenBuildVersion> loader;
+	private List<MavenBuildVersion> loader;
 	public List<MavenUrlVersion> installer;
 
 	private VersionDatabase() {
@@ -87,4 +88,11 @@ public class VersionDatabase {
 		game = minecraftVersions.stream().map(s -> new BaseVersion(s, launcherMeta.isStable(s))).collect(Collectors.toList());
 	}
 
+	public List<MavenBuildVersion> getLoader() {
+		return loader.stream().filter(mavenBuildVersion -> !mavenBuildVersion.getVersion().startsWith("0.12")).collect(Collectors.toList());
+	}
+
+	public List<MavenBuildVersion> getAllLoader() {
+		return Collections.unmodifiableList(loader);
+	}
 }

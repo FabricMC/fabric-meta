@@ -31,6 +31,7 @@ jar {
 		attributes "Main-Class": "net.fabricmc.meta.FabricMeta"
 	}
 	from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
+	duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 
 tasks.withType(JavaCompile).configureEach {
