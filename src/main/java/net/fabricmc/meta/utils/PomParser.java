@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class PomParser {
@@ -59,8 +60,14 @@ public class PomParser {
 		Collections.reverse(versions);
 		latestVersion = versions.get(0);
 	}
-
+	
 	public <T extends BaseVersion> List<T> getMeta(Function<String, T> function, String prefix) throws IOException, XMLStreamException {
+		return getMeta(function, prefix, list -> {
+			if (!list.isEmpty()) list.get(0).setStable(true);
+		});
+	}
+
+	public <T extends BaseVersion> List<T> getMeta(Function<String, T> function, String prefix, StableVersionIdentifier stableIdentifier) throws IOException, XMLStreamException {
 		try {
 			load();
 		} catch (IOException e){
@@ -86,12 +93,14 @@ public class PomParser {
 					.findFirst()
 					.ifPresent(v -> v.setStable(true));
 		} else {
-			if(list.get(0) != null){
-				list.get(0).setStable(true);
-			}
+			stableIdentifier.process(list);
 		}
 
 		return Collections.unmodifiableList(list);
+	}
+	
+	public interface StableVersionIdentifier {
+		void process(List<? extends BaseVersion> versions);
 	}
 
 }

@@ -51,7 +51,14 @@ public class VersionDatabase {
 		VersionDatabase database = new VersionDatabase();
 		database.mappings = MAPPINGS_PARSER.getMeta(MavenBuildGameVersion::new, "net.fabricmc:yarn:");
 		database.intermediary = INTERMEDIARY_PARSER.getMeta(MavenVersion::new, "net.fabricmc:intermediary:");
-		database.loader = LOADER_PARSER.getMeta(MavenBuildVersion::new, "net.fabricmc:fabric-loader:");
+		database.loader = LOADER_PARSER.getMeta(MavenBuildVersion::new, "net.fabricmc:fabric-loader:", list -> {
+			for (BaseVersion version : list) {
+				if (isPublicLoaderVersion(version)) {
+					version.setStable(true);
+					break;
+				}
+			}
+		});
 		database.installer = INSTALLER_PARSER.getMeta(MavenUrlVersion::new, "net.fabricmc:fabric-installer:");
 		database.loadMcData();
 		System.out.println("DB update took " + (System.currentTimeMillis() - start) + "ms");
@@ -89,7 +96,11 @@ public class VersionDatabase {
 	}
 
 	public List<MavenBuildVersion> getLoader() {
-		return loader.stream().filter(mavenBuildVersion -> !mavenBuildVersion.getVersion().startsWith("0.12")).collect(Collectors.toList());
+		return loader.stream().filter(VersionDatabase::isPublicLoaderVersion).collect(Collectors.toList());
+	}
+	
+	private static boolean isPublicLoaderVersion(BaseVersion version) {
+		return !version.getVersion().startsWith("0.12");
 	}
 
 	public List<MavenBuildVersion> getAllLoader() {
