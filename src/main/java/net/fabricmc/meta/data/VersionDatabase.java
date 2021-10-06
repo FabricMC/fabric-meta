@@ -100,7 +100,7 @@ public class VersionDatabase {
 	}
 	
 	private static boolean isPublicLoaderVersion(BaseVersion version) {
-		return !version.getVersion().startsWith("0.12");
+		return true;
 	}
 
 	public List<MavenBuildVersion> getAllLoader() {
