@@ -117,9 +117,9 @@ public class ProfileHandler {
 		JsonObject librariesObject = launcherMeta.get("libraries").getAsJsonObject();
 		// Build the libraries array with the existing libs + loader and intermediary
 		JsonArray libraries = (JsonArray) librariesObject.get("common");
-		String maven = loader.equals("fabric-loader-1.8.9") ? LoaderMeta.LEGACY_MAVEN_URL : LoaderMeta.MAVEN_URL;
-		libraries.add(getLibrary(info.getIntermediary().getMaven(), maven));
-		libraries.add(getLibrary(info.getLoader().getMaven(), maven));
+		String loaderMaven = loader.equals("fabric-loader-1.8.9") ? LoaderMeta.LEGACY_MAVEN_URL : LoaderMeta.MAVEN_URL;
+		libraries.add(getLibrary(info.getIntermediary().getMaven(), LoaderMeta.LEGACY_MAVEN_URL));
+		libraries.add(getLibrary(info.getLoader().getMaven(), loaderMaven));
 
 		if (librariesObject.has(side)) {
 			libraries.addAll(librariesObject.get(side).getAsJsonArray());
