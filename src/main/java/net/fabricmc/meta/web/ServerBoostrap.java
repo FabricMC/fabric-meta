@@ -8,28 +8,23 @@ import io.javalin.http.InternalServerErrorResponse;
 import net.fabricmc.meta.FabricMeta;
 import net.fabricmc.meta.web.models.BaseVersion;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-import java.util.zip.ZipOutputStream;
 
 public class ServerBoostrap {
     private static final Path CACHE_DIR = Paths.get("metadata", "installer");
-    private static final Executor INSTALLER_DL_EXECUTOR = Executors.newSingleThreadExecutor();
+    private static final Executor WORKER_EXECUTOR = Executors.newSingleThreadExecutor();
 
     public static void setup() {
         // http://localhost:5555/v2/versions/loader/1.17.1/0.12.0/0.8.0/server/jar
@@ -40,19 +35,21 @@ public class ServerBoostrap {
         return ctx -> {
             if (!ctx.queryParamMap().isEmpty()) {
                 // Cannot really afford people to cache bust this.
-                throw new BadRequestResponse("Query params not supported on this endpoint.");
+                throw new BadRequestResponse("Query params not allowed on this endpoint.");
             }
-
-            ctx.header(Header.ACCESS_CONTROL_ALLOW_ORIGIN, "https://fabricmc.net");
 
             final String installerVersion = getAndValidateVersion(ctx, FabricMeta.database.installer, "installer_version");
             final String gameVersion = getAndValidateVersion(ctx, FabricMeta.database.intermediary, "game_version");
             final String loaderVersion = getAndValidateVersion(ctx, FabricMeta.database.getAllLoader(), "loader_version");
 
-            final CompletableFuture<InputStream> future = packageBootstrap(installerVersion, gameVersion, loaderVersion);
+            validateLoaderVersion(loaderVersion);
+            validateInstallerVersion(installerVersion);
+
+            final CompletableFuture<InputStream> future = getBootstrapPath(installerVersion, gameVersion, loaderVersion)
+                    .thenApplyAsync(ServerBoostrap::readInstallerJar);
 
             // Set the filename and cache headers
-            final String filename = String.format("fabric-server+mc.%s-loader.%s-installer.%s.jar", gameVersion, loaderVersion, installerVersion);
+            final String filename = String.format("fabric-server-mc.%s-loader.%s-installer.%s.jar", gameVersion, loaderVersion, installerVersion);
             ctx.header(Header.CONTENT_DISPOSITION, String.format("attachment; filename=\"%s\"", filename));
             ctx.header(Header.CACHE_CONTROL, "public, max-age=86400");
             ctx.contentType("application/java-archive");
@@ -73,76 +70,105 @@ public class ServerBoostrap {
         throw new BadRequestResponse("Unable to find valid version for " + name);
     }
 
-    private static CompletableFuture<InputStream> packageBootstrap(String installerVersion, String gameVersion, String loaderVersion) {
-        return getInstallerJar(installerVersion)
-                .thenApplyAsync(inputStream -> {
-                    try {
-                        return writePropertiesToJar(inputStream, loaderVersion, gameVersion);
-                    } catch (IOException e) {
-                        throw new InternalServerErrorResponse("Failed to write properties to jar");
-                    }
-                });
+    private static void validateLoaderVersion(String loaderVersion) {
+        String[] versionSplit = loaderVersion.split("\\.");
+
+        // future 1.x versions
+        if (Integer.parseInt(versionSplit[0]) > 0) {
+            return;
+        }
+
+        // 0.12.x or newer
+        if (Integer.parseInt(versionSplit[1]) >= 12) {
+            return;
+        }
+
+        throw new BadRequestResponse("Fabric loader 0.12 or higher is required for unattended server installs. Please use a newer fabric loader version, or the full installer.");
     }
 
-    private static CompletableFuture<InputStream> getInstallerJar(String installerVersion) {
-        Path installerJar = CACHE_DIR.resolve(String.format("fabric-installer-%s", installerVersion));
+    private static void validateInstallerVersion(String installerVersion) {
+        String[] versionSplit = installerVersion.split("\\.");
+
+        // future 1.x versions
+        if (Integer.parseInt(versionSplit[0]) > 0) {
+            return;
+        }
+
+        // 0.8.x or newer
+        if (Integer.parseInt(versionSplit[1]) >= 8) {
+            return;
+        }
+
+        throw new BadRequestResponse("Fabric Installer 0.8 or higher is required for unattended server installs.");
+    }
+
+    private static CompletableFuture<Path> getBootstrapPath(String installerVersion, String gameVersion, String loaderVersion) {
+        Path bundledJar = CACHE_DIR.resolve(String.format("fabric-server+mc.%s-loader.%s-installer.%s.jar", gameVersion, loaderVersion, installerVersion));
+
+        if (Files.exists(bundledJar)) {
+            return CompletableFuture.completedFuture(bundledJar);
+        }
+
+        return getInstallerJar(installerVersion)
+                .thenApplyAsync(inputJar -> {
+                    try {
+                        writePropertiesToJar(inputJar, bundledJar, loaderVersion, gameVersion);
+                        return bundledJar;
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        throw new InternalServerErrorResponse("Failed to write properties to jar");
+                    }
+                }, WORKER_EXECUTOR);
+    }
+
+    private static CompletableFuture<Path> getInstallerJar(String installerVersion) {
+        Path installerJar = CACHE_DIR.resolve(String.format("fabric-installer-%s.jar", installerVersion));
 
         if (Files.exists(installerJar)) {
-            return readInstallerJar(installerJar);
+            return CompletableFuture.completedFuture(installerJar);
         }
 
         return downloadInstallerJar(installerJar, installerVersion);
     }
 
-    private static CompletableFuture<InputStream> readInstallerJar(Path jar) {
+    private static InputStream readInstallerJar(Path jar) {
         try {
-            return CompletableFuture.completedFuture(Files.newInputStream(jar));
+            return Files.newInputStream(jar);
         } catch (IOException e) {
+            e.printStackTrace();
             throw new InternalServerErrorResponse("Failed to read installer jar");
         }
     }
 
-    private static CompletableFuture<InputStream> downloadInstallerJar(Path jar, String installerVersion) {
+    private static CompletableFuture<Path> downloadInstallerJar(Path jar, String installerVersion) {
         final String url = String.format("https://maven.fabricmc.net/net/fabricmc/fabric-installer/%1$s/fabric-installer-%1$s-server.jar", installerVersion);
         return CompletableFuture.supplyAsync(() -> {
             try {
                 System.out.println("Downloading: " + url);
                 FileUtils.copyURLToFile(new URL(url), jar.toFile());
-                return Files.newInputStream(jar);
+                return jar;
             } catch (IOException e) {
+                e.printStackTrace();
                 throw new InternalServerErrorResponse("Failed to download installer jar");
             }
-        }, INSTALLER_DL_EXECUTOR);
+        }, WORKER_EXECUTOR);
     }
 
-    // Is this really the best way? Can we somehow save repacking the whole zip?
-    private static InputStream writePropertiesToJar(InputStream inputStream, String loaderVersion, String gameVersion) throws IOException {
+    private static void writePropertiesToJar(Path inputJar, Path outputJar, String loaderVersion, String gameVersion) throws IOException {
         String data = String.format("fabric-loader-version=%s\ngame-version=%s", loaderVersion, gameVersion);
 
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        Path workingFile = Paths.get(outputJar.toAbsolutePath() + ".tmp");
+        Files.copy(inputJar, workingFile);
 
-        try (ZipOutputStream outputZip = new ZipOutputStream(outputStream);
-             ZipInputStream inputZip = new ZipInputStream(inputStream))  {
-            // Copy the existing installer jar contents
-            copyZipEntries(inputZip, outputZip);
+        Map<String, String> env = new HashMap<>();
+        env.put("create", "true");
+        URI uri = URI.create("jar:" + workingFile.toUri());
 
-            // Add the installer properties
-            outputZip.putNextEntry(new ZipEntry("install.properties"));
-            IOUtils.write(data, outputZip, StandardCharsets.UTF_8);
-            outputZip.closeEntry();
+        try (FileSystem zipFs = FileSystems.newFileSystem(uri, env)) {
+            Files.write(zipFs.getPath("install.properties"), data.getBytes(StandardCharsets.UTF_8));
         }
 
-        return new ByteArrayInputStream(outputStream.toByteArray());
-    }
-
-    private static void copyZipEntries(ZipInputStream input, ZipOutputStream output) throws IOException {
-        ZipEntry currentEntry;
-
-        while ((currentEntry = input.getNextEntry()) != null) {
-            ZipEntry newEntry = new ZipEntry(currentEntry.getName());
-            output.putNextEntry(newEntry);
-            IOUtils.copy(input, output);
-            output.closeEntry();
-        }
+        Files.copy(workingFile, outputJar);
+        Files.delete(workingFile);
     }
 }
