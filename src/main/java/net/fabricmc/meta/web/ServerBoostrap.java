@@ -116,25 +116,30 @@ public class ServerBoostrap {
     }
 
     private static CompletableFuture<InputStream> getResultStream(String installerVersion, String gameVersion, String loaderVersion) {
-        return CompletableFuture.supplyAsync(() -> {
-            try {
-                return getBootstrapPath(installerVersion, gameVersion, loaderVersion);
-            } catch (IOException e) {
-                e.printStackTrace();
-                throw new InternalServerErrorResponse("Failed to generate bootstrap jar");
-            }
-        }, WORKER_EXECUTOR);
-    }
-
-    private static InputStream getBootstrapPath(String installerVersion, String gameVersion, String loaderVersion) throws IOException {
         Path bundledJar = CACHE_DIR.resolve(String.format("fabric-server+mc.%s-loader.%s-installer.%s.jar", gameVersion, loaderVersion, installerVersion));
 
         if (!Files.exists(bundledJar)) {
-            Path installerJar = getInstallerJar(installerVersion);
-            writePropertiesToJar(installerJar, bundledJar, loaderVersion, gameVersion);
+            return CompletableFuture.supplyAsync(() -> {
+                try {
+                    if (!Files.exists(bundledJar)) {
+                        Path installerJar = getInstallerJar(installerVersion);
+                        writePropertiesToJar(installerJar, bundledJar, loaderVersion, gameVersion);
+                    }
+
+                    return Files.newInputStream(bundledJar);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    throw new InternalServerErrorResponse("Failed to generate bundled jar");
+                }
+            }, WORKER_EXECUTOR);
         }
 
-        return Files.newInputStream(bundledJar);
+        try {
+            return CompletableFuture.completedFuture(Files.newInputStream(bundledJar));
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new InternalServerErrorResponse("Failed to serve bundled jar");
+        }
     }
 
     private static Path getInstallerJar(String installerVersion) throws IOException {
