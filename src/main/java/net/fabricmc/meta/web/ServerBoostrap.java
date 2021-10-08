@@ -61,16 +61,13 @@ public class ServerBoostrap {
             validateLoaderVersion(loaderVersion);
             validateInstallerVersion(installerVersion);
 
-            final CompletableFuture<InputStream> future = getBootstrapPath(installerVersion, gameVersion, loaderVersion)
-                    .thenApplyAsync(ServerBoostrap::readInstallerJar);
-
             // Set the filename and cache headers
             final String filename = String.format("fabric-server-mc.%s-loader.%s-installer.%s.jar", gameVersion, loaderVersion, installerVersion);
             ctx.header(Header.CONTENT_DISPOSITION, String.format("attachment; filename=\"%s\"", filename));
             ctx.header(Header.CACHE_CONTROL, "public, max-age=86400");
             ctx.contentType("application/java-archive");
 
-            ctx.result(future);
+            ctx.result(getResultStream(installerVersion, gameVersion, loaderVersion));
         };
     }
 
@@ -118,56 +115,44 @@ public class ServerBoostrap {
         throw new BadRequestResponse("Fabric Installer 0.8 or higher is required for unattended server installs.");
     }
 
-    private static CompletableFuture<Path> getBootstrapPath(String installerVersion, String gameVersion, String loaderVersion) {
-        Path bundledJar = CACHE_DIR.resolve(String.format("fabric-server+mc.%s-loader.%s-installer.%s.jar", gameVersion, loaderVersion, installerVersion));
-
-        if (Files.exists(bundledJar)) {
-            return CompletableFuture.completedFuture(bundledJar);
-        }
-
-        return getInstallerJar(installerVersion)
-                .thenApplyAsync(inputJar -> {
-                    try {
-                        writePropertiesToJar(inputJar, bundledJar, loaderVersion, gameVersion);
-                        return bundledJar;
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        throw new InternalServerErrorResponse("Failed to write properties to jar");
-                    }
-                }, WORKER_EXECUTOR);
+    private static CompletableFuture<InputStream> getResultStream(String installerVersion, String gameVersion, String loaderVersion) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                return getBootstrapPath(installerVersion, gameVersion, loaderVersion);
+            } catch (IOException e) {
+                e.printStackTrace();
+                throw new InternalServerErrorResponse("Failed to generate bootstrap jar");
+            }
+        }, WORKER_EXECUTOR);
     }
 
-    private static CompletableFuture<Path> getInstallerJar(String installerVersion) {
+    private static InputStream getBootstrapPath(String installerVersion, String gameVersion, String loaderVersion) throws IOException {
+        Path bundledJar = CACHE_DIR.resolve(String.format("fabric-server+mc.%s-loader.%s-installer.%s.jar", gameVersion, loaderVersion, installerVersion));
+
+        if (!Files.exists(bundledJar)) {
+            Path installerJar = getInstallerJar(installerVersion);
+            writePropertiesToJar(installerJar, bundledJar, loaderVersion, gameVersion);
+        }
+
+        return Files.newInputStream(bundledJar);
+    }
+
+    private static Path getInstallerJar(String installerVersion) throws IOException {
         Path installerJar = CACHE_DIR.resolve(String.format("fabric-installer-%s.jar", installerVersion));
 
         if (Files.exists(installerJar)) {
-            return CompletableFuture.completedFuture(installerJar);
+            return installerJar;
         }
 
         return downloadInstallerJar(installerJar, installerVersion);
     }
 
-    private static InputStream readInstallerJar(Path jar) {
-        try {
-            return Files.newInputStream(jar);
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new InternalServerErrorResponse("Failed to read installer jar");
-        }
-    }
-
-    private static CompletableFuture<Path> downloadInstallerJar(Path jar, String installerVersion) {
+    private static Path downloadInstallerJar(Path jar, String installerVersion) throws IOException {
         final String url = String.format("https://maven.fabricmc.net/net/fabricmc/fabric-installer/%1$s/fabric-installer-%1$s-server.jar", installerVersion);
-        return CompletableFuture.supplyAsync(() -> {
-            try {
-                System.out.println("Downloading: " + url);
-                FileUtils.copyURLToFile(new URL(url), jar.toFile());
-                return jar;
-            } catch (IOException e) {
-                e.printStackTrace();
-                throw new InternalServerErrorResponse("Failed to download installer jar");
-            }
-        }, WORKER_EXECUTOR);
+
+        System.out.println("Downloading: " + url);
+        FileUtils.copyURLToFile(new URL(url), jar.toFile());
+        return jar;
     }
 
     private static void writePropertiesToJar(Path inputJar, Path outputJar, String loaderVersion, String gameVersion) throws IOException {
