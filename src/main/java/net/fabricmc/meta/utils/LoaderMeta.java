@@ -92,14 +92,14 @@ public class LoaderMeta {
 		try {
 			// Versions < 1.12 ship Guava 17 so they need the fix
 			if (compareVersions(gameVersion, "1.12") < 0) {
-				return guavaFixLoader;
+				return guavaFixLoader || compareVersions(loaderVersion.getVersion(), "0.12.0") >= 0;
 			}
 			// 1.12 needs a fix that's implemented since loader 0.11.3
 			if (compareVersions(gameVersion, "1.12.2") <= 0) {
 				return compareVersions(loaderVersion.getVersion(), "0.11.3") >= 0;
 			}
 			// > 1.12 can use any loader
-			return true;
+			return !guavaFixLoader;
 		} catch (IllegalArgumentException ignored) {
 			return false;
 		}
