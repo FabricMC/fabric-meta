@@ -34,7 +34,11 @@ public class MavenBuildVersion extends MavenVersion {
 			separator = ".";
 		}
 		// FIXME: if a version contains a non number, such as `+local`, it will fail and crash. try/catch maybe?
-		build = Long.parseLong(version.substring(version.lastIndexOf(".") + 1));
+		try {
+			build = Long.parseLong(version.substring(version.lastIndexOf(".") + 1));
+		} catch (NumberFormatException e) {
+			build = -1L;
+		}
 
 	}
 

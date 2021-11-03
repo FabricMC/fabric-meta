@@ -59,6 +59,17 @@ public class LoaderMeta {
 
 		try {
 			JsonObject jsonObject = WebServer.GSON.fromJson(new FileReader(launcherMetaFile), JsonObject.class);
+
+			if (launcherMetaFile.toString().contains("fabric-loader-1.8.9")) {
+				jsonObject.getAsJsonObject("libraries").getAsJsonArray("server").remove(0);
+
+				JsonObject guavaFix = new JsonObject();
+				guavaFix.addProperty("name", "com.google.guava:guava:21.0");
+				guavaFix.addProperty("url", "https://maven.fabricmc.net/");
+
+				jsonObject.getAsJsonObject("libraries").getAsJsonArray("common").add(guavaFix);
+			}
+			
 			return jsonObject;
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
