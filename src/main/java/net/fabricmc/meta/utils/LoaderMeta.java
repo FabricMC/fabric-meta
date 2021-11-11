@@ -59,6 +59,17 @@ public class LoaderMeta {
 
 		try {
 			JsonObject jsonObject = WebServer.GSON.fromJson(new FileReader(launcherMetaFile), JsonObject.class);
+
+			if (launcherMetaFile.toString().contains("fabric-loader-1.8.9")) {
+				jsonObject.getAsJsonObject("libraries").getAsJsonArray("server").remove(0);
+
+				JsonObject guavaFix = new JsonObject();
+				guavaFix.addProperty("name", "com.google.guava:guava:21.0");
+				guavaFix.addProperty("url", "https://maven.fabricmc.net/");
+
+				jsonObject.getAsJsonObject("libraries").getAsJsonArray("common").add(guavaFix);
+			}
+			
 			return jsonObject;
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -92,14 +103,14 @@ public class LoaderMeta {
 		try {
 			// Versions < 1.12 ship Guava 17 so they need the fix
 			if (compareVersions(gameVersion, "1.12") < 0) {
-				return guavaFixLoader;
+				return guavaFixLoader || compareVersions(loaderVersion.getVersion(), "0.12.0") >= 0;
 			}
 			// 1.12 needs a fix that's implemented since loader 0.11.3
 			if (compareVersions(gameVersion, "1.12.2") <= 0) {
 				return compareVersions(loaderVersion.getVersion(), "0.11.3") >= 0;
 			}
 			// > 1.12 can use any loader
-			return true;
+			return !guavaFixLoader;
 		} catch (IllegalArgumentException ignored) {
 			return false;
 		}
