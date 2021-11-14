@@ -308,6 +308,31 @@ Downloads a zip file with the launcher's profile json, and the dummy jar. To be 
 
 Returns the JSON file in format of the launcher JSON, but with the server's main class.
 
+### /v2/versions/:game_version
+
+Returns the best versions of yarn and loader to use for the supplied game version - this is a way to programmatically obtain the data at the [versions page](https://fabricmc.net/versions.html)
+
+```json
+{
+  "gameVersion": "1.17.1",
+  "yarn": {
+    "gameVersion": "1.17.1",
+    "separator": "+build.",
+    "build": 63,
+    "maven": "net.fabricmc:yarn:1.17.1+build.63",
+    "version": "1.17.1+build.63",
+    "stable": false
+  },
+  "loader": {
+    "separator": ".",
+    "build": 5,
+    "maven": "net.fabricmc:fabric-loader:0.12.5",
+    "version": "0.12.5",
+    "stable": true
+  }
+}
+```
+
 # V1
 
 ### /v1/versions
