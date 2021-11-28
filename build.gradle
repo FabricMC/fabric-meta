@@ -6,7 +6,7 @@ plugins {
 }
 
 group 'net.fabricmc'
-version '1.2.2'
+version '1.2.4'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -23,6 +23,17 @@ dependencies {
 	implementation("org.slf4j:slf4j-simple:1.7.30")
 	implementation("commons-io:commons-io:2.8.0")
 }
+
+task generateSources(type: Copy) {
+	from 'src/replaceme/java/net/fabricmc/meta/web/models/MetaServerInfo.java'
+	into "$buildDir/generated-src"
+	filter(org.apache.tools.ant.filters.ReplaceTokens, tokens: [
+			'VERSION': project.version
+	])
+}
+// the following lines are important to wire the task in with the compileJava task
+compileJava.source "$buildDir/generated-src"
+compileJava.dependsOn generateSources
 
 jar {
 	manifest {
