@@ -38,7 +38,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-public class ServerBoostrap {
+public class ServerBootstrap {
     private static final Path CACHE_DIR = Paths.get("metadata", "installer");
     private static final Executor WORKER_EXECUTOR = Executors.newSingleThreadExecutor();
 
@@ -116,7 +116,7 @@ public class ServerBoostrap {
     }
 
     private static CompletableFuture<InputStream> getResultStream(String installerVersion, String gameVersion, String loaderVersion) {
-        Path bundledJar = CACHE_DIR.resolve(String.format("fabric-server+mc.%s-loader.%s-installer.%s.jar", gameVersion, loaderVersion, installerVersion));
+        Path bundledJar = CACHE_DIR.resolve(String.format("fabric-server-mc.%s-loader.%s-launcher.%s.jar", gameVersion, loaderVersion, installerVersion));
 
         if (!Files.exists(bundledJar)) {
             return CompletableFuture.supplyAsync(() -> {

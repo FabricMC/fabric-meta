@@ -55,7 +55,7 @@ public class EndpointsV2 {
 		WebServer.jsonGet("/v2/versions/installer", context -> withLimitSkip(context, FabricMeta.database.installer));
 
 		ProfileHandler.setup();
-		ServerBoostrap.setup();
+		ServerBootstrap.setup();
 	}
 
 	private static <T> List<T> withLimitSkip(Context context, List<T> list) {
