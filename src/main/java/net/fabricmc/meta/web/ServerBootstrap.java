@@ -62,7 +62,7 @@ public class ServerBootstrap {
             validateInstallerVersion(installerVersion);
 
             // Set the filename and cache headers
-            final String filename = String.format("fabric-server-mc.%s-loader.%s-installer.%s.jar", gameVersion, loaderVersion, installerVersion);
+            final String filename = String.format("fabric-server-mc.%s-loader.%s-launcher.%s.jar", gameVersion, loaderVersion, installerVersion);
             ctx.header(Header.CONTENT_DISPOSITION, String.format("attachment; filename=\"%s\"", filename));
             ctx.header(Header.CACHE_CONTROL, "public, max-age=86400");
             ctx.contentType("application/java-archive");
