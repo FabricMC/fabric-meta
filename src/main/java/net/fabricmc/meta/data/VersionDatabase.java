@@ -18,6 +18,7 @@
 package net.fabricmc.meta.data;
 
 import net.fabricmc.meta.utils.MinecraftLauncherMeta;
+import net.fabricmc.meta.utils.PageParser;
 import net.fabricmc.meta.utils.PomParser;
 import net.fabricmc.meta.web.models.*;
 
@@ -35,7 +36,7 @@ public class VersionDatabase {
 	public static final String UPSTREAM_MAVEN_URL = "https://maven.fabricmc.net/";
 	public static final String MAVEN_URL = "https://maven.legacyfabric.net/";
 
-	public static final PomParser MAPPINGS_PARSER = new PomParser(MAVEN_URL + "net/fabricmc/yarn/maven-metadata.xml");
+	public static final PageParser MAPPINGS_PARSER = new PageParser(MAVEN_URL + "net/fabricmc/yarn");
 	public static final PomParser INTERMEDIARY_PARSER = new PomParser(MAVEN_URL + "net/fabricmc/intermediary/maven-metadata.xml");
 	public static final PomParser GUAVA_LOADER_PARSER = new PomParser(MAVEN_URL + "net/fabricmc/fabric-loader-1.8.9/maven-metadata.xml");
 	public static final PomParser LOADER_PARSER = new PomParser(UPSTREAM_MAVEN_URL + "net/fabricmc/fabric-loader/maven-metadata.xml");
