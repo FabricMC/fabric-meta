@@ -38,14 +38,12 @@ public class VersionDatabase {
 
 	public static final PageParser MAPPINGS_PARSER = new PageParser(MAVEN_URL + "net/fabricmc/yarn");
 	public static final PomParser INTERMEDIARY_PARSER = new PomParser(MAVEN_URL + "net/fabricmc/intermediary/maven-metadata.xml");
-	public static final PomParser GUAVA_LOADER_PARSER = new PomParser(MAVEN_URL + "net/fabricmc/fabric-loader-1.8.9/maven-metadata.xml");
 	public static final PomParser LOADER_PARSER = new PomParser(UPSTREAM_MAVEN_URL + "net/fabricmc/fabric-loader/maven-metadata.xml");
 	public static final PomParser INSTALLER_PARSER = new PomParser(MAVEN_URL + "net/fabricmc/fabric-installer/maven-metadata.xml");
 
 	public List<BaseVersion> game;
 	public List<MavenBuildGameVersion> mappings;
 	public List<MavenVersion> intermediary;
-	public List<MavenBuildVersion> guavaLoader;
 	public List<MavenBuildVersion> loader;
 	public List<MavenUrlVersion> installer;
 
@@ -57,8 +55,7 @@ public class VersionDatabase {
 		VersionDatabase database = new VersionDatabase();
 		database.mappings = MAPPINGS_PARSER.getMeta(MavenBuildGameVersion::new, "net.fabricmc:yarn:");
 		database.intermediary = INTERMEDIARY_PARSER.getMeta(MavenVersion::new, "net.fabricmc:intermediary:");
-		database.guavaLoader = GUAVA_LOADER_PARSER.getMeta(MavenBuildVersion::new, "net.fabricmc:fabric-loader-1.8.9:");
-		database.loader = Collections.unmodifiableList(Stream.of(LOADER_PARSER.getMeta(MavenBuildVersion::new, "net.fabricmc:fabric-loader:"), database.guavaLoader)
+		database.loader = Collections.unmodifiableList(Stream.of(LOADER_PARSER.getMeta(MavenBuildVersion::new, "net.fabricmc:fabric-loader:"))
 															   .flatMap(Collection::stream)
 															   .collect(Collectors.toList()));
 		// database.installer = INSTALLER_PARSER.getMeta(MavenUrlVersion::new, "net.fabricmc:fabric-installer:");

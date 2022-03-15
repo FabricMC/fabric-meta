@@ -34,6 +34,7 @@ import java.util.zip.ZipOutputStream;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import net.fabricmc.meta.data.VersionDatabase;
 import org.apache.commons.io.IOUtils;
 
 import net.fabricmc.meta.utils.LoaderMeta;
@@ -117,9 +118,8 @@ public class ProfileHandler {
 		JsonObject librariesObject = launcherMeta.get("libraries").getAsJsonObject();
 		// Build the libraries array with the existing libs + loader and intermediary
 		JsonArray libraries = (JsonArray) librariesObject.get("common");
-		String loaderMaven = loader.equals("fabric-loader-1.8.9") ? LoaderMeta.LEGACY_MAVEN_URL : LoaderMeta.MAVEN_URL;
-		libraries.add(getLibrary(info.getIntermediary().getMaven(), LoaderMeta.LEGACY_MAVEN_URL));
-		libraries.add(getLibrary(info.getLoader().getMaven(), loaderMaven));
+		libraries.add(getLibrary(info.getIntermediary().getMaven(), VersionDatabase.MAVEN_URL));
+		libraries.add(getLibrary(info.getLoader().getMaven(), VersionDatabase.UPSTREAM_MAVEN_URL));
 
 		if (librariesObject.has(side)) {
 			libraries.addAll(librariesObject.get(side).getAsJsonArray());

@@ -35,8 +35,6 @@ import java.util.regex.Pattern;
 public class LoaderMeta {
 
 	public static final File BASE_DIR = new File("metadata");
-	public static final String MAVEN_URL = "https://maven.fabricmc.net/";
-	public static final String LEGACY_MAVEN_URL = VersionDatabase.MAVEN_URL;
 
 	public static JsonObject getMeta(LoaderInfoBase loaderInfo){
 		String loaderMaven = loaderInfo.getLoader().getMaven();
@@ -47,8 +45,7 @@ public class LoaderMeta {
 		File launcherMetaFile = new File(BASE_DIR, path + "/" + filename);
 		if(!launcherMetaFile.exists()){
 			try {
-				String maven = loaderInfo.getLoader().getName().equals("fabric-loader-1.8.9") ? LEGACY_MAVEN_URL : MAVEN_URL;
-				String url = String.format("%s%s/%s", maven, path, filename);
+				String url = String.format("%s%s/%s", VersionDatabase.UPSTREAM_MAVEN_URL, path, filename);
 				System.out.println("Downloading " + url);
 				FileUtils.copyURLToFile(new URL(url), launcherMetaFile);
 			} catch (IOException e) {
@@ -58,19 +55,7 @@ public class LoaderMeta {
 		}
 
 		try {
-			JsonObject jsonObject = WebServer.GSON.fromJson(new FileReader(launcherMetaFile), JsonObject.class);
-
-			if (launcherMetaFile.toString().contains("fabric-loader-1.8.9")) {
-				jsonObject.getAsJsonObject("libraries").getAsJsonArray("server").remove(0);
-
-				JsonObject guavaFix = new JsonObject();
-				guavaFix.addProperty("name", "com.google.guava:guava:21.0");
-				guavaFix.addProperty("url", "https://maven.fabricmc.net/");
-
-				jsonObject.getAsJsonObject("libraries").getAsJsonArray("common").add(guavaFix);
-			}
-			
-			return jsonObject;
+			return WebServer.GSON.fromJson(new FileReader(launcherMetaFile), JsonObject.class);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 			return null;
@@ -99,18 +84,8 @@ public class LoaderMeta {
 	}
 
 	public static boolean canUse(String gameVersion, MavenBuildVersion loaderVersion) {
-		boolean guavaFixLoader = "fabric-loader-1.8.9".equals(loaderVersion.getName());
 		try {
-			// Versions < 1.12 ship Guava 17 so they need the fix
-			if (compareVersions(gameVersion, "1.12") < 0) {
-				return guavaFixLoader || compareVersions(loaderVersion.getVersion(), "0.12.0") >= 0;
-			}
-			// 1.12 needs a fix that's implemented since loader 0.11.3
-			if (compareVersions(gameVersion, "1.12.2") <= 0) {
-				return compareVersions(loaderVersion.getVersion(), "0.11.3") >= 0;
-			}
-			// > 1.12 can use any loader
-			return !guavaFixLoader;
+			return compareVersions(loaderVersion.getVersion(), "0.12.12") >= 0;
 		} catch (IllegalArgumentException ignored) {
 			return false;
 		}
