@@ -50,10 +50,17 @@ public class MinecraftLauncherMeta {
 		return GSON.fromJson(json, MinecraftLauncherMeta.class);
 	}
 
+	public static MinecraftLauncherMeta getMissingMeta() throws IOException {
+		String url = "https://raw.githubusercontent.com/Legacy-Fabric/manifests/master/manifest.json";
+		String json = IOUtils.toString(new URL(url), StandardCharsets.UTF_8);
+		return GSON.fromJson(json, MinecraftLauncherMeta.class);
+	}
+
 	public static MinecraftLauncherMeta getAllMeta() throws IOException {
 		List<Version> versions = new ArrayList<>();
 		versions.addAll(getMeta().versions);
 		versions.addAll(getExperimentalMeta().versions);
+		versions.addAll(getMissingMeta().versions);
 
 		// Order by release time
 		versions.sort(Comparator.comparing(Version::getReleaseTime).reversed());
