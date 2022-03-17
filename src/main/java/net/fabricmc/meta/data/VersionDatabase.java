@@ -24,11 +24,7 @@ import net.fabricmc.meta.web.models.*;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -104,7 +100,10 @@ public class VersionDatabase {
 	}
 	
 	private static boolean isPublicLoaderVersion(BaseVersion version) {
-		return true;
+		String[] ver = version.getVersion().split("\\.");
+		System.out.println(Arrays.toString(ver));
+		return Integer.parseInt(ver[1]) >= 12
+				|| Integer.parseInt(ver[0]) > 0;
 	}
 
 	public List<MavenBuildVersion> getAllLoader() {

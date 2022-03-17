@@ -43,6 +43,12 @@ public abstract class Parser {
     public abstract void load() throws IOException, XMLStreamException;
 
     public <T extends BaseVersion> List<T> getMeta(Function<String, T> function, String prefix) throws IOException, XMLStreamException {
+        return getMeta(function, prefix, list -> {
+            if (!list.isEmpty()) list.get(0).setStable(true);
+        });
+    }
+
+    public <T extends BaseVersion> List<T> getMeta(Function<String, T> function, String prefix, StableVersionIdentifier stableIdentifier) throws IOException, XMLStreamException {
         try {
             load();
         } catch (IOException e){
@@ -68,11 +74,13 @@ public abstract class Parser {
                     .findFirst()
                     .ifPresent(v -> v.setStable(true));
         } else {
-            if(list.get(0) != null){
-                list.get(0).setStable(true);
-            }
+            stableIdentifier.process(list);
         }
 
         return Collections.unmodifiableList(list);
+    }
+
+    public interface StableVersionIdentifier {
+        void process(List<? extends BaseVersion> versions);
     }
 }
