@@ -50,7 +50,7 @@ public class EndpointsV2 {
 		WebServer.jsonGet("/v2/versions/intermediary", () -> FabricMeta.database.intermediary);
 		WebServer.jsonGet("/v2/versions/intermediary/:game_version", context -> filter(context, FabricMeta.database.intermediary));
 
-		WebServer.jsonGet("/v2/versions/loader", context -> withLimitSkip(context, FabricMeta.database.loader));
+		WebServer.jsonGet("/v2/versions/loader", context -> withLimitSkip(context, FabricMeta.database.getLoader()));
 		WebServer.jsonGet("/v2/versions/loader/:game_version", context -> withLimitSkip(context, EndpointsV2.getLoaderInfoAll(context)));
 		WebServer.jsonGet("/v2/versions/loader/:game_version/:loader_version", EndpointsV2::getLoaderInfo);
 		WebServer.jsonGet("/v2/meta", () -> MetaServerInfo.INSTANCE);
@@ -58,6 +58,7 @@ public class EndpointsV2 {
 		WebServer.jsonGet("/v2/versions/installer", context -> withLimitSkip(context, FabricMeta.database.installer));
 
 		ProfileHandler.setup();
+		ServerBootstrap.setup();
 	}
 
 	private static <T> List<T> withLimitSkip(Context context, List<T> list) {
@@ -94,8 +95,8 @@ public class EndpointsV2 {
 
 		String gameVersion = context.pathParam("game_version");
 		String loaderVersion = context.pathParam("loader_version");
-		
-		MavenBuildVersion loader = FabricMeta.database.loader.stream()
+
+		MavenBuildVersion loader = FabricMeta.database.getAllLoader().stream()
 			.filter(mavenBuildVersion -> loaderVersion.equals(mavenBuildVersion.getVersion()))
 			.findFirst().orElse(null);
 
@@ -129,11 +130,9 @@ public class EndpointsV2 {
 		}
 
 		List<LoaderInfoV2> infoList = new ArrayList<>();
-		
-		for(MavenBuildVersion loader : FabricMeta.database.loader){
-			if (LoaderMeta.canUse(gameVersion, loader)) {
-				infoList.add(new LoaderInfoV2(loader, mappings).populateMeta());
-			}
+
+		for(MavenBuildVersion loader : FabricMeta.database.getLoader()){
+			infoList.add(new LoaderInfoV2(loader, mappings).populateMeta());
 		}
 		return infoList;
 	}

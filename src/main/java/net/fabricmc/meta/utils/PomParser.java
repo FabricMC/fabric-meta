@@ -23,6 +23,10 @@ import javax.xml.stream.XMLStreamReader;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Collections;
+import java.util.List;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class PomParser extends Parser {
 
@@ -45,4 +49,47 @@ public class PomParser extends Parser {
 		Collections.reverse(versions);
 		latestVersion = versions.get(0);
 	}
+	
+	public <T extends BaseVersion> List<T> getMeta(Function<String, T> function, String prefix) throws IOException, XMLStreamException {
+		return getMeta(function, prefix, list -> {
+			if (!list.isEmpty()) list.get(0).setStable(true);
+		});
+	}
+
+	public <T extends BaseVersion> List<T> getMeta(Function<String, T> function, String prefix, StableVersionIdentifier stableIdentifier) throws IOException, XMLStreamException {
+		try {
+			load();
+		} catch (IOException e){
+			throw new IOException("Failed to load " + path, e);
+		}
+
+		List<T> list = versions.stream()
+				.map((version) -> prefix + version)
+				.map(function)
+				.collect(Collectors.toList());
+
+		Path unstableVersionsPath = Paths.get(prefix
+												.replace(":", "_")
+												.replace(".", "_")
+												.replaceFirst(".$","")
+												+ ".txt");
+
+		if (Files.exists(unstableVersionsPath)) {
+			// Read a file containing a new line separated list of versions that should not be marked as stable.
+			List<String> unstableVersions = Files.readAllLines(unstableVersionsPath);
+			list.stream()
+					.filter(v -> !unstableVersions.contains(v.getVersion()))
+					.findFirst()
+					.ifPresent(v -> v.setStable(true));
+		} else {
+			stableIdentifier.process(list);
+		}
+
+		return Collections.unmodifiableList(list);
+	}
+	
+	public interface StableVersionIdentifier {
+		void process(List<? extends BaseVersion> versions);
+	}
+
 }
