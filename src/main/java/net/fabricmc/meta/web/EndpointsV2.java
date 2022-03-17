@@ -55,7 +55,7 @@ public class EndpointsV2 {
 		WebServer.jsonGet("/v2/versions/loader/:game_version/:loader_version", EndpointsV2::getLoaderInfo);
 		WebServer.jsonGet("/v2/meta", () -> MetaServerInfo.INSTANCE);
 
-		// WebServer.jsonGet("/v2/versions/installer", context -> withLimitSkip(context, FabricMeta.database.installer));
+		WebServer.jsonGet("/v2/versions/installer", context -> withLimitSkip(context, FabricMeta.database.installer));
 
 		ProfileHandler.setup();
 	}

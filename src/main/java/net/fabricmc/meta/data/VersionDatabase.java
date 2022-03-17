@@ -37,7 +37,7 @@ public class VersionDatabase {
 	public static final String MAVEN_URL = "https://maven.legacyfabric.net/";
 
 	public static final PageParser MAPPINGS_PARSER = new PageParser(MAVEN_URL + "net/fabricmc/yarn");
-	public static final PomParser INTERMEDIARY_PARSER = new PomParser(MAVEN_URL + "net/fabricmc/intermediary/maven-metadata.xml");
+	public static final PageParser INTERMEDIARY_PARSER = new PageParser(MAVEN_URL + "net/fabricmc/intermediary");
 	public static final PomParser LOADER_PARSER = new PomParser(UPSTREAM_MAVEN_URL + "net/fabricmc/fabric-loader/maven-metadata.xml");
 	public static final PomParser INSTALLER_PARSER = new PomParser(MAVEN_URL + "net/fabricmc/fabric-installer/maven-metadata.xml");
 
@@ -58,7 +58,7 @@ public class VersionDatabase {
 		database.loader = Collections.unmodifiableList(Stream.of(LOADER_PARSER.getMeta(MavenBuildVersion::new, "net.fabricmc:fabric-loader:"))
 															   .flatMap(Collection::stream)
 															   .collect(Collectors.toList()));
-		// database.installer = INSTALLER_PARSER.getMeta(MavenUrlVersion::new, "net.fabricmc:fabric-installer:");
+	 	database.installer = INSTALLER_PARSER.getMeta(MavenUrlVersion::new, "net.fabricmc:fabric-installer:");
 		database.loadMcData();
 		System.out.println("DB update took " + (System.currentTimeMillis() - start) + "ms");
 		return database;
