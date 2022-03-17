@@ -101,7 +101,6 @@ public class VersionDatabase {
 	
 	private static boolean isPublicLoaderVersion(BaseVersion version) {
 		String[] ver = version.getVersion().split("\\.");
-		System.out.println(Arrays.toString(ver));
 		return Integer.parseInt(ver[1]) >= 12
 				|| Integer.parseInt(ver[0]) > 0;
 	}
