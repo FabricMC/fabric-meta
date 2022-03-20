@@ -2,16 +2,20 @@
 //file:noinspection GroovyAccessibility
 plugins {
     id 'java'
+	id 'maven-publish'
 	id 'org.cadixdev.licenser' version '0.6.1'
 }
 
 group 'net.fabricmc'
 version '1.6.1'
 
+def ENV = System.getenv()
+version = version + (ENV.GITHUB_ACTIONS ? "" : "+local")
+
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
-archivesBaseName = "legacy-meta"
+archivesBaseName = "fabric-meta"
 
 repositories {
     mavenCentral()
@@ -60,3 +64,43 @@ license {
 	header file('HEADER')
 	include '**/*.java'
 }
+
+publishing {
+	publications {
+		maven(MavenPublication) {
+			groupId project.group
+			artifactId project.archivesBaseName
+			version project.version
+
+			artifact jar
+		}
+	}
+	repositories {
+		if (ENV.MAVEN_PUBLISH_TOKEN) {
+			maven {
+				url "https://maven.legacyfabric.net/"
+				credentials {
+					username 'legacyfabric-ci'
+					password ENV.MAVEN_PUBLISH_TOKEN
+				}
+				authentication {
+					basic(BasicAuthentication)
+				}
+			}
+		}
+	}
+}
+
+// A task to ensure that the version being released has not already been released.
+task checkVersion {
+	doFirst {
+		def xml = new URL("https://maven.legacyfabric.net/net/fabricmc/fabric-meta/maven-metadata.xml").text
+		def metadata = new XmlSlurper().parseText(xml)
+		def versions = metadata.versioning.versions.version*.text();
+		if (versions.contains(version)) {
+			throw new RuntimeException("${version} has already been released!")
+		}
+	}
+}
+
+//publish.mustRunAfter checkVersion
