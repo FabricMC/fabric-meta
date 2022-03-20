@@ -103,4 +103,4 @@ task checkVersion {
 	}
 }
 
-//publish.mustRunAfter checkVersion
+publish.mustRunAfter checkVersion
