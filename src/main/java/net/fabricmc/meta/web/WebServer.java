@@ -65,4 +65,26 @@ public class WebServer {
 		ctx.contentType("application/json").header(Header.CACHE_CONTROL, "public, max-age=60").result(response);
 	}
 
+	public static void stringGet(String route, Supplier<String> supplier) {
+		javalin.get(route, ctx -> {
+			String object = supplier.get();
+			handleString(ctx, object);
+		});
+	}
+
+	public static void stringGet(String route, Function<Context, String> supplier) {
+		javalin.get(route, ctx -> {
+			String object = supplier.apply(ctx);
+			handleString(ctx, object);
+		});
+	}
+
+	public static void handleString(Context ctx, String string) {
+		if (string == null) {
+			string = "";
+			ctx.status(400);
+		}
+
+		ctx.contentType("application/json").header(Header.CACHE_CONTROL, "public, max-age=60").result(string);
+	}
 }

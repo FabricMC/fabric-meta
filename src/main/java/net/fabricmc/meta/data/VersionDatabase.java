@@ -42,6 +42,7 @@ public class VersionDatabase {
 	public List<MavenVersion> intermediary;
 	private List<MavenBuildVersion> loader;
 	public List<MavenUrlVersion> installer;
+	public MinecraftLauncherMeta launcherMeta;
 
 	private VersionDatabase() {
 	}
@@ -69,7 +70,7 @@ public class VersionDatabase {
 		if (mappings == null || intermediary == null) {
 			throw new RuntimeException("Mappings are null");
 		}
-		MinecraftLauncherMeta launcherMeta = MinecraftLauncherMeta.getAllMeta();
+		launcherMeta = MinecraftLauncherMeta.getAllMeta();
 
 		//Sorts in the order of minecraft release dates
 		intermediary = new ArrayList<>(intermediary);

@@ -21,12 +21,18 @@ import io.javalin.core.util.Header;
 import io.javalin.http.Context;
 import net.fabricmc.meta.FabricMeta;
 import net.fabricmc.meta.utils.LoaderMeta;
+import net.fabricmc.meta.utils.MinecraftLauncherMeta;
 import net.fabricmc.meta.web.models.*;
+import org.apache.commons.io.IOUtils;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -57,6 +63,8 @@ public class EndpointsV2 {
 
 		WebServer.jsonGet("/v2/versions/installer", context -> withLimitSkip(context, FabricMeta.database.installer));
 
+		WebServer.stringGet("/v2/manifest/:game_version", EndpointsV2::getVersionManifest);
+
 		ProfileHandler.setup();
 		ServerBootstrap.setup();
 	}
@@ -83,6 +91,30 @@ public class EndpointsV2 {
 		}
 		return versionList.stream().filter(t -> t.test(context.pathParam("game_version"))).collect(Collectors.toList());
 
+	}
+
+	private static String getVersionManifest(Context context) {
+		if (!context.pathParamMap().containsKey("game_version")) {
+			return null;
+		}
+
+		String gameVersion = context.pathParam("game_version");
+
+		MinecraftLauncherMeta.Version version = FabricMeta.database.launcherMeta.getVersions().stream()
+				.filter(v -> Objects.equals(v.getId(), gameVersion))
+				.findFirst().orElse(null);
+
+		String json = null;
+
+		if (version != null) {
+			try {
+				json = IOUtils.toString(new URL(version.getUrl()), StandardCharsets.UTF_8);
+			} catch (IOException e) {
+
+			}
+		}
+
+		return json;
 	}
 	
 	private static Object getLoaderInfo(Context context) {
