@@ -55,7 +55,7 @@ public class ServerBootstrap {
             }
 
             final String installerVersion = getAndValidateVersion(ctx, FabricMeta.database.installer, "installer_version");
-            final String gameVersion = getAndValidateVersion(ctx, FabricMeta.database.intermediary, "game_version");
+            final String gameVersion = getAndValidateVersion(ctx, FabricMeta.database.game, "game_version");
             final String loaderVersion = getAndValidateVersion(ctx, FabricMeta.database.getAllLoader(), "loader_version");
 
             validateLoaderVersion(loaderVersion);
@@ -64,7 +64,8 @@ public class ServerBootstrap {
             // Set the filename and cache headers
             final String filename = String.format("fabric-server-mc.%s-loader.%s-launcher.%s.jar", gameVersion, loaderVersion, installerVersion);
             ctx.header(Header.CONTENT_DISPOSITION, String.format("attachment; filename=\"%s\"", filename));
-            ctx.header(Header.CACHE_CONTROL, "public, max-age=86400");
+            final String cacheControl = String.format("public, max-age=%d", getCacheDuration(ctx));
+            ctx.header(Header.CACHE_CONTROL, cacheControl);
             ctx.contentType("application/java-archive");
 
             ctx.result(getResultStream(installerVersion, gameVersion, loaderVersion));
@@ -75,6 +76,10 @@ public class ServerBootstrap {
         String version = ctx.pathParam(name);
 
         for (V v : versions) {
+            if (version.equals("stable") && v.isStable()) {
+                return v.getVersion();
+            }
+
             if (v.getVersion().equals(version)) {
                 return version;
             }
@@ -176,5 +181,12 @@ public class ServerBootstrap {
 
         Files.copy(workingFile, outputJar);
         Files.delete(workingFile);
+    }
+
+    private static int getCacheDuration(Context ctx) {
+        if (ctx.pathParamMap().containsValue("stable")) {
+            return 120;
+        }
+        return 86400;
     }
 }
