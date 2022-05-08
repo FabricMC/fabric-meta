@@ -85,7 +85,7 @@ public class LoaderMeta {
 
 	public static boolean canUse(String gameVersion, MavenBuildVersion loaderVersion) {
 		try {
-			return compareVersions(loaderVersion.getVersion(), "0.12.12") >= 0;
+			return compareVersions(loaderVersion.getVersion(), "0.13.0") >= 0;
 		} catch (IllegalArgumentException ignored) {
 			return false;
 		}
