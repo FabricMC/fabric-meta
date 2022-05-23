@@ -7,7 +7,7 @@ plugins {
 }
 
 group 'net.fabricmc'
-version '1.65'
+version '1.66'
 
 def ENV = System.getenv()
 version = version + (ENV.GITHUB_ACTIONS ? "" : "+local")

@@ -45,7 +45,7 @@ public class PageParser extends Parser {
                 new InputStreamReader(url.openStream(), StandardCharsets.UTF_8))
                 .lines()
                 .collect(Collectors.joining("\n"))
-                .replaceAll("<hr>", "");
+                .replaceAll("<hr>", "").replace("defer", "");
 
         XMLStreamReader reader = XMLInputFactory.newInstance().createXMLStreamReader(new StringReader(originalText));
         while (reader.hasNext()) {
