@@ -16,14 +16,9 @@
 
 package net.fabricmc.meta.utils;
 
-import net.fabricmc.meta.web.models.BaseVersion;
-
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamConstants;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
 import java.io.IOException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -31,8 +26,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+
+import net.fabricmc.meta.web.models.BaseVersion;
 
 public class PomParser {
 
@@ -49,18 +50,28 @@ public class PomParser {
 		versions.clear();
 
 		URL url = new URL(path);
-		XMLStreamReader reader = XMLInputFactory.newInstance().createXMLStreamReader(url.openStream());
-		while (reader.hasNext()) {
-			if (reader.next() == XMLStreamConstants.START_ELEMENT && reader.getLocalName().equals("version")) {
-				String text = reader.getElementText();
-				versions.add(text);
+		URLConnection conn = url.openConnection();
+		conn.setConnectTimeout(3000);
+		conn.setReadTimeout(3000);
+		XMLStreamReader reader = null;
+
+		try {
+			reader = XMLInputFactory.newInstance().createXMLStreamReader(conn.getInputStream());
+
+			while (reader.hasNext()) {
+				if (reader.next() == XMLStreamConstants.START_ELEMENT && reader.getLocalName().equals("version")) {
+					String text = reader.getElementText();
+					versions.add(text);
+				}
 			}
+		} finally {
+			if (reader != null) reader.close();
 		}
-		reader.close();
+
 		Collections.reverse(versions);
 		latestVersion = versions.get(0);
 	}
-	
+
 	public <T extends BaseVersion> List<T> getMeta(Function<String, T> function, String prefix) throws IOException, XMLStreamException {
 		return getMeta(function, prefix, list -> {
 			if (!list.isEmpty()) list.get(0).setStable(true);
@@ -80,25 +91,25 @@ public class PomParser {
 				.collect(Collectors.toList());
 
 		Path unstableVersionsPath = Paths.get(prefix
-												.replace(":", "_")
-												.replace(".", "_")
-												.replaceFirst(".$","")
-												+ ".txt");
+				.replace(":", "_")
+				.replace(".", "_")
+				.replaceFirst(".$","")
+				+ ".txt");
 
 		if (Files.exists(unstableVersionsPath)) {
 			// Read a file containing a new line separated list of versions that should not be marked as stable.
 			List<String> unstableVersions = Files.readAllLines(unstableVersionsPath);
 			list.stream()
-					.filter(v -> !unstableVersions.contains(v.getVersion()))
-					.findFirst()
-					.ifPresent(v -> v.setStable(true));
+			.filter(v -> !unstableVersions.contains(v.getVersion()))
+			.findFirst()
+			.ifPresent(v -> v.setStable(true));
 		} else {
 			stableIdentifier.process(list);
 		}
 
 		return Collections.unmodifiableList(list);
 	}
-	
+
 	public interface StableVersionIdentifier {
 		void process(List<? extends BaseVersion> versions);
 	}
