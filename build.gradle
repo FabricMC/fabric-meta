@@ -6,7 +6,7 @@ plugins {
 	id 'org.cadixdev.licenser' version '0.6.1'
 }
 
-group 'net.fabricmc'
+group 'net.legacyfabric'
 version '1.66'
 
 def ENV = System.getenv()
