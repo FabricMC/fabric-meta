@@ -32,10 +32,10 @@ public class VersionDatabase {
 	public static final String UPSTREAM_MAVEN_URL = "https://maven.fabricmc.net/";
 	public static final String MAVEN_URL = "https://maven.legacyfabric.net/";
 
-	public static final PageParser MAPPINGS_PARSER = new PageParser(MAVEN_URL + "net/fabricmc/yarn");
-	public static final PageParser INTERMEDIARY_PARSER = new PageParser(MAVEN_URL + "net/fabricmc/intermediary");
+	public static final PageParser MAPPINGS_PARSER = new PageParser(MAVEN_URL + "net/legacyfabric/yarn");
+	public static final PageParser INTERMEDIARY_PARSER = new PageParser(MAVEN_URL + "net/legacyfabric/intermediary");
 	public static final PomParser LOADER_PARSER = new PomParser(UPSTREAM_MAVEN_URL + "net/fabricmc/fabric-loader/maven-metadata.xml");
-	public static final PomParser INSTALLER_PARSER = new PomParser(MAVEN_URL + "net/fabricmc/fabric-installer/maven-metadata.xml");
+	public static final PomParser INSTALLER_PARSER = new PomParser(MAVEN_URL + "net/legacyfabric/fabric-installer/maven-metadata.xml");
 
 	public List<BaseVersion> game;
 	public List<MavenBuildGameVersion> mappings;
@@ -50,8 +50,8 @@ public class VersionDatabase {
 	public static VersionDatabase generate() throws IOException, XMLStreamException {
 		long start = System.currentTimeMillis();
 		VersionDatabase database = new VersionDatabase();
-		database.mappings = MAPPINGS_PARSER.getMeta(MavenBuildGameVersion::new, "net.fabricmc:yarn:");
-		database.intermediary = INTERMEDIARY_PARSER.getMeta(MavenVersion::new, "net.fabricmc:intermediary:");
+		database.mappings = MAPPINGS_PARSER.getMeta(MavenBuildGameVersion::new, "net.legacyfabric:yarn:");
+		database.intermediary = INTERMEDIARY_PARSER.getMeta(MavenVersion::new, "net.legacyfabric:intermediary:");
 		database.loader = LOADER_PARSER.getMeta(MavenBuildVersion::new, "net.fabricmc:fabric-loader:", list -> {
 			for (BaseVersion version : list) {
 				if (isPublicLoaderVersion(version)) {
@@ -60,7 +60,7 @@ public class VersionDatabase {
 				}
 			}
 		});
-		database.installer = INSTALLER_PARSER.getMeta(MavenUrlVersion::new, "net.fabricmc:fabric-installer:");
+		database.installer = INSTALLER_PARSER.getMeta(MavenUrlVersion::new, "net.legacyfabric:fabric-installer:");
 		database.loadMcData();
 		System.out.println("DB update took " + (System.currentTimeMillis() - start) + "ms");
 		return database;
