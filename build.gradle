@@ -7,7 +7,7 @@ plugins {
 }
 
 group 'net.legacyfabric'
-version '1.66'
+version '1.67'
 
 def ENV = System.getenv()
 version = version + (ENV.GITHUB_ACTIONS ? "" : "+local")
