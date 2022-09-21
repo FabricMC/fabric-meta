@@ -39,7 +39,7 @@ public class MinecraftLauncherMeta {
 	}
 
 	public static MinecraftLauncherMeta getMeta() throws IOException {
-		String url = "https://launchermeta.mojang.com/mc/game/version_manifest.json";
+		String url = "https://piston-meta.mojang.com/mc/game/version_manifest.json";
 		String json = IOUtils.toString(new URL(url), StandardCharsets.UTF_8);
 		return GSON.fromJson(json, MinecraftLauncherMeta.class);
 	}
