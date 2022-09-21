@@ -142,19 +142,20 @@ public class ProfileHandler {
 
 		profile.addProperty("mainClass", mainClass);
 
-		JsonObject arguments = new JsonObject();
-
-		// I believe this is required to stop the launcher from complaining
-		arguments.add("game", new JsonArray());
-
-		if (side.equals("client")) {
-			// add '-DFabricMcEmu= net.minecraft.client.main.Main ' to emulate vanilla MC presence for programs that check the process command line (discord, nvidia hybrid gpu, ..)
-			JsonArray jvmArgs = new JsonArray();
-			jvmArgs.add("-DFabricMcEmu= net.minecraft.client.main.Main ");
-			arguments.add("jvm", jvmArgs);
-		}
-
-		profile.add("arguments", arguments);
+		// Prevent pre-1.13 from launching in vanilla launcher for some reasons???
+		//		JsonObject arguments = new JsonObject();
+		//
+		//		// I believe this is required to stop the launcher from complaining
+		//		arguments.add("game", new JsonArray());
+		//
+		//		if (side.equals("client")) {
+		//			// add '-DFabricMcEmu= net.minecraft.client.main.Main ' to emulate vanilla MC presence for programs that check the process command line (discord, nvidia hybrid gpu, ..)
+		//			JsonArray jvmArgs = new JsonArray();
+		//			jvmArgs.add("-DFabricMcEmu= net.minecraft.client.main.Main ");
+		//			arguments.add("jvm", jvmArgs);
+		//		}
+		//
+		//		profile.add("arguments", arguments);
 
 		profile.add("libraries", libraries);
 
