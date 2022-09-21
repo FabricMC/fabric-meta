@@ -64,6 +64,7 @@ public class EndpointsV2 {
 		WebServer.jsonGet("/v2/versions/installer", context -> withLimitSkip(context, FabricMeta.database.installer));
 
 		WebServer.stringGet("/v2/manifest/:game_version", EndpointsV2::getVersionManifest);
+		WebServer.jsonGet("/v2/versions/manifest", context -> FabricMeta.database.launcherMeta);
 
 		ProfileHandler.setup();
 		ServerBootstrap.setup();
