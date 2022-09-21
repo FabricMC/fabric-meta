@@ -19,13 +19,11 @@ package net.fabricmc.meta.web.models;
 
 public class MavenBuildVersion extends MavenVersion {
 
-	String name;
 	String separator;
-	long build;
+	int build;
 
 	public MavenBuildVersion(String maven) {
 		super(maven);
-		name = maven.split(":")[1];
 		String version = maven.split(":")[2];
 
 		if (version.contains("+build.")) {
@@ -33,24 +31,15 @@ public class MavenBuildVersion extends MavenVersion {
 		} else {
 			separator = ".";
 		}
-		// FIXME: if a version contains a non number, such as `+local`, it will fail and crash. try/catch maybe?
-		try {
-			build = Long.parseLong(version.substring(version.lastIndexOf(".") + 1));
-		} catch (NumberFormatException e) {
-			build = -1L;
-		}
+		build = Integer.parseInt(version.substring(version.lastIndexOf(".") + 1));
 
 	}
 
-	public String getName() {
-		return name;
-	}
-	
 	public String getSeparator() {
 		return separator;
 	}
 
-	public long getBuild() {
+	public int getBuild() {
 		return build;
 	}
 }

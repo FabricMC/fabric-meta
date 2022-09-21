@@ -61,8 +61,7 @@ public class ProfileHandler {
 	}
 
 	private static String getJsonFileName(LoaderInfoV2 info, String ext) {
-		String loader = info.getLoader().getName() + "-%s-%s.%s";
-		return String.format(loader, info.getLoader().getVersion(), info.getIntermediary().getVersion(), ext);
+		return String.format("fabric-loader-%s-%s.%s", info.getLoader().getVersion(), info.getIntermediary().getVersion(), ext);
 	}
 
 	private static CompletableFuture<InputStream> profileJson(LoaderInfoV2 info) {
@@ -79,8 +78,7 @@ public class ProfileHandler {
 	}
 
 	private static InputStream packageZip(LoaderInfoV2 info, InputStream profileJson)  {
-		String loader = info.getLoader().getName() + "-%s-%s";
-		String profileName = String.format(loader, info.getLoader().getVersion(), info.getIntermediary().getVersion());
+		String profileName = String.format("fabric-loader-%s-%s", info.getLoader().getVersion(), info.getIntermediary().getVersion());
 
 		try {
 			ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -112,8 +110,7 @@ public class ProfileHandler {
 	private static JsonObject buildProfileJson(LoaderInfoV2 info, String side) {
 		JsonObject launcherMeta = info.getLauncherMeta();
 
-		String loader = info.getLoader().getName();
-		String profileName = String.format(loader + "-%s-%s", info.getLoader().getVersion(), info.getIntermediary().getVersion());
+		String profileName = String.format("fabric-loader-%s-%s", info.getLoader().getVersion(), info.getIntermediary().getVersion());
 
 		JsonObject librariesObject = launcherMeta.get("libraries").getAsJsonObject();
 		// Build the libraries array with the existing libs + loader and intermediary

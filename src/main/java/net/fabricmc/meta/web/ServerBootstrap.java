@@ -158,7 +158,7 @@ public class ServerBootstrap {
     }
 
     private static Path downloadInstallerJar(Path jar, String installerVersion) throws IOException {
-        final String url = String.format("https://maven.fabricmc.net/net/legacyfabric/fabric-installer/%1$s/fabric-installer-%1$s-server.jar", installerVersion);
+        final String url = String.format("https://maven.legacyfabric.net/net/legacyfabric/fabric-installer/%1$s/fabric-installer-%1$s-server.jar", installerVersion);
 
         System.out.println("Downloading: " + url);
         FileUtils.copyURLToFile(new URL(url), jar.toFile());

@@ -18,22 +18,23 @@
 package net.fabricmc.meta.data;
 
 import net.fabricmc.meta.utils.MinecraftLauncherMeta;
-import net.fabricmc.meta.utils.PageParser;
 import net.fabricmc.meta.utils.PomParser;
 import net.fabricmc.meta.web.models.*;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class VersionDatabase {
-	public static final String UPSTREAM_MAVEN_URL = "https://maven.fabricmc.net/";
 	public static final String MAVEN_URL = "https://maven.legacyfabric.net/";
+	public static final String UPSTREAM_MAVEN_URL = "https://maven.fabricmc.net/";
 
-	public static final PageParser MAPPINGS_PARSER = new PageParser(MAVEN_URL + "net/legacyfabric/yarn");
-	public static final PageParser INTERMEDIARY_PARSER = new PageParser(MAVEN_URL + "net/legacyfabric/intermediary");
+	public static final PomParser MAPPINGS_PARSER = new PomParser(MAVEN_URL + "net/legacyfabric/yarn/maven-metadata.xml");
+	public static final PomParser INTERMEDIARY_PARSER = new PomParser(MAVEN_URL + "net/legacyfabric/intermediary/maven-metadata.xml");
 	public static final PomParser LOADER_PARSER = new PomParser(UPSTREAM_MAVEN_URL + "net/fabricmc/fabric-loader/maven-metadata.xml");
 	public static final PomParser INSTALLER_PARSER = new PomParser(MAVEN_URL + "net/legacyfabric/fabric-installer/maven-metadata.xml");
 
@@ -99,7 +100,7 @@ public class VersionDatabase {
 	public List<MavenBuildVersion> getLoader() {
 		return loader.stream().filter(VersionDatabase::isPublicLoaderVersion).collect(Collectors.toList());
 	}
-	
+
 	private static boolean isPublicLoaderVersion(BaseVersion version) {
 		String[] ver = version.getVersion().split("\\.");
 		return Integer.parseInt(ver[1]) >= 13

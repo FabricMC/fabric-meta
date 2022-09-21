@@ -20,7 +20,6 @@ package net.fabricmc.meta.web;
 import io.javalin.core.util.Header;
 import io.javalin.http.Context;
 import net.fabricmc.meta.FabricMeta;
-import net.fabricmc.meta.utils.LoaderMeta;
 import net.fabricmc.meta.utils.MinecraftLauncherMeta;
 import net.fabricmc.meta.web.models.*;
 import org.apache.commons.io.IOUtils;
@@ -130,12 +129,12 @@ public class EndpointsV2 {
 		String loaderVersion = context.pathParam("loader_version");
 
 		MavenBuildVersion loader = FabricMeta.database.getAllLoader().stream()
-			.filter(mavenBuildVersion -> loaderVersion.equals(mavenBuildVersion.getVersion()))
-			.findFirst().orElse(null);
+				.filter(mavenBuildVersion -> loaderVersion.equals(mavenBuildVersion.getVersion()))
+				.findFirst().orElse(null);
 
 		MavenVersion mappings = FabricMeta.database.intermediary.stream()
-			.filter(t -> t.test(gameVersion))
-			.findFirst().orElse(null);
+				.filter(t -> t.test(gameVersion))
+				.findFirst().orElse(null);
 
 		if (loader == null) {
 			context.status(400);
@@ -147,7 +146,7 @@ public class EndpointsV2 {
 		}
 		return new LoaderInfoV2(loader, mappings).populateMeta();
 	}
-	
+
 	private static List<?> getLoaderInfoAll(Context context) {
 		if (!context.pathParamMap().containsKey("game_version")) {
 			return null;
@@ -155,8 +154,8 @@ public class EndpointsV2 {
 		String gameVersion = context.pathParam("game_version");
 
 		MavenVersion mappings = FabricMeta.database.intermediary.stream()
-			.filter(t -> t.test(gameVersion))
-			.findFirst().orElse(null);
+				.filter(t -> t.test(gameVersion))
+				.findFirst().orElse(null);
 
 		if(mappings == null){
 			return Collections.emptyList();

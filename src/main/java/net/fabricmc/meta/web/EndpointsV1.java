@@ -19,7 +19,6 @@ package net.fabricmc.meta.web;
 
 import io.javalin.http.Context;
 import net.fabricmc.meta.FabricMeta;
-import net.fabricmc.meta.utils.LoaderMeta;
 import net.fabricmc.meta.web.models.LoaderInfoV1;
 import net.fabricmc.meta.web.models.MavenBuildGameVersion;
 import net.fabricmc.meta.web.models.MavenBuildVersion;
@@ -56,7 +55,7 @@ public class EndpointsV1 {
 		return versionList.stream().filter(t -> t.test(context.pathParam("game_version"))).collect(Collectors.toList());
 
 	}
-	
+
 	private static Object getLoaderInfo(Context context) {
 		if (!context.pathParamMap().containsKey("game_version")) {
 			return null;
@@ -69,12 +68,12 @@ public class EndpointsV1 {
 		String loaderVersion = context.pathParam("loader_version");
 
 		MavenBuildVersion loader = FabricMeta.database.getAllLoader().stream()
-			.filter(mavenBuildVersion -> loaderVersion.equals(mavenBuildVersion.getVersion()))
-			.findFirst().orElse(null);
+				.filter(mavenBuildVersion -> loaderVersion.equals(mavenBuildVersion.getVersion()))
+				.findFirst().orElse(null);
 
 		MavenBuildGameVersion mappings = FabricMeta.database.mappings.stream()
-			.filter(t -> t.test(gameVersion))
-			.findFirst().orElse(null);
+				.filter(t -> t.test(gameVersion))
+				.findFirst().orElse(null);
 
 		if (loader == null) {
 			context.status(400);
@@ -86,7 +85,7 @@ public class EndpointsV1 {
 		}
 		return new LoaderInfoV1(loader, mappings).populateMeta();
 	}
-	
+
 	private static Object getLoaderInfoAll(Context context) {
 		if (!context.pathParamMap().containsKey("game_version")) {
 			return null;
@@ -94,8 +93,8 @@ public class EndpointsV1 {
 		String gameVersion = context.pathParam("game_version");
 
 		MavenBuildGameVersion mappings = FabricMeta.database.mappings.stream()
-			.filter(t -> t.test(gameVersion))
-			.findFirst().orElse(null);
+				.filter(t -> t.test(gameVersion))
+				.findFirst().orElse(null);
 
 		if(mappings == null){
 			return Collections.emptyList();
