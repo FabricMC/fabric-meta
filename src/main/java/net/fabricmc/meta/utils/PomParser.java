@@ -30,6 +30,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -42,6 +43,8 @@ public class PomParser {
 
 	public PomParser(String path) {
 		this.path = path;
+		// Legacy Fabric
+		this.path = this.path.replace("maven-metadata.xml", "");
 	}
 
 	private void load() throws IOException, XMLStreamException {
@@ -50,9 +53,23 @@ public class PomParser {
 		URL url = new URL(path);
 		XMLStreamReader reader = XMLInputFactory.newInstance().createXMLStreamReader(url.openStream());
 		while (reader.hasNext()) {
+			/*
 			if (reader.next() == XMLStreamConstants.START_ELEMENT && reader.getLocalName().equals("version")) {
 				String text = reader.getElementText();
 				versions.add(text);
+			}
+			*/
+			// Legacy Fabric
+			try {
+				if (reader.next() == XMLStreamConstants.START_ELEMENT && reader.getLocalName().equals("a")) {
+					String text = reader.getElementText();
+
+					if (!Objects.equals(text, "../") && !text.contains(".xml")) {
+						versions.add(text.replace("/", ""));
+					}
+				}
+			} catch (XMLStreamException e) {
+				break;
 			}
 		}
 		reader.close();
