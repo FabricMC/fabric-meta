@@ -47,7 +47,7 @@ public class VersionDatabase {
 	public List<MavenUrlVersion> installer;
 	public MinecraftLauncherMeta launcherMeta;
 
-	private final ArrayList<String> incorrectVersions = new ArrayList<>();
+	private static final ArrayList<String> incorrectVersions = new ArrayList<>();
 
 	private static final Logger LOGGER = new SimpleLoggerFactory().getLogger(VersionDatabase.class.getName());
 
@@ -88,9 +88,9 @@ public class VersionDatabase {
 		intermediary.removeIf(o -> {
 			if (launcherMeta.getVersions().stream().noneMatch(version -> version.getId().equals(o.getVersion()))) {
 				// only print unmatched versions once so that it doesn't spam the console with "Removing ..." messages
-				if (!this.incorrectVersions.contains(o.getVersion())) {
+				if (incorrectVersions.stream().noneMatch(o.getVersion()::equals)) {
 					LOGGER.warn("Removing " + o.getVersion() + " as it doesn't have a valid intermediary match");
-					this.incorrectVersions.add(o.getVersion());
+					incorrectVersions.add(o.getVersion());
 				}
 				return true;
 			}
