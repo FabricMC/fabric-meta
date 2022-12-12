@@ -2,12 +2,13 @@
 //file:noinspection GroovyAccessibility
 plugins {
     id 'java'
+	id 'application'
 	id 'maven-publish'
 	id 'org.cadixdev.licenser' version '0.6.1'
 }
 
 group 'net.legacyfabric'
-version '1.7.2+fabricmc.1.5.2'
+version '1.7.3+fabricmc.1.5.2'
 
 def ENV = System.getenv()
 version = version + (ENV.GITHUB_ACTIONS ? "" : "+local")
@@ -47,6 +48,8 @@ jar {
 	duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 
+mainClassName = 'net.fabricmc.meta.FabricMeta'
+
 tasks.withType(JavaCompile).configureEach {
 	it.options.encoding = "UTF-8"
 
@@ -59,7 +62,7 @@ license {
 	matching(includes: ['**/VersionDatabase.java', '**/LoaderMeta.java', '**/MavenBuildVersion.java',
 						'**/MavenUrlVersion.java', '**/ProfileHandler.java', '**/EndpointsV1.java',
 						'**/EndpointsV2.java']) {
-		header = file('LFQ-HEADER')
+		header = file('LF-HEADER')
 	}
 	header file('HEADER')
 	include '**/*.java'

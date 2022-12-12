@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Legacy Fabric/Quilt
+ * Copyright (c) 2021-2022 Legacy Fabric
  * Copyright (c) 2019 FabricMC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -52,8 +52,7 @@ public class LoaderMeta {
 		}
 
 		try {
-			JsonObject jsonObject = WebServer.GSON.fromJson(new FileReader(launcherMetaFile), JsonObject.class);
-			return jsonObject;
+			return WebServer.GSON.fromJson(new FileReader(launcherMetaFile), JsonObject.class);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 			return null;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Legacy Fabric/Quilt
+ * Copyright (c) 2021-2022 Legacy Fabric
  * Copyright (c) 2019 FabricMC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,6 +20,8 @@ package net.fabricmc.meta.data;
 import net.fabricmc.meta.utils.MinecraftLauncherMeta;
 import net.fabricmc.meta.utils.PomParser;
 import net.fabricmc.meta.web.models.*;
+import org.slf4j.Logger;
+import org.slf4j.impl.SimpleLoggerFactory;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
@@ -30,7 +32,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class VersionDatabase {
-	public static final String MAVEN_URL = "https://maven.legacyfabric.net/";
+	public static final String MAVEN_URL = "https://repo.legacyfabric.net/repository/legacyfabric/";
 	public static final String UPSTREAM_MAVEN_URL = "https://maven.fabricmc.net/";
 
 	public static final PomParser MAPPINGS_PARSER = new PomParser(MAVEN_URL + "net/legacyfabric/yarn/maven-metadata.xml");
@@ -44,6 +46,10 @@ public class VersionDatabase {
 	private List<MavenBuildVersion> loader;
 	public List<MavenUrlVersion> installer;
 	public MinecraftLauncherMeta launcherMeta;
+
+	private final ArrayList<String> incorrectVersions = new ArrayList<>();
+
+	private static final Logger LOGGER = new SimpleLoggerFactory().getLogger(VersionDatabase.class.getName());
 
 	private VersionDatabase() {
 	}
@@ -63,7 +69,7 @@ public class VersionDatabase {
 		});
 		database.installer = INSTALLER_PARSER.getMeta(MavenUrlVersion::new, "net.legacyfabric:fabric-installer:");
 		database.loadMcData();
-		System.out.println("DB update took " + (System.currentTimeMillis() - start) + "ms");
+		LOGGER.info("DB update took " + (System.currentTimeMillis() - start) + "ms");
 		return database;
 	}
 
@@ -81,7 +87,11 @@ public class VersionDatabase {
 		// Remove entries that do not match a valid mc version.
 		intermediary.removeIf(o -> {
 			if (launcherMeta.getVersions().stream().noneMatch(version -> version.getId().equals(o.getVersion()))) {
-				System.out.println("Removing " + o.getVersion() + " as it is not match an mc version");
+				// only print unmatched versions once so that it doesn't spam the console with "Removing ..." messages
+				if (!this.incorrectVersions.contains(o.getVersion())) {
+					LOGGER.warn("Removing " + o.getVersion() + " as it doesn't have a valid intermediary match");
+					this.incorrectVersions.add(o.getVersion());
+				}
 				return true;
 			}
 			return false;
