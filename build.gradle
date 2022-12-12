@@ -79,12 +79,12 @@ publishing {
 		}
 	}
 	repositories {
-		if (ENV.MAVEN_PUBLISH_TOKEN) {
+		if (ENV.MAVEN_PUBLISH_CREDENTIALS) {
 			maven {
 				url "https://maven.legacyfabric.net/"
 				credentials {
-					username 'BobTheBuilder'
-					password ENV.MAVEN_PUBLISH_TOKEN
+					username ENV.MAVEN_PUBLISH_CREDENTIALS.split(":")[0]
+					password ENV.MAVEN_PUBLISH_CREDENTIALS.split(":")[1]
 				}
 				authentication {
 					basic(BasicAuthentication)
