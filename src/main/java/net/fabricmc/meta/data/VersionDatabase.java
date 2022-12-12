@@ -19,6 +19,8 @@ package net.fabricmc.meta.data;
 import net.fabricmc.meta.utils.MinecraftLauncherMeta;
 import net.fabricmc.meta.utils.PomParser;
 import net.fabricmc.meta.web.models.*;
+import org.slf4j.Logger;
+import org.slf4j.impl.SimpleLoggerFactory;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
@@ -43,6 +45,10 @@ public class VersionDatabase {
 	private List<MavenBuildVersion> loader;
 	public List<MavenUrlVersion> installer;
 
+	private static final ArrayList<String> incorrectVersions = new ArrayList<>();
+
+	private static final Logger LOGGER = new SimpleLoggerFactory().getLogger(VersionDatabase.class.getName());
+
 	private VersionDatabase() {
 	}
 
@@ -61,7 +67,7 @@ public class VersionDatabase {
 		});
 		database.installer = INSTALLER_PARSER.getMeta(MavenUrlVersion::new, "net.fabricmc:fabric-installer:");
 		database.loadMcData();
-		System.out.println("DB update took " + (System.currentTimeMillis() - start) + "ms");
+		LOGGER.info("DB update took " + (System.currentTimeMillis() - start) + "ms");
 		return database;
 	}
 
@@ -79,7 +85,11 @@ public class VersionDatabase {
 		// Remove entries that do not match a valid mc version.
 		intermediary.removeIf(o -> {
 			if (launcherMeta.getVersions().stream().noneMatch(version -> version.getId().equals(o.getVersion()))) {
-				System.out.println("Removing " + o.getVersion() + " as it is not match an mc version");
+				// only print unmatched versions once so that it doesn't spam the console with "Removing ..." messages
+				if (incorrectVersions.stream().noneMatch(o.getVersion()::equals)) {
+					LOGGER.warn("Removing " + o.getVersion() + " as it doesn't have a valid intermediary match");
+					incorrectVersions.add(o.getVersion());
+				}
 				return true;
 			}
 			return false;
