@@ -80,7 +80,7 @@ publishing {
 			maven {
 				url "https://maven.legacyfabric.net/"
 				credentials {
-					username 'legacyfabric-ci'
+					username 'BobTheBuilder'
 					password ENV.MAVEN_PUBLISH_TOKEN
 				}
 				authentication {
