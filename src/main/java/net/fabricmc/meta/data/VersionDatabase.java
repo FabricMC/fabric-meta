@@ -87,7 +87,7 @@ public class VersionDatabase {
 			if (launcherMeta.getVersions().stream().noneMatch(version -> version.getId().equals(o.getVersion()))) {
 				// only print unmatched versions once so that it doesn't spam the console with "Removing ..." messages
 				if (incorrectVersions.stream().noneMatch(o.getVersion()::equals)) {
-					LOGGER.warn("Removing " + o.getVersion() + " as it doesn't have a valid intermediary match");
+					LOGGER.warn("Removing " + o.getVersion() + " as it doesn't match a valid mc version");
 					incorrectVersions.add(o.getVersion());
 				}
 				return true;
