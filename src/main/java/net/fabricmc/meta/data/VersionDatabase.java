@@ -19,6 +19,8 @@ package net.fabricmc.meta.data;
 import net.fabricmc.meta.utils.MinecraftLauncherMeta;
 import net.fabricmc.meta.utils.PomParser;
 import net.fabricmc.meta.web.models.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
@@ -36,6 +38,9 @@ public class VersionDatabase {
 	public static final PomParser INTERMEDIARY_PARSER = new PomParser(MAVEN_URL + "net/fabricmc/intermediary/maven-metadata.xml");
 	public static final PomParser LOADER_PARSER = new PomParser(MAVEN_URL + "net/fabricmc/fabric-loader/maven-metadata.xml");
 	public static final PomParser INSTALLER_PARSER = new PomParser(MAVEN_URL + "net/fabricmc/fabric-installer/maven-metadata.xml");
+
+	private static final ArrayList<String> incorrectVersions = new ArrayList<>();
+	private static final Logger LOGGER = LoggerFactory.getLogger(VersionDatabase.class);
 
 	public List<BaseVersion> game;
 	public List<MavenBuildGameVersion> mappings;
@@ -61,7 +66,7 @@ public class VersionDatabase {
 		});
 		database.installer = INSTALLER_PARSER.getMeta(MavenUrlVersion::new, "net.fabricmc:fabric-installer:");
 		database.loadMcData();
-		System.out.println("DB update took " + (System.currentTimeMillis() - start) + "ms");
+		LOGGER.info("DB update took {} ms", (System.currentTimeMillis() - start));
 		return database;
 	}
 
@@ -79,7 +84,11 @@ public class VersionDatabase {
 		// Remove entries that do not match a valid mc version.
 		intermediary.removeIf(o -> {
 			if (launcherMeta.getVersions().stream().noneMatch(version -> version.getId().equals(o.getVersion()))) {
-				System.out.println("Removing " + o.getVersion() + " as it is not match an mc version");
+				// only print unmatched versions once so that it doesn't spam the console with "Removing ..." messages
+				if (incorrectVersions.stream().noneMatch(o.getVersion()::equals)) {
+					LOGGER.warn("Removing {} as it doesn't match a valid mc version", o.getVersion());
+					incorrectVersions.add(o.getVersion());
+				}
 				return true;
 			}
 			return false;
