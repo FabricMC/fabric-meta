@@ -16,17 +16,19 @@
 
 package net.fabricmc.meta.utils;
 
+import java.io.IOException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.apache.commons.io.IOUtils;
 
-import java.io.IOException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-
 public class MinecraftLauncherMeta {
-
 	public static final Gson GSON = new GsonBuilder().create();
 
 	List<Version> versions;
@@ -45,7 +47,7 @@ public class MinecraftLauncherMeta {
 	}
 
 	public static MinecraftLauncherMeta getExperimentalMeta() throws IOException {
-		String url = "https://maven.fabricmc.net/net/minecraft/experimental_versions.json";
+		String url = Reference.LOCAL_FABRIC_MAVEN_URL+"net/minecraft/experimental_versions.json";
 		String json = IOUtils.toString(new URL(url), StandardCharsets.UTF_8);
 		return GSON.fromJson(json, MinecraftLauncherMeta.class);
 	}
