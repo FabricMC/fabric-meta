@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-package net.fabricmc.meta.web.models;
+package net.fabricmc.meta.utils;
 
-import net.fabricmc.meta.utils.Reference;
+import net.fabricmc.meta.FabricMeta;
 
-public class MavenUrlVersion extends MavenVersion {
-	public final String url;
+public final class Reference {
+	/**
+	 * Fabric maven url to expose to the user.
+	 *
+	 * <p>This shouldn't be directly accessed by this meta server instance!
+	 */
+	public static final String FABRIC_MAVEN_URL = "https://maven.fabricmc.net/";
 
-	public MavenUrlVersion(String maven) {
-		super(maven);
-		String[] split = maven.split(":");
-		this.url = String.format("%s%s/%s/%s/%s-%s.jar", Reference.FABRIC_MAVEN_URL,
-				split[0].replace('.', '/'),
-				split[1],
-				split[2],
-				split[1],
-				split[2]
-				);
-	}
+	/**
+	 * Fabric maven url to access from this meta server instance.
+	 *
+	 * <p>This is not to be included in any output data!
+	 */
+	public static final String LOCAL_FABRIC_MAVEN_URL = FabricMeta.getConfig().getOrDefault("localFabricMavenUrl", FABRIC_MAVEN_URL);
 }

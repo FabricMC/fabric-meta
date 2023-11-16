@@ -35,7 +35,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.apache.commons.io.IOUtils;
 
-import net.fabricmc.meta.utils.LoaderMeta;
+import net.fabricmc.meta.utils.Reference;
 import net.fabricmc.meta.web.models.LoaderInfoV2;
 
 public class ProfileHandler {
@@ -113,8 +113,8 @@ public class ProfileHandler {
 		JsonObject librariesObject = launcherMeta.get("libraries").getAsJsonObject();
 		// Build the libraries array with the existing libs + loader and intermediary
 		JsonArray libraries = (JsonArray) librariesObject.get("common");
-		libraries.add(getLibrary(info.getIntermediary().getMaven(), LoaderMeta.MAVEN_URL));
-		libraries.add(getLibrary(info.getLoader().getMaven(), LoaderMeta.MAVEN_URL));
+		libraries.add(formatLibrary(info.getIntermediary().getMaven(), Reference.FABRIC_MAVEN_URL));
+		libraries.add(formatLibrary(info.getLoader().getMaven(), Reference.FABRIC_MAVEN_URL));
 
 		if (librariesObject.has(side)) {
 			libraries.addAll(librariesObject.get(side).getAsJsonArray());
@@ -159,7 +159,7 @@ public class ProfileHandler {
 		return profile;
 	}
 
-	private static JsonObject getLibrary(String mavenPath, String url) {
+	private static JsonObject formatLibrary(String mavenPath, String url) {
 		JsonObject jsonObject = new JsonObject();
 		jsonObject.addProperty("name", mavenPath);
 		jsonObject.addProperty("url", url);
