@@ -19,8 +19,6 @@ package net.fabricmc.meta;
 import net.fabricmc.meta.data.VersionDatabase;
 import net.fabricmc.meta.web.WebServer;
 
-import javax.xml.stream.XMLStreamException;
-import java.io.IOException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -42,11 +40,11 @@ public class FabricMeta {
 	private static void update(){
 		try {
 			database = VersionDatabase.generate();
-		} catch (IOException | XMLStreamException e) {
-			if(database == null){
-				throw new RuntimeException(e);
+		} catch (Throwable t) {
+			if (database == null){
+				throw new RuntimeException(t);
 			} else {
-				e.printStackTrace();
+				t.printStackTrace();
 			}
 		}
 	}
