@@ -17,6 +17,8 @@
 package net.fabricmc.meta;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -40,6 +42,7 @@ public class FabricMeta {
 	private static final Logger LOGGER = LoggerFactory.getLogger(VersionDatabase.class);
 	private static final Map<String, String> config = new HashMap<>();
 	private static boolean configInitialized;
+	private static URL heartbeatUrl; // URL pinged with every successful update()
 
 	public static void main(String[] args) {
 		Path configFile = Paths.get("config.json");
@@ -53,6 +56,12 @@ public class FabricMeta {
 				}
 
 				reader.endObject();
+
+				String heartbeatUrlString = config.get("heartbeatUrl");
+
+				if (heartbeatUrlString != null) {
+					heartbeatUrl = new URL(heartbeatUrlString);
+				}
 			} catch (IOException | IllegalStateException e) {
 				throw new RuntimeException("malformed config in "+configFile, e);
 			}
@@ -73,12 +82,32 @@ public class FabricMeta {
 	private static void update(){
 		try {
 			database = VersionDatabase.generate();
+			updateHeartbeat();
 		} catch (Throwable t) {
 			if (database == null){
 				throw new RuntimeException(t);
 			} else {
-				t.printStackTrace();
+				LOGGER.warn("update failed", t);
 			}
+		}
+	}
+
+	private static void updateHeartbeat() {
+		if (heartbeatUrl == null) return;
+
+		try {
+			HttpURLConnection conn = (HttpURLConnection) heartbeatUrl.openConnection();
+			conn.setRequestMethod("HEAD");
+			conn.setConnectTimeout(500);
+			conn.setReadTimeout(500);
+
+			int status = conn.getResponseCode();
+
+			if (status != HttpURLConnection.HTTP_OK) {
+				LOGGER.warn("heartbeat request failed with status {}", status);
+			}
+		} catch (IOException e) {
+			LOGGER.warn("heartbeat request failed: {}", e.toString());
 		}
 	}
 
