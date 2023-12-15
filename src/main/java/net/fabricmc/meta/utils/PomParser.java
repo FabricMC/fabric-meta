@@ -36,7 +36,6 @@ import javax.xml.stream.XMLStreamReader;
 import net.fabricmc.meta.web.models.BaseVersion;
 
 public class PomParser {
-
 	public String path;
 
 	public String latestVersion = "";
@@ -81,7 +80,7 @@ public class PomParser {
 	public <T extends BaseVersion> List<T> getMeta(Function<String, T> function, String prefix, StableVersionIdentifier stableIdentifier) throws IOException, XMLStreamException {
 		try {
 			load();
-		} catch (IOException e){
+		} catch (IOException e) {
 			throw new IOException("Failed to load " + path, e);
 		}
 
@@ -93,16 +92,16 @@ public class PomParser {
 		Path unstableVersionsPath = Paths.get(prefix
 				.replace(":", "_")
 				.replace(".", "_")
-				.replaceFirst(".$","")
+				.replaceFirst(".$", "")
 				+ ".txt");
 
 		if (Files.exists(unstableVersionsPath)) {
 			// Read a file containing a new line separated list of versions that should not be marked as stable.
 			List<String> unstableVersions = Files.readAllLines(unstableVersionsPath);
 			list.stream()
-			.filter(v -> !unstableVersions.contains(v.getVersion()))
-			.findFirst()
-			.ifPresent(v -> v.setStable(true));
+					.filter(v -> !unstableVersions.contains(v.getVersion()))
+					.findFirst()
+					.ifPresent(v -> v.setStable(true));
 		} else {
 			stableIdentifier.process(list);
 		}
@@ -113,5 +112,4 @@ public class PomParser {
 	public interface StableVersionIdentifier {
 		void process(List<? extends BaseVersion> versions);
 	}
-
 }

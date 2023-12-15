@@ -31,14 +31,15 @@ import net.fabricmc.meta.web.models.LoaderInfoBase;
 public class LoaderMeta {
 	public static final File BASE_DIR = new File("metadata");
 
-	public static JsonObject getMeta(LoaderInfoBase loaderInfo){
+	public static JsonObject getMeta(LoaderInfoBase loaderInfo) {
 		String loaderMaven = loaderInfo.getLoader().getMaven();
 		String[] split = loaderMaven.split(":");
-		String path = String.format("%s/%s/%s", split[0].replaceAll("\\.","/"), split[1], split[2]);
+		String path = String.format("%s/%s/%s", split[0].replaceAll("\\.", "/"), split[1], split[2]);
 		String filename = String.format("%s-%s.json", split[1], split[2]);
 
 		File launcherMetaFile = new File(BASE_DIR, path + "/" + filename);
-		if(!launcherMetaFile.exists()){
+
+		if (!launcherMetaFile.exists()) {
 			try {
 				String url = String.format("%s%s/%s", Reference.LOCAL_FABRIC_MAVEN_URL, path, filename);
 				System.out.println("Downloading " + url);
@@ -57,5 +58,4 @@ public class LoaderMeta {
 			return null;
 		}
 	}
-
 }

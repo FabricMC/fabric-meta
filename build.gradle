@@ -1,8 +1,9 @@
 plugins {
     id 'java'
 	id 'maven-publish'
-	id 'org.cadixdev.licenser' version '0.6.1'
+	id 'checkstyle'
 	id 'eclipse'
+	id "com.diffplug.spotless" version "6.23.3"
 }
 
 group 'net.fabricmc'
@@ -11,10 +12,9 @@ version '1.5.3'
 def ENV = System.getenv()
 version = version + (ENV.GITHUB_ACTIONS ? "" : "+local")
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
-
-archivesBaseName = "fabric-meta"
+base {
+	archivesName = "fabric-meta"
+}
 
 repositories {
     mavenCentral()
@@ -25,6 +25,11 @@ dependencies {
 	implementation group: 'io.javalin', name: 'javalin', version: '3.13.11'
 	implementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.32'
 	implementation group: 'commons-io', name: 'commons-io', version: '2.8.0'
+}
+
+java {
+	sourceCompatibility = 1.8
+	targetCompatibility = 1.8
 }
 
 jar {
@@ -43,16 +48,28 @@ tasks.withType(JavaCompile).configureEach {
 	}
 }
 
-license {
-	header file('HEADER')
-	include '**/*.java'
+spotless {
+	lineEndings = com.diffplug.spotless.LineEnding.UNIX
+
+	java {
+		licenseHeaderFile(rootProject.file("HEADER"))
+		removeUnusedImports()
+		importOrder('java', 'javax', '', 'net.fabricmc')
+		indentWithTabs()
+		trimTrailingWhitespace()
+	}
+}
+
+checkstyle {
+	configFile = file('checkstyle.xml')
+	toolVersion = "10.12.1"
 }
 
 publishing {
 	publications {
 		maven(MavenPublication) {
 			groupId project.group
-			artifactId project.archivesBaseName
+			artifactId project.base.archivesName.get()
 			version project.version
 
 			artifact jar

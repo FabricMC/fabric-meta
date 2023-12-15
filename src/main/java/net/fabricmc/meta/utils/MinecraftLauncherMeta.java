@@ -67,12 +67,13 @@ public class MinecraftLauncherMeta {
 		return versions.stream().anyMatch(version -> version.id.equals(id) && version.type.equals("release"));
 	}
 
-	public int getIndex(String version){
+	public int getIndex(String version) {
 		for (int i = 0; i < versions.size(); i++) {
-			if(versions.get(i).id.equals(version)){
+			if (versions.get(i).id.equals(version)) {
 				return i;
 			}
 		}
+
 		return 0;
 	}
 
@@ -81,7 +82,6 @@ public class MinecraftLauncherMeta {
 	}
 
 	public static class Version {
-
 		String id;
 		String type;
 		String url;
@@ -108,5 +108,4 @@ public class MinecraftLauncherMeta {
 			return releaseTime;
 		}
 	}
-
 }

@@ -79,6 +79,7 @@ public class VersionDatabase {
 		if (mappings == null || intermediary == null) {
 			throw new RuntimeException("Mappings are null");
 		}
+
 		MinecraftLauncherMeta launcherMeta = MinecraftLauncherMeta.getAllMeta();
 
 		//Sorts in the order of minecraft release dates
@@ -94,12 +95,15 @@ public class VersionDatabase {
 					LOGGER.warn("Removing {} as it doesn't match a valid mc version", o.getVersion());
 					incorrectVersions.add(o.getVersion());
 				}
+
 				return true;
 			}
+
 			return false;
 		});
 
 		List<String> minecraftVersions = new ArrayList<>();
+
 		for (MavenVersion gameVersion : intermediary) {
 			if (!minecraftVersions.contains(gameVersion.getVersion())) {
 				minecraftVersions.add(gameVersion.getVersion());

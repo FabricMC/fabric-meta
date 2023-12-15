@@ -79,12 +79,12 @@ public class FabricMeta {
 		WebServer.start();
 	}
 
-	private static void update(){
+	private static void update() {
 		try {
 			database = VersionDatabase.generate();
 			updateHeartbeat();
 		} catch (Throwable t) {
-			if (database == null){
+			if (database == null) {
 				throw new RuntimeException(t);
 			} else {
 				LOGGER.warn("update failed", t);

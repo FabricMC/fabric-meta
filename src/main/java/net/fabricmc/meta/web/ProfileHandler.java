@@ -39,7 +39,6 @@ import net.fabricmc.meta.utils.Reference;
 import net.fabricmc.meta.web.models.LoaderInfoV2;
 
 public class ProfileHandler {
-
 	private static final Executor EXECUTOR = Executors.newFixedThreadPool(2);
 	private static final DateFormat ISO_8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
 
@@ -75,13 +74,13 @@ public class ProfileHandler {
 				.thenApply(inputStream -> packageZip(info, inputStream));
 	}
 
-	private static InputStream packageZip(LoaderInfoV2 info, InputStream profileJson)  {
+	private static InputStream packageZip(LoaderInfoV2 info, InputStream profileJson) {
 		String profileName = String.format("fabric-loader-%s-%s", info.getLoader().getVersion(), info.getIntermediary().getVersion());
 
 		try {
 			ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
-			try (ZipOutputStream zipStream = new ZipOutputStream(byteArrayOutputStream))  {
+			try (ZipOutputStream zipStream = new ZipOutputStream(byteArrayOutputStream)) {
 				//Write the profile json
 				zipStream.putNextEntry(new ZipEntry(profileName + "/" + profileName + ".json"));
 				IOUtils.copy(profileJson, zipStream);

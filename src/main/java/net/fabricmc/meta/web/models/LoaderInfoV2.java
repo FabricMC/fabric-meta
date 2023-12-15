@@ -17,11 +17,11 @@
 package net.fabricmc.meta.web.models;
 
 import com.google.gson.JsonObject;
-import net.fabricmc.meta.utils.LoaderMeta;
 import org.jetbrains.annotations.Nullable;
 
-public class LoaderInfoV2 implements LoaderInfoBase {
+import net.fabricmc.meta.utils.LoaderMeta;
 
+public class LoaderInfoV2 implements LoaderInfoBase {
 	MavenBuildVersion loader;
 	MavenVersion intermediary;
 

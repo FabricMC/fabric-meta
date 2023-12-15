@@ -19,7 +19,6 @@ package net.fabricmc.meta.web.models;
 import java.util.function.Predicate;
 
 public class BaseVersion implements Predicate<String> {
-
 	String version;
 	boolean stable = false;
 

@@ -16,6 +16,9 @@
 
 package net.fabricmc.meta.web;
 
+import java.util.function.Function;
+import java.util.function.Supplier;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.javalin.Javalin;
@@ -23,11 +26,7 @@ import io.javalin.core.util.Header;
 import io.javalin.core.util.RouteOverviewPlugin;
 import io.javalin.http.Context;
 
-import java.util.function.Function;
-import java.util.function.Supplier;
-
 public class WebServer {
-
 	public static Javalin javalin;
 	public static Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
@@ -61,8 +60,8 @@ public class WebServer {
 			object = new Object();
 			ctx.status(400);
 		}
+
 		String response = GSON.toJson(object);
 		ctx.contentType("application/json").header(Header.CACHE_CONTROL, "public, max-age=60").result(response);
 	}
-
 }

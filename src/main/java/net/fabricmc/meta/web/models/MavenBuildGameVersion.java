@@ -19,13 +19,11 @@ package net.fabricmc.meta.web.models;
 import net.fabricmc.meta.utils.YarnVersionParser;
 
 public class MavenBuildGameVersion extends MavenBuildVersion {
-
 	String gameVersion;
 
 	public MavenBuildGameVersion(String maven) {
 		super(maven);
 		gameVersion = new YarnVersionParser(maven.split(":")[2]).getMinecraftVersion();
-
 	}
 
 	public String getGameVersion() {

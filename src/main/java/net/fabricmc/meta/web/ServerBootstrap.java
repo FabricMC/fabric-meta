@@ -193,6 +193,7 @@ public class ServerBootstrap {
 		if (ctx.pathParamMap().containsValue("stable")) {
 			return 120;
 		}
+
 		return 86400;
 	}
 }
