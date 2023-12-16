@@ -38,6 +38,8 @@ import net.fabricmc.meta.utils.Reference;
 import net.fabricmc.meta.web.WebServer;
 
 public class FabricMeta {
+	// TODO remove all this static access
+	@Deprecated()
 	public static volatile VersionDatabase database;
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(VersionDatabase.class);

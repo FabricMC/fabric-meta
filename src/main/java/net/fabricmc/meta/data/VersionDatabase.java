@@ -63,10 +63,8 @@ public class VersionDatabase {
 		database.intermediary = INTERMEDIARY_PARSER.getMeta(MavenVersion::new, "net.fabricmc:intermediary:");
 		database.loader = LOADER_PARSER.getMeta(MavenBuildVersion::new, "net.fabricmc:fabric-loader:", list -> {
 			for (BaseVersion version : list) {
-				if (isPublicLoaderVersion(version)) {
-					version.setStable(true);
-					break;
-				}
+				version.setStable(true);
+				break;
 			}
 		});
 		database.installer = INSTALLER_PARSER.getMeta(MavenUrlVersion::new, "net.fabricmc:fabric-installer:");
@@ -114,14 +112,6 @@ public class VersionDatabase {
 	}
 
 	public List<MavenBuildVersion> getLoader() {
-		return loader.stream().filter(VersionDatabase::isPublicLoaderVersion).collect(Collectors.toList());
-	}
-
-	private static boolean isPublicLoaderVersion(BaseVersion version) {
-		return true;
-	}
-
-	public List<MavenBuildVersion> getAllLoader() {
 		return Collections.unmodifiableList(loader);
 	}
 }

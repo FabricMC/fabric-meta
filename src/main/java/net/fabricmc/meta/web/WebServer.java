@@ -16,6 +16,8 @@
 
 package net.fabricmc.meta.web;
 
+import static io.javalin.apibuilder.ApiBuilder.path;
+
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -25,6 +27,9 @@ import io.javalin.Javalin;
 import io.javalin.http.Context;
 import io.javalin.http.Header;
 import io.javalin.plugin.bundled.CorsPluginConfig;
+
+import net.fabricmc.meta.FabricMeta;
+import net.fabricmc.meta.web.v1.EndpointsV1;
 
 public class WebServer {
 	public static Javalin javalin;
@@ -41,7 +46,12 @@ public class WebServer {
 			config.plugins.enableCors(cors -> cors.add(CorsPluginConfig::anyHost));
 		});
 
-		EndpointsV1.setup();
+		EndpointsV1 endpointsV1 = new EndpointsV1(() -> FabricMeta.database);
+
+		javalin.routes(() -> {
+			path("v1", endpointsV1.routes());
+		});
+
 		EndpointsV2.setup();
 
 		return javalin;

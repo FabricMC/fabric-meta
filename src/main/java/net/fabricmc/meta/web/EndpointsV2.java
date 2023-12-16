@@ -98,7 +98,7 @@ public class EndpointsV2 {
 		String gameVersion = context.pathParam("game_version");
 		String loaderVersion = context.pathParam("loader_version");
 
-		MavenBuildVersion loader = FabricMeta.database.getAllLoader().stream()
+		MavenBuildVersion loader = FabricMeta.database.getLoader().stream()
 				.filter(mavenBuildVersion -> loaderVersion.equals(mavenBuildVersion.getVersion()))
 				.findFirst().orElse(null);
 
