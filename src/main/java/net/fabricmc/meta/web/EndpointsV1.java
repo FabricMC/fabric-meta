@@ -35,14 +35,14 @@ public class EndpointsV1 {
 		WebServer.jsonGet("/v1/versions", () -> FabricMeta.database);
 
 		WebServer.jsonGet("/v1/versions/game", () -> FabricMeta.database.game);
-		WebServer.jsonGet("/v1/versions/game/:game_version", context -> filter(context, FabricMeta.database.game));
+		WebServer.jsonGet("/v1/versions/game/{game_version}", context -> filter(context, FabricMeta.database.game));
 
 		WebServer.jsonGet("/v1/versions/mappings", () -> FabricMeta.database.mappings);
-		WebServer.jsonGet("/v1/versions/mappings/:game_version", context -> filter(context, FabricMeta.database.mappings));
+		WebServer.jsonGet("/v1/versions/mappings/{game_version}", context -> filter(context, FabricMeta.database.mappings));
 
 		WebServer.jsonGet("/v1/versions/loader", () -> FabricMeta.database.getLoader());
-		WebServer.jsonGet("/v1/versions/loader/:game_version", EndpointsV1::getLoaderInfoAll);
-		WebServer.jsonGet("/v1/versions/loader/:game_version/:loader_version", EndpointsV1::getLoaderInfo);
+		WebServer.jsonGet("/v1/versions/loader/{game_version}", EndpointsV1::getLoaderInfoAll);
+		WebServer.jsonGet("/v1/versions/loader/{game_version}/{loader_version}", EndpointsV1::getLoaderInfo);
 	}
 
 	private static <T extends Predicate<String>> List filter(Context context, List<T> versionList) {

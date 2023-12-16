@@ -22,23 +22,34 @@ import java.util.function.Supplier;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.javalin.Javalin;
-import io.javalin.core.util.Header;
-import io.javalin.core.util.RouteOverviewPlugin;
 import io.javalin.http.Context;
+import io.javalin.http.Header;
+import io.javalin.plugin.bundled.CorsPluginConfig;
 
 public class WebServer {
 	public static Javalin javalin;
 	public static Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-	public static void start() {
+	public static Javalin create() {
+		if (javalin != null) {
+			javalin.stop();
+		}
+
 		javalin = Javalin.create(config -> {
-			config.registerPlugin(new RouteOverviewPlugin("/"));
+			config.plugins.enableRouteOverview("/");
 			config.showJavalinBanner = false;
-			config.enableCorsForAllOrigins();
-		}).start(5555);
+			config.plugins.enableCors(cors -> cors.add(CorsPluginConfig::anyHost));
+		});
 
 		EndpointsV1.setup();
 		EndpointsV2.setup();
+
+		return javalin;
+	}
+
+	public static void start() {
+		assert javalin == null;
+		create().start(5555);
 	}
 
 	public static <T> void jsonGet(String route, Supplier<T> supplier) {
