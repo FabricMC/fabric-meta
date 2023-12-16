@@ -33,10 +33,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-import io.javalin.core.util.Header;
 import io.javalin.http.BadRequestResponse;
 import io.javalin.http.Context;
 import io.javalin.http.Handler;
+import io.javalin.http.Header;
 import io.javalin.http.InternalServerErrorResponse;
 import org.apache.commons.io.FileUtils;
 
@@ -50,7 +50,7 @@ public class ServerBootstrap {
 
 	public static void setup() {
 		// http://localhost:5555/v2/versions/loader/1.17.1/0.12.0/0.8.0/server/jar
-		WebServer.javalin.get("/v2/versions/loader/:game_version/:loader_version/:installer_version/server/jar", boostrapHandler());
+		WebServer.javalin.get("/v2/versions/loader/{game_version}/{loader_version}/{installer_version}/server/jar", boostrapHandler());
 	}
 
 	private static Handler boostrapHandler() {
@@ -74,7 +74,7 @@ public class ServerBootstrap {
 			ctx.header(Header.CACHE_CONTROL, cacheControl);
 			ctx.contentType("application/java-archive");
 
-			ctx.result(getResultStream(installerVersion, gameVersion, loaderVersion));
+			ctx.future(() -> getResultStream(installerVersion, gameVersion, loaderVersion));
 		};
 	}
 

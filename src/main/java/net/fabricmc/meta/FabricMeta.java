@@ -29,6 +29,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import com.google.gson.stream.JsonReader;
+import org.jetbrains.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -90,6 +91,16 @@ public class FabricMeta {
 				LOGGER.warn("update failed", t);
 			}
 		}
+	}
+
+	@VisibleForTesting
+	public static void setupForTesting() {
+		if (configInitialized) {
+			return;
+		}
+
+		configInitialized = true;
+		update();
 	}
 
 	private static void updateHeartbeat() {

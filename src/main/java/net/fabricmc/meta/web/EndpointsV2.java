@@ -26,8 +26,8 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import io.javalin.core.util.Header;
 import io.javalin.http.Context;
+import io.javalin.http.Header;
 
 import net.fabricmc.meta.FabricMeta;
 import net.fabricmc.meta.web.models.BaseVersion;
@@ -46,14 +46,14 @@ public class EndpointsV2 {
 		WebServer.jsonGet("/v2/versions/game/intermediary", () -> compatibleGameVersions(FabricMeta.database.intermediary, BaseVersion::getVersion, v -> new BaseVersion(v.getVersion(), v.isStable())));
 
 		WebServer.jsonGet("/v2/versions/yarn", context -> withLimitSkip(context, FabricMeta.database.mappings));
-		WebServer.jsonGet("/v2/versions/yarn/:game_version", context -> withLimitSkip(context, filter(context, FabricMeta.database.mappings)));
+		WebServer.jsonGet("/v2/versions/yarn/{game_version}", context -> withLimitSkip(context, filter(context, FabricMeta.database.mappings)));
 
 		WebServer.jsonGet("/v2/versions/intermediary", () -> FabricMeta.database.intermediary);
-		WebServer.jsonGet("/v2/versions/intermediary/:game_version", context -> filter(context, FabricMeta.database.intermediary));
+		WebServer.jsonGet("/v2/versions/intermediary/{game_version}", context -> filter(context, FabricMeta.database.intermediary));
 
 		WebServer.jsonGet("/v2/versions/loader", context -> withLimitSkip(context, FabricMeta.database.getLoader()));
-		WebServer.jsonGet("/v2/versions/loader/:game_version", context -> withLimitSkip(context, EndpointsV2.getLoaderInfoAll(context)));
-		WebServer.jsonGet("/v2/versions/loader/:game_version/:loader_version", EndpointsV2::getLoaderInfo);
+		WebServer.jsonGet("/v2/versions/loader/{game_version}", context -> withLimitSkip(context, EndpointsV2.getLoaderInfoAll(context)));
+		WebServer.jsonGet("/v2/versions/loader/{game_version}/{loader_version}", EndpointsV2::getLoaderInfo);
 
 		WebServer.jsonGet("/v2/versions/installer", context -> withLimitSkip(context, FabricMeta.database.installer));
 
@@ -66,8 +66,8 @@ public class EndpointsV2 {
 			return Collections.emptyList();
 		}
 
-		int limit = context.queryParam("limit", Integer.class, "0").check(i -> i >= 0).get();
-		int skip = context.queryParam("skip", Integer.class, "0").check(i -> i >= 0).get();
+		int limit = context.queryParamAsClass("limit", Integer.class).check(i -> i >= 0, "limit must be larger than one").getOrDefault(0);
+		int skip = context.queryParamAsClass("skip", Integer.class).check(i -> i >= 0, "skip must be larger than one").getOrDefault(0);
 
 		Stream<T> listStream = list.stream().skip(skip);
 
@@ -157,15 +157,13 @@ public class EndpointsV2 {
 	}
 
 	public static void fileDownload(String path, String ext, Function<LoaderInfoV2, String> fileNameFunction, Function<LoaderInfoV2, CompletableFuture<InputStream>> streamSupplier) {
-		WebServer.javalin.get("/v2/versions/loader/:game_version/:loader_version/" + path + "/" + ext, ctx -> {
+		WebServer.javalin.get("/v2/versions/loader/{game_version}/{loader_version}/" + path + "/" + ext, ctx -> {
 			Object obj = getLoaderInfo(ctx);
 
 			if (obj instanceof String) {
 				ctx.result((String) obj);
 			} else if (obj instanceof LoaderInfoV2) {
 				LoaderInfoV2 versionInfo = (LoaderInfoV2) obj;
-
-				CompletableFuture<InputStream> streamFuture = streamSupplier.apply(versionInfo);
 
 				if (ext.equals("zip")) {
 					//Set the filename to download
@@ -179,7 +177,7 @@ public class EndpointsV2 {
 				//Cache for a day
 				ctx.header(Header.CACHE_CONTROL, "public, max-age=86400");
 
-				ctx.result(streamFuture);
+				ctx.future(() -> streamSupplier.apply(versionInfo));
 			} else {
 				ctx.result("An internal error occurred");
 			}
