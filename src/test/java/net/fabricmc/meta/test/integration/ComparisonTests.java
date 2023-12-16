@@ -94,7 +94,7 @@ public class ComparisonTests {
 	private static String getRemoteEndpoint(String endpoint) throws Exception {
 		try (var httpClient = java.net.http.HttpClient.newHttpClient()) {
 			HttpRequest request = HttpRequest.newBuilder()
-					.uri(URI.create(REMOTE_FABRIC_META_URL + endpoint)) // Replace with your URL
+					.uri(URI.create(REMOTE_FABRIC_META_URL + endpoint))
 					.build();
 			HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 			assertEquals(200, response.statusCode());
