@@ -65,6 +65,8 @@ public class ComparisonTests {
 				"/v2/versions/intermediary",
 				"/v2/versions/intermediary/1.20.4",
 				"/v2/versions/loader",
+				"/v2/versions/loader?limit=5",
+				"/v2/versions/loader?limit=5&skip=5",
 				// Disabled as this forces all the load metadata to be downloaded, timing out the test.
 				//"/v2/versions/loader/1.20.4",
 				"/v2/versions/loader/1.20.4/0.15.2",

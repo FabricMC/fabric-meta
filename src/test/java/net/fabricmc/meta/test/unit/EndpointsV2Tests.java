@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Test;
 import net.fabricmc.meta.FabricMeta;
 import net.fabricmc.meta.web.WebServer;
 
-public class TestEndpointsV2 {
+public class EndpointsV2Tests {
 	@BeforeAll
 	static void beforeAll() {
 		// TODO provide a way to pass in dummy data for constant test results

@@ -74,7 +74,7 @@ public class ServerBootstrap {
 			ctx.header(Header.CACHE_CONTROL, cacheControl);
 			ctx.contentType("application/java-archive");
 
-			ctx.future(() -> getResultStream(installerVersion, gameVersion, loaderVersion));
+			ctx.future(() -> getResultStream(installerVersion, gameVersion, loaderVersion).thenApply(ctx::result));
 		};
 	}
 

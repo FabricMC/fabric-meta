@@ -177,7 +177,7 @@ public class EndpointsV2 {
 				//Cache for a day
 				ctx.header(Header.CACHE_CONTROL, "public, max-age=86400");
 
-				ctx.future(() -> streamSupplier.apply(versionInfo));
+				ctx.future(() -> streamSupplier.apply(versionInfo).thenApply(ctx::result));
 			} else {
 				ctx.result("An internal error occurred");
 			}
