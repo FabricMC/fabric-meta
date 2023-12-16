@@ -14,24 +14,30 @@
  * limitations under the License.
  */
 
-package net.fabricmc.meta.web.models;
+package net.fabricmc.meta.models;
 
-import net.fabricmc.meta.utils.YarnVersionParser;
+public class MavenBuildVersion extends MavenVersion {
+	String separator;
+	int build;
 
-public class MavenBuildGameVersion extends MavenBuildVersion {
-	String gameVersion;
-
-	public MavenBuildGameVersion(String maven) {
+	public MavenBuildVersion(String maven) {
 		super(maven);
-		gameVersion = new YarnVersionParser(maven.split(":")[2]).getMinecraftVersion();
+		String version = maven.split(":")[2];
+
+		if (version.contains("+build.")) {
+			separator = "+build.";
+		} else {
+			separator = ".";
+		}
+
+		build = Integer.parseInt(version.substring(version.lastIndexOf(".") + 1));
 	}
 
-	public String getGameVersion() {
-		return gameVersion;
+	public String getSeparator() {
+		return separator;
 	}
 
-	@Override
-	public boolean test(String s) {
-		return getGameVersion().equals(s);
+	public int getBuild() {
+		return build;
 	}
 }

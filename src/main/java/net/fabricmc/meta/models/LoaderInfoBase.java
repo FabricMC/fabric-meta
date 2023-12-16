@@ -14,21 +14,8 @@
  * limitations under the License.
  */
 
-package net.fabricmc.meta.web.models;
+package net.fabricmc.meta.models;
 
-public class MavenVersion extends BaseVersion {
-	String maven;
-
-	public MavenVersion(String maven, boolean stable) {
-		super(maven.split(":")[2], stable);
-		this.maven = maven;
-	}
-
-	public MavenVersion(String maven) {
-		this(maven, false);
-	}
-
-	public String getMaven() {
-		return maven;
-	}
+public interface LoaderInfoBase {
+	MavenBuildVersion getLoader();
 }

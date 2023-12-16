@@ -28,38 +28,38 @@ import io.javalin.http.Context;
 import io.javalin.http.Header;
 import io.javalin.plugin.bundled.CorsPluginConfig;
 
-import net.fabricmc.meta.FabricMeta;
+import net.fabricmc.meta.data.DataProvider;
 import net.fabricmc.meta.web.v1.EndpointsV1;
+import net.fabricmc.meta.web.v2.EndpointsV2;
 
 public class WebServer {
+	@Deprecated(forRemoval = true)
 	public static Javalin javalin;
-	public static Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-	public static Javalin create() {
-		if (javalin != null) {
-			javalin.stop();
-		}
+	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-		javalin = Javalin.create(config -> {
+	private final DataProvider dataProvider;
+	private final EndpointsV1 endpointsV1;
+
+	public WebServer(DataProvider dataProvider) {
+		this.dataProvider = dataProvider;
+		endpointsV1 = new EndpointsV1(dataProvider);
+	}
+
+	public Javalin createServer() {
+		Javalin javalin = Javalin.create(config -> {
 			config.plugins.enableRouteOverview("/");
 			config.showJavalinBanner = false;
 			config.plugins.enableCors(cors -> cors.add(CorsPluginConfig::anyHost));
-		});
-
-		EndpointsV1 endpointsV1 = new EndpointsV1(() -> FabricMeta.database);
-
-		javalin.routes(() -> {
+		}).routes(() -> {
 			path("v1", endpointsV1.routes());
 		});
 
+		// TODO remove this
+		WebServer.javalin = javalin;
 		EndpointsV2.setup();
 
 		return javalin;
-	}
-
-	public static void start() {
-		assert javalin == null;
-		create().start(5555);
 	}
 
 	public static <T> void jsonGet(String route, Supplier<T> supplier) {

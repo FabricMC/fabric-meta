@@ -22,17 +22,18 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import org.apache.commons.io.FileUtils;
-
-import net.fabricmc.meta.web.WebServer;
-import net.fabricmc.meta.web.models.LoaderInfoBase;
+import org.jetbrains.annotations.Nullable;
 
 public class LoaderMeta {
-	public static final File BASE_DIR = new File("metadata");
+	private static final File BASE_DIR = new File("metadata");
+	private static final Gson GSON = new GsonBuilder().create();
 
-	public static JsonObject getMeta(LoaderInfoBase loaderInfo) {
-		String loaderMaven = loaderInfo.getLoader().getMaven();
+	@Nullable
+	public static JsonObject getMeta(String loaderMaven) {
 		String[] split = loaderMaven.split(":");
 		String path = String.format("%s/%s/%s", split[0].replaceAll("\\.", "/"), split[1], split[2]);
 		String filename = String.format("%s-%s.json", split[1], split[2]);
@@ -51,7 +52,7 @@ public class LoaderMeta {
 		}
 
 		try {
-			JsonObject jsonObject = WebServer.GSON.fromJson(new FileReader(launcherMetaFile), JsonObject.class);
+			JsonObject jsonObject = GSON.fromJson(new FileReader(launcherMetaFile), JsonObject.class);
 			return jsonObject;
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();

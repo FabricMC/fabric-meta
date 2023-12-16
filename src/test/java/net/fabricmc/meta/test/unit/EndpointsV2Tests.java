@@ -24,7 +24,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import net.fabricmc.meta.FabricMeta;
-import net.fabricmc.meta.web.WebServer;
+import net.fabricmc.meta.test.TestUtils;
 
 public class EndpointsV2Tests {
 	@BeforeAll
@@ -35,7 +35,7 @@ public class EndpointsV2Tests {
 
 	@Test
 	void versions() {
-		JavalinTest.test(WebServer.create(), (server, client) -> {
+		JavalinTest.test(TestUtils.createServer(), (server, client) -> {
 			Response response = client.get("/v2/versions");
 			assertEquals(200, response.code());
 			String body = response.body().string();

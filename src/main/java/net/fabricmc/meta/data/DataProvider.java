@@ -16,6 +16,37 @@
 
 package net.fabricmc.meta.data;
 
+import java.util.List;
+
+import com.google.gson.JsonObject;
+
+import net.fabricmc.meta.models.BaseVersion;
+import net.fabricmc.meta.models.MavenBuildGameVersion;
+import net.fabricmc.meta.models.MavenBuildVersion;
+import net.fabricmc.meta.models.MavenVersion;
+import net.fabricmc.meta.utils.LoaderMeta;
+
 public interface DataProvider {
+	@Deprecated // TODO work to remove
 	VersionDatabase getVersionDatabase();
+
+	default List<BaseVersion> getGameVersions() {
+		return getVersionDatabase().game;
+	}
+
+	default List<MavenBuildGameVersion> getMappingVersions() {
+		return getVersionDatabase().mappings;
+	}
+
+	default List<MavenVersion> getIntermediaryVersions() {
+		return getVersionDatabase().intermediary;
+	}
+
+	default List<MavenBuildVersion> getLoaderVersions() {
+		return getVersionDatabase().getLoader();
+	}
+
+	default JsonObject getLoaderInstallerJson(String mavenNotation) {
+		return LoaderMeta.getMeta(mavenNotation);
+	}
 }

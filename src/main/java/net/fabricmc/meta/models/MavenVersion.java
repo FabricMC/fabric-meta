@@ -14,30 +14,21 @@
  * limitations under the License.
  */
 
-package net.fabricmc.meta.web.models;
+package net.fabricmc.meta.models;
 
-public class MavenBuildVersion extends MavenVersion {
-	String separator;
-	int build;
+public class MavenVersion extends BaseVersion {
+	String maven;
 
-	public MavenBuildVersion(String maven) {
-		super(maven);
-		String version = maven.split(":")[2];
-
-		if (version.contains("+build.")) {
-			separator = "+build.";
-		} else {
-			separator = ".";
-		}
-
-		build = Integer.parseInt(version.substring(version.lastIndexOf(".") + 1));
+	public MavenVersion(String maven, boolean stable) {
+		super(maven.split(":")[2], stable);
+		this.maven = maven;
 	}
 
-	public String getSeparator() {
-		return separator;
+	public MavenVersion(String maven) {
+		this(maven, false);
 	}
 
-	public int getBuild() {
-		return build;
+	public String getMaven() {
+		return maven;
 	}
 }
