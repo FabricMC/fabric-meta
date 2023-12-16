@@ -109,8 +109,8 @@ public class FabricMeta {
 		try {
 			HttpURLConnection conn = (HttpURLConnection) heartbeatUrl.openConnection();
 			conn.setRequestMethod("HEAD");
-			conn.setConnectTimeout(500);
-			conn.setReadTimeout(500);
+			conn.setConnectTimeout(2000);
+			conn.setReadTimeout(5000);
 
 			int status = conn.getResponseCode();
 
