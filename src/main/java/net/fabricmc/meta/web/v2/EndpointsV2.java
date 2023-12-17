@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.fabricmc.meta.web;
+package net.fabricmc.meta.web.v2;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -30,11 +30,14 @@ import io.javalin.http.Context;
 import io.javalin.http.Header;
 
 import net.fabricmc.meta.FabricMeta;
-import net.fabricmc.meta.web.models.BaseVersion;
-import net.fabricmc.meta.web.models.LoaderInfoV2;
-import net.fabricmc.meta.web.models.MavenBuildGameVersion;
-import net.fabricmc.meta.web.models.MavenBuildVersion;
-import net.fabricmc.meta.web.models.MavenVersion;
+import net.fabricmc.meta.models.BaseVersion;
+import net.fabricmc.meta.models.LoaderInfoV2;
+import net.fabricmc.meta.models.MavenBuildGameVersion;
+import net.fabricmc.meta.models.MavenBuildVersion;
+import net.fabricmc.meta.models.MavenVersion;
+import net.fabricmc.meta.web.ProfileHandler;
+import net.fabricmc.meta.web.ServerBootstrap;
+import net.fabricmc.meta.web.WebServer;
 
 @SuppressWarnings("Duplicates")
 public class EndpointsV2 {
@@ -98,7 +101,7 @@ public class EndpointsV2 {
 		String gameVersion = context.pathParam("game_version");
 		String loaderVersion = context.pathParam("loader_version");
 
-		MavenBuildVersion loader = FabricMeta.database.getAllLoader().stream()
+		MavenBuildVersion loader = FabricMeta.database.getLoader().stream()
 				.filter(mavenBuildVersion -> loaderVersion.equals(mavenBuildVersion.getVersion()))
 				.findFirst().orElse(null);
 

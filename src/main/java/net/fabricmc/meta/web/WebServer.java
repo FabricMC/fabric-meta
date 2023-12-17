@@ -16,6 +16,10 @@
 
 package net.fabricmc.meta.web;
 
+import static io.javalin.apibuilder.ApiBuilder.after;
+import static io.javalin.apibuilder.ApiBuilder.before;
+import static io.javalin.apibuilder.ApiBuilder.path;
+
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -24,32 +28,51 @@ import com.google.gson.GsonBuilder;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import io.javalin.http.Header;
+import io.javalin.plugin.bundled.CorsPlugin;
 import io.javalin.plugin.bundled.CorsPluginConfig;
+import io.javalin.plugin.bundled.RouteOverviewPlugin;
+
+import net.fabricmc.meta.data.DataProvider;
+import net.fabricmc.meta.web.v1.EndpointsV1;
+import net.fabricmc.meta.web.v2.EndpointsV2;
 
 public class WebServer {
+	@Deprecated(forRemoval = true)
 	public static Javalin javalin;
-	public static Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-	public static Javalin create() {
-		if (javalin != null) {
-			javalin.stop();
-		}
+	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-		javalin = Javalin.create(config -> {
-			config.plugins.enableRouteOverview("/");
+	private final DataProvider dataProvider;
+	private final CacheHandler cacheHandler;
+
+	private final EndpointsV1 endpointsV1;
+
+	public WebServer(DataProvider dataProvider, CacheHandler cacheHandler) {
+		this.dataProvider = dataProvider;
+		this.cacheHandler = cacheHandler;
+
+		endpointsV1 = new EndpointsV1(dataProvider);
+	}
+
+	public Javalin createServer() {
+		Javalin javalin = Javalin.create(config -> {
+			config.useVirtualThreads = true;
 			config.showJavalinBanner = false;
-			config.plugins.enableCors(cors -> cors.add(CorsPluginConfig::anyHost));
+			config.registerPlugin(new RouteOverviewPlugin(routeOverview -> routeOverview.path = "/"));
+			config.registerPlugin(new CorsPlugin(cors -> cors.addRule(CorsPluginConfig.CorsRule::anyHost)));
+
+			config.router.apiBuilder(() -> {
+				before(cacheHandler.before());
+				after(cacheHandler.after());
+				path("v1", endpointsV1.routes());
+			});
 		});
 
-		EndpointsV1.setup();
+		// TODO remove this
+		WebServer.javalin = javalin;
 		EndpointsV2.setup();
 
 		return javalin;
-	}
-
-	public static void start() {
-		assert javalin == null;
-		create().start(5555);
 	}
 
 	public static <T> void jsonGet(String route, Supplier<T> supplier) {

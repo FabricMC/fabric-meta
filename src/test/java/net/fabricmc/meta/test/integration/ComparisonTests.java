@@ -32,7 +32,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import net.fabricmc.meta.FabricMeta;
-import net.fabricmc.meta.web.WebServer;
+import net.fabricmc.meta.test.TestUtils;
 
 // Tests that the local response matches the remote response of the version in prod
 public class ComparisonTests {
@@ -79,7 +79,7 @@ public class ComparisonTests {
 	@ParameterizedTest
 	@MethodSource("provideEndpoints")
 	void compareEndpoint(String endpoint) {
-		JavalinTest.test(WebServer.create(), (server, client) -> {
+		JavalinTest.test(TestUtils.createServer(), (server, client) -> {
 			compareEndpoint(endpoint, client);
 		});
 	}

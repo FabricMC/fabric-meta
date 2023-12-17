@@ -33,7 +33,7 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
-import net.fabricmc.meta.web.models.BaseVersion;
+import net.fabricmc.meta.models.BaseVersion;
 
 public class PomParser {
 	public String path;

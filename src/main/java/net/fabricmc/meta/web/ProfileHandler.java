@@ -35,8 +35,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.apache.commons.io.IOUtils;
 
+import net.fabricmc.meta.models.LoaderInfoV2;
 import net.fabricmc.meta.utils.Reference;
-import net.fabricmc.meta.web.models.LoaderInfoV2;
+import net.fabricmc.meta.web.v2.EndpointsV2;
 
 public class ProfileHandler {
 	private static final Executor EXECUTOR = Executors.newFixedThreadPool(2);

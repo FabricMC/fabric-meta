@@ -41,8 +41,8 @@ import io.javalin.http.InternalServerErrorResponse;
 import org.apache.commons.io.FileUtils;
 
 import net.fabricmc.meta.FabricMeta;
+import net.fabricmc.meta.models.BaseVersion;
 import net.fabricmc.meta.utils.Reference;
-import net.fabricmc.meta.web.models.BaseVersion;
 
 public class ServerBootstrap {
 	private static final Path CACHE_DIR = Paths.get("metadata", "installer");
@@ -62,7 +62,7 @@ public class ServerBootstrap {
 
 			final String installerVersion = getAndValidateVersion(ctx, FabricMeta.database.installer, "installer_version");
 			final String gameVersion = getAndValidateVersion(ctx, FabricMeta.database.game, "game_version");
-			final String loaderVersion = getAndValidateVersion(ctx, FabricMeta.database.getAllLoader(), "loader_version");
+			final String loaderVersion = getAndValidateVersion(ctx, FabricMeta.database.getLoader(), "loader_version");
 
 			validateLoaderVersion(loaderVersion);
 			validateInstallerVersion(installerVersion);

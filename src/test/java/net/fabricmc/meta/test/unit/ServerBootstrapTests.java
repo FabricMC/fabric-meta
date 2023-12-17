@@ -29,7 +29,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import net.fabricmc.meta.FabricMeta;
-import net.fabricmc.meta.web.WebServer;
+import net.fabricmc.meta.test.TestUtils;
 
 public class ServerBootstrapTests {
 	@TempDir
@@ -43,7 +43,7 @@ public class ServerBootstrapTests {
 
 	@Test
 	void serverJar() {
-		JavalinTest.test(WebServer.create(), (server, client) -> {
+		JavalinTest.test(TestUtils.createServer(), (server, client) -> {
 			Response response = client.get("/v2/versions/loader/stable/stable/stable/server/jar");
 			assertEquals(200, response.code());
 			Path jarFile = tempDir.resolve("server.jar");

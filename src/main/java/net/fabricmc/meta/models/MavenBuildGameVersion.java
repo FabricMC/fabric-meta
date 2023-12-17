@@ -14,22 +14,24 @@
  * limitations under the License.
  */
 
-package net.fabricmc.meta.web.models;
+package net.fabricmc.meta.models;
 
-import net.fabricmc.meta.utils.Reference;
+import net.fabricmc.meta.utils.YarnVersionParser;
 
-public class MavenUrlVersion extends MavenVersion {
-	public final String url;
+public class MavenBuildGameVersion extends MavenBuildVersion {
+	String gameVersion;
 
-	public MavenUrlVersion(String maven) {
+	public MavenBuildGameVersion(String maven) {
 		super(maven);
-		String[] split = maven.split(":");
-		this.url = String.format("%s%s/%s/%s/%s-%s.jar", Reference.FABRIC_MAVEN_URL,
-				split[0].replace('.', '/'),
-				split[1],
-				split[2],
-				split[1],
-				split[2]
-				);
+		gameVersion = new YarnVersionParser(maven.split(":")[2]).getMinecraftVersion();
+	}
+
+	public String getGameVersion() {
+		return gameVersion;
+	}
+
+	@Override
+	public boolean test(String s) {
+		return getGameVersion().equals(s);
 	}
 }
