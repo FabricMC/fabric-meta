@@ -16,6 +16,8 @@
 
 package net.fabricmc.meta.web;
 
+import static io.javalin.apibuilder.ApiBuilder.after;
+import static io.javalin.apibuilder.ApiBuilder.before;
 import static io.javalin.apibuilder.ApiBuilder.path;
 
 import java.util.function.Function;
@@ -39,10 +41,14 @@ public class WebServer {
 	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
 	private final DataProvider dataProvider;
+	private final CacheHandler cacheHandler;
+
 	private final EndpointsV1 endpointsV1;
 
-	public WebServer(DataProvider dataProvider) {
+	public WebServer(DataProvider dataProvider, CacheHandler cacheHandler) {
 		this.dataProvider = dataProvider;
+		this.cacheHandler = cacheHandler;
+
 		endpointsV1 = new EndpointsV1(dataProvider);
 	}
 
@@ -52,6 +58,8 @@ public class WebServer {
 			config.showJavalinBanner = false;
 			config.plugins.enableCors(cors -> cors.add(CorsPluginConfig::anyHost));
 		}).routes(() -> {
+			before(cacheHandler.before());
+			after(cacheHandler.after());
 			path("v1", endpointsV1.routes());
 		});
 

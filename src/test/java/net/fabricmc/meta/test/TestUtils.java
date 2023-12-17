@@ -19,10 +19,12 @@ package net.fabricmc.meta.test;
 import io.javalin.Javalin;
 
 import net.fabricmc.meta.FabricMeta;
+import net.fabricmc.meta.web.CacheHandler;
 import net.fabricmc.meta.web.WebServer;
 
 public class TestUtils {
 	public static Javalin createServer() {
-		return new WebServer(() -> FabricMeta.database).createServer();
+		CacheHandler cacheHandler = new CacheHandler();
+		return new WebServer(() -> FabricMeta.database, cacheHandler).createServer();
 	}
 }

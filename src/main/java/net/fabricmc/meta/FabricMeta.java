@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 
 import net.fabricmc.meta.data.VersionDatabase;
 import net.fabricmc.meta.utils.Reference;
+import net.fabricmc.meta.web.CacheHandler;
 import net.fabricmc.meta.web.WebServer;
 
 public class FabricMeta {
@@ -46,6 +47,7 @@ public class FabricMeta {
 	private static final Map<String, String> config = new HashMap<>();
 	private static boolean configInitialized;
 	private static URL heartbeatUrl; // URL pinged with every successful update()
+	private static CacheHandler cacheHandler = new CacheHandler();
 
 	public static void main(String[] args) {
 		Path configFile = Paths.get("config.json");
@@ -79,13 +81,14 @@ public class FabricMeta {
 		ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
 		executorService.scheduleAtFixedRate(FabricMeta::update, 1, 1, TimeUnit.MINUTES);
 
-		WebServer webServer = new WebServer(() -> database);
+		WebServer webServer = new WebServer(() -> database, cacheHandler);
 		webServer.createServer().start(5555);
 	}
 
 	private static void update() {
 		try {
 			database = VersionDatabase.generate();
+			cacheHandler.invalidateCache();
 			updateHeartbeat();
 		} catch (Throwable t) {
 			if (database == null) {

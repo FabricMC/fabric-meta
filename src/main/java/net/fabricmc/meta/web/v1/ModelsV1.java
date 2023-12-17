@@ -31,13 +31,14 @@ import net.fabricmc.meta.models.MavenBuildVersion;
 import net.fabricmc.meta.web.JsonModel;
 
 /**
- * Strongly defined records of the public API. Take extra care to record to method return types here.
+ * Strongly defined records of the public API. Take extra care when changing method return types and record components.
  */
 public sealed interface ModelsV1 extends JsonModel permits ModelsV1.GameVersion, ModelsV1.MappingVersion, ModelsV1.LoaderVersion, ModelsV1.LoaderInfo, ModelsV1.LoaderLauncherInfo {
 	/**
-	 * /v2/versions/game
+	 * /v1/versions/game
 	 */
 	static List<GameVersion> gameVersions(DataProvider dataProvider) {
+		System.out.println("ohno");
 		LinkedList<GameVersion> versions = new LinkedList<>();
 
 		for (BaseVersion version : dataProvider.getGameVersions()) {
@@ -48,7 +49,7 @@ public sealed interface ModelsV1 extends JsonModel permits ModelsV1.GameVersion,
 	}
 
 	/**
-	 * /v2/game/{game_version}
+	 * /v1/game/{game_version}
 	 */
 	static List<GameVersion> gameVersions(DataProvider dataProvider, String gameVersion) {
 		for (BaseVersion version : dataProvider.getGameVersions()) {
@@ -61,7 +62,7 @@ public sealed interface ModelsV1 extends JsonModel permits ModelsV1.GameVersion,
 	}
 
 	/**
-	 * /v2/versions/mappings
+	 * /v1/versions/mappings
 	 */
 	static List<MappingVersion> mappingVersions(DataProvider dataProvider) {
 		LinkedList<MappingVersion> versions = new LinkedList<>();
@@ -74,7 +75,7 @@ public sealed interface ModelsV1 extends JsonModel permits ModelsV1.GameVersion,
 	}
 
 	/**
-	 * /v2/mappings/{game_version}
+	 * /v1/mappings/{game_version}
 	 */
 	static List<MappingVersion> mappingVersions(DataProvider dataProvider, String gameVersion) {
 		LinkedList<MappingVersion> versions = new LinkedList<>();
@@ -89,7 +90,7 @@ public sealed interface ModelsV1 extends JsonModel permits ModelsV1.GameVersion,
 	}
 
 	/**
-	 * /v2/versions/loader
+	 * /v1/versions/loader
 	 */
 	static List<LoaderVersion> loaderVersions(DataProvider dataProvider) {
 		LinkedList<LoaderVersion> versions = new LinkedList<>();
@@ -102,7 +103,7 @@ public sealed interface ModelsV1 extends JsonModel permits ModelsV1.GameVersion,
 	}
 
 	/**
-	 * /v2/versions/loader/{game_version}/{loader_version}
+	 * /v1/versions/loader/{game_version}/{loader_version}
 	 */
 	static List<LoaderInfo> loaderInfo(DataProvider dataProvider, String gameVersion) {
 		MavenBuildGameVersion mappings = null;
@@ -128,7 +129,7 @@ public sealed interface ModelsV1 extends JsonModel permits ModelsV1.GameVersion,
 	}
 
 	/**
-	 * /v2/versions/loader/{game_version}/{loader_version}
+	 * /v1/versions/loader/{game_version}/{loader_version}
 	 */
 	static LoaderLauncherInfo loaderLauncherInfo(DataProvider dataProvider, String gameVersion, String loaderVersion) {
 		MavenBuildVersion loader = null;
