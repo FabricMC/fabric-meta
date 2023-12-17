@@ -22,7 +22,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.javalin.http.Handler;
-import io.javalin.http.servlet.JavalinServletContext;
 
 public class CacheHandler {
 	private final Map<String, Response> cache = new ConcurrentHashMap<>();
@@ -44,9 +43,7 @@ public class CacheHandler {
 			ctx.contentType(response.contentType());
 			ctx.result(response.body());
 
-			// Replace with ctx.skipRemainingHandlers() in Javalin 6
-			JavalinServletContext jsc = (JavalinServletContext) ctx;
-			jsc.getTasks().clear();
+			ctx.skipRemainingHandlers();
 		};
 	}
 

@@ -38,7 +38,6 @@ public sealed interface ModelsV1 extends JsonModel permits ModelsV1.GameVersion,
 	 * /v1/versions/game
 	 */
 	static List<GameVersion> gameVersions(DataProvider dataProvider) {
-		System.out.println("ohno");
 		LinkedList<GameVersion> versions = new LinkedList<>();
 
 		for (BaseVersion version : dataProvider.getGameVersions()) {

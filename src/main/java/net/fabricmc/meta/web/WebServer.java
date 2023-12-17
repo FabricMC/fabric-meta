@@ -28,7 +28,9 @@ import com.google.gson.GsonBuilder;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import io.javalin.http.Header;
+import io.javalin.plugin.bundled.CorsPlugin;
 import io.javalin.plugin.bundled.CorsPluginConfig;
+import io.javalin.plugin.bundled.RouteOverviewPlugin;
 
 import net.fabricmc.meta.data.DataProvider;
 import net.fabricmc.meta.web.v1.EndpointsV1;
@@ -54,13 +56,16 @@ public class WebServer {
 
 	public Javalin createServer() {
 		Javalin javalin = Javalin.create(config -> {
-			config.plugins.enableRouteOverview("/");
+			config.useVirtualThreads = true;
 			config.showJavalinBanner = false;
-			config.plugins.enableCors(cors -> cors.add(CorsPluginConfig::anyHost));
-		}).routes(() -> {
-			before(cacheHandler.before());
-			after(cacheHandler.after());
-			path("v1", endpointsV1.routes());
+			config.registerPlugin(new RouteOverviewPlugin(routeOverview -> routeOverview.path = "/"));
+			config.registerPlugin(new CorsPlugin(cors -> cors.addRule(CorsPluginConfig.CorsRule::anyHost)));
+
+			config.router.apiBuilder(() -> {
+				before(cacheHandler.before());
+				after(cacheHandler.after());
+				path("v1", endpointsV1.routes());
+			});
 		});
 
 		// TODO remove this
