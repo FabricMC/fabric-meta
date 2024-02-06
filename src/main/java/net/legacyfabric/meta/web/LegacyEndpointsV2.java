@@ -22,7 +22,7 @@ import net.fabricmc.meta.utils.MinecraftLauncherMeta;
 import net.fabricmc.meta.web.EndpointsV2;
 import net.fabricmc.meta.web.WebServer;
 
-import net.legacyfabric.meta.web.models.MetaServerInfo;
+import net.legacyfabric.meta.BuildConstants;
 import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
@@ -32,7 +32,7 @@ import java.util.Objects;
 
 public class LegacyEndpointsV2 extends EndpointsV2 {
     public static void setup() {
-        WebServer.jsonGet("/v2/meta", () -> MetaServerInfo.INSTANCE);
+        WebServer.jsonGet("/v2/meta", () -> BuildConstants.VERSION);
 
         LegacyWebServer.stringGet("/v2/manifest/:game_version", LegacyEndpointsV2::getVersionManifest);
         WebServer.jsonGet("/v2/versions/manifest", context -> FabricMeta.database.launcherMeta);

@@ -5,6 +5,7 @@ plugins {
 	id 'application'
 	id 'maven-publish'
 	id 'org.cadixdev.licenser' version '0.6.1'
+	id "com.github.gmazzo.buildconfig" version "5.2.0"
 }
 
 def legacyVersion = "1.7.6"
@@ -32,16 +33,14 @@ dependencies {
 	implementation group: 'commons-io', name: 'commons-io', version: '2.8.0'
 }
 
-task generateSources(type: Copy) {
-	from 'src/replaceme/java/net/fabricmc/meta/web/models/MetaServerInfo.java'
-	into "$buildDir/generated-src"
-	filter(org.apache.tools.ant.filters.ReplaceTokens, tokens: [
-			'VERSION': project.version
-	])
+buildConfig {
+	className("BuildConstants")
+	packageName("net.legacyfabric.meta")
+
+	useJavaOutput()
+
+	buildConfigField(String.class, "VERSION", "$project.version")
 }
-// the following lines are important to wire the task in with the compileJava task
-compileJava.source "$buildDir/generated-src"
-compileJava.dependsOn generateSources
 
 jar {
 	manifest {
@@ -62,7 +61,7 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 license {
-	matching(includes: ['**/legacyfabric/**']) {
+	matching(excludes: ['**/BuildConstants.java'], includes: ['**/legacyfabric/**']) {
 		header = file("LF-ONLY-HEADER")
 	}
 	matching(includes: ['**/VersionDatabase.java', '**/MinecraftLauncherMeta.java','**/EndpointsV2.java',
@@ -72,6 +71,7 @@ license {
 	}
 	header file('HEADER')
 	include '**/*.java'
+	exclude '**/BuildConstants.java'
 }
 
 publishing {
