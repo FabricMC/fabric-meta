@@ -29,6 +29,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import com.google.gson.stream.JsonReader;
+import net.legacyfabric.meta.data.LegacyVersionDatabase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

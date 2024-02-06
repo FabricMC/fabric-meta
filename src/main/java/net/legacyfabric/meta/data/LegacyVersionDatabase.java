@@ -21,6 +21,7 @@ import net.fabricmc.meta.utils.PomParser;
 import net.fabricmc.meta.web.models.BaseVersion;
 import net.fabricmc.meta.web.models.MavenBuildVersion;
 import net.fabricmc.meta.web.models.MavenUrlVersion;
+import net.legacyfabric.meta.utils.LegacyReference;
 import net.legacyfabric.meta.web.models.LegacyMavenUrlVersion;
 
 import java.util.List;
@@ -28,11 +29,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class LegacyVersionDatabase extends VersionDatabase {
-    public static final String MAVEN_URL = "https://repo.legacyfabric.net/repository/legacyfabric/";
-
-    public static final PomParser MAPPINGS_PARSER = new PomParser(MAVEN_URL + "net/legacyfabric/yarn/maven-metadata.xml");
-    public static final PomParser INTERMEDIARY_PARSER = new PomParser(MAVEN_URL + "net/legacyfabric/intermediary/maven-metadata.xml");
-    public static final PomParser INSTALLER_PARSER = new PomParser(MAVEN_URL + "net/legacyfabric/fabric-installer/maven-metadata.xml");
+    public static final PomParser MAPPINGS_PARSER = new PomParser(LegacyReference.LOCAL_LEGACY_FABRIC_MAVEN_URL + "net/legacyfabric/yarn/maven-metadata.xml");
+    public static final PomParser INTERMEDIARY_PARSER = new PomParser(LegacyReference.LOCAL_LEGACY_FABRIC_MAVEN_URL + "net/legacyfabric/intermediary/maven-metadata.xml");
+    public static final PomParser INSTALLER_PARSER = new PomParser(LegacyReference.LOCAL_LEGACY_FABRIC_MAVEN_URL + "net/legacyfabric/fabric-installer/maven-metadata.xml");
 
     public PomParser getMappingsParser() {
         return MAPPINGS_PARSER;

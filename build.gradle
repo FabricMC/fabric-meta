@@ -9,7 +9,7 @@ plugins {
     id "com.github.gmazzo.buildconfig" version "5.2.0"
 }
 
-def legacyVersion = "1.7.6"
+def legacyVersion = "1.7.7"
 group 'net.legacyfabric'
 version '1.5.3'
 

@@ -39,6 +39,7 @@ import io.javalin.http.BadRequestResponse;
 import io.javalin.http.Context;
 import io.javalin.http.Handler;
 import io.javalin.http.InternalServerErrorResponse;
+import net.legacyfabric.meta.utils.LegacyReference;
 import org.apache.commons.io.FileUtils;
 
 import net.fabricmc.meta.FabricMeta;
@@ -198,7 +199,6 @@ public class ServerBootstrap {
 	}
 
     private static String getInstallerURL() {
-        // Reference.LOCAL_FABRIC_MAVEN_URL+"net/fabricmc/fabric-installer/%1$s/fabric-installer-%1$s-server.jar"
-        return "https://maven.legacyfabric.net/net/legacyfabric/fabric-installer/%1$s/fabric-installer-%1$s-server.jar";
+        return LegacyReference.LOCAL_LEGACY_FABRIC_MAVEN_URL + "net/legacyfabric/fabric-installer/%1$s/fabric-installer-%1$s-server.jar";
     }
 }
