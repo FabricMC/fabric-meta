@@ -7,8 +7,11 @@ plugins {
 	id 'org.cadixdev.licenser' version '0.6.1'
 }
 
+def legacyVersion = "1.7.6"
 group 'net.legacyfabric'
-version '1.7.5+fabricmc.1.5.2'
+version '1.5.2'
+
+version = legacyVersion + "+fabricmc." + project.version
 
 def ENV = System.getenv()
 version = version + (ENV.GITHUB_ACTIONS ? "" : "+local")
@@ -59,9 +62,12 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 license {
-	matching(includes: ['**/VersionDatabase.java', '**/LoaderMeta.java', '**/MavenBuildVersion.java',
-						'**/MavenUrlVersion.java', '**/ProfileHandler.java', '**/EndpointsV1.java',
-						'**/EndpointsV2.java']) {
+	matching(includes: ['**/legacyfabric/**']) {
+		header = file("LF-ONLY-HEADER")
+	}
+	matching(includes: ['**/VersionDatabase.java', '**/MinecraftLauncherMeta.java','**/EndpointsV2.java',
+						'**/ProfileHandler.java', '**/MavenUrlVersion.java', '**/ServerBootstrap.java'
+	]) {
 		header = file('LF-HEADER')
 	}
 	header file('HEADER')

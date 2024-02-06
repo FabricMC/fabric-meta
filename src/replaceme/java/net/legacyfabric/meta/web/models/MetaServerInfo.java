@@ -1,4 +1,4 @@
-package net.fabricmc.meta.web.models;
+package net.legacyfabric.meta.web.models;
 
 public class MetaServerInfo {
     public static final MetaServerInfo INSTANCE = new MetaServerInfo();

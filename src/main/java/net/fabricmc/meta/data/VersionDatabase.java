@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Legacy Fabric
+ * Copyright (c) 2021-2024 Legacy Fabric
  * Copyright (c) 2019 FabricMC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,6 +21,7 @@ import net.fabricmc.meta.utils.MinecraftLauncherMeta;
 import net.fabricmc.meta.utils.PomParser;
 import net.fabricmc.meta.web.models.*;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slf4j.impl.SimpleLoggerFactory;
 
 import javax.xml.stream.XMLStreamException;
@@ -29,36 +30,33 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class VersionDatabase {
-	public static final String MAVEN_URL = "https://repo.legacyfabric.net/repository/legacyfabric/";
-	public static final String UPSTREAM_MAVEN_URL = "https://maven.fabricmc.net/";
+	public static final String MAVEN_URL = "https://maven.fabricmc.net/";
 
-	public static final PomParser MAPPINGS_PARSER = new PomParser(MAVEN_URL + "net/legacyfabric/yarn/maven-metadata.xml");
-	public static final PomParser INTERMEDIARY_PARSER = new PomParser(MAVEN_URL + "net/legacyfabric/intermediary/maven-metadata.xml");
-	public static final PomParser LOADER_PARSER = new PomParser(UPSTREAM_MAVEN_URL + "net/fabricmc/fabric-loader/maven-metadata.xml");
-	public static final PomParser INSTALLER_PARSER = new PomParser(MAVEN_URL + "net/legacyfabric/fabric-installer/maven-metadata.xml");
+	public static final PomParser MAPPINGS_PARSER = new PomParser(MAVEN_URL + "net/fabricmc/yarn/maven-metadata.xml");
+	public static final PomParser INTERMEDIARY_PARSER = new PomParser(MAVEN_URL + "net/fabricmc/intermediary/maven-metadata.xml");
+	public static final PomParser LOADER_PARSER = new PomParser(MAVEN_URL + "net/fabricmc/fabric-loader/maven-metadata.xml");
+	public static final PomParser INSTALLER_PARSER = new PomParser(MAVEN_URL + "net/fabricmc/fabric-installer/maven-metadata.xml");
+
+	private static final ArrayList<String> incorrectVersions = new ArrayList<>();
+	private static final Logger LOGGER = LoggerFactory.getLogger(VersionDatabase.class);
 
 	public List<BaseVersion> game;
 	public List<MavenBuildGameVersion> mappings;
 	public List<MavenVersion> intermediary;
-	private List<MavenBuildVersion> loader;
+	public List<MavenBuildVersion> loader;
 	public List<MavenUrlVersion> installer;
-	public MinecraftLauncherMeta launcherMeta;
 
-	private static final ArrayList<String> incorrectVersions = new ArrayList<>();
-
-	private static final Logger LOGGER = new SimpleLoggerFactory().getLogger(VersionDatabase.class.getName());
-
-	private VersionDatabase() {
+	public VersionDatabase() {
 	}
 
-	public static VersionDatabase generate() throws IOException, XMLStreamException {
+	public static VersionDatabase generate(VersionDatabase database) throws IOException, XMLStreamException {
 		long start = System.currentTimeMillis();
-		VersionDatabase database = new VersionDatabase();
-		database.mappings = MAPPINGS_PARSER.getMeta(MavenBuildGameVersion::new, "net.legacyfabric:yarn:");
-		database.intermediary = INTERMEDIARY_PARSER.getMeta(MavenVersion::new, "net.legacyfabric:intermediary:");
+		database.mappings = database.getMappingsParser().getMeta(MavenBuildGameVersion::new, database.getMappingsPrefix());
+		database.intermediary = database.getIntermediaryParser().getMeta(MavenVersion::new, database.getIntermediaryPrefix());
 		database.loader = LOADER_PARSER.getMeta(MavenBuildVersion::new, "net.fabricmc:fabric-loader:", list -> {
 			for (BaseVersion version : list) {
 				if (isPublicLoaderVersion(version)) {
@@ -67,9 +65,9 @@ public class VersionDatabase {
 				}
 			}
 		});
-		database.installer = INSTALLER_PARSER.getMeta(MavenUrlVersion::new, "net.legacyfabric:fabric-installer:");
+		database.installer = database.getInstallerParser().getMeta(database.getMavenUrlVersionBuilder(), database.getInstallerPrefix());
 		database.loadMcData();
-		LOGGER.info("DB update took " + (System.currentTimeMillis() - start) + "ms");
+		LOGGER.info("DB update took {} ms", (System.currentTimeMillis() - start));
 		return database;
 	}
 
@@ -89,7 +87,7 @@ public class VersionDatabase {
 			if (launcherMeta.getVersions().stream().noneMatch(version -> version.getId().equals(o.getVersion()))) {
 				// only print unmatched versions once so that it doesn't spam the console with "Removing ..." messages
 				if (incorrectVersions.stream().noneMatch(o.getVersion()::equals)) {
-					LOGGER.warn("Removing " + o.getVersion() + " as it doesn't have a valid intermediary match");
+					LOGGER.warn("Removing {} as it doesn't match a valid mc version", o.getVersion());
 					incorrectVersions.add(o.getVersion());
 				}
 				return true;
@@ -112,12 +110,42 @@ public class VersionDatabase {
 	}
 
 	private static boolean isPublicLoaderVersion(BaseVersion version) {
-		String[] ver = version.getVersion().split("\\.");
-		return Integer.parseInt(ver[1]) >= 13
-				|| Integer.parseInt(ver[0]) > 0;
+		return true;
 	}
 
 	public List<MavenBuildVersion> getAllLoader() {
 		return Collections.unmodifiableList(loader);
 	}
+
+
+	// LegacyFabric extensions
+	public PomParser getMappingsParser() {
+		return MAPPINGS_PARSER;
+	}
+
+	public String getMappingsPrefix() {
+		return "net.fabricmc:yarn:";
+	}
+
+	public PomParser getIntermediaryParser() {
+		return INTERMEDIARY_PARSER;
+	}
+
+	public String getIntermediaryPrefix() {
+		return "net.fabricmc:intermediary:";
+	}
+
+	public PomParser getInstallerParser() {
+		return INSTALLER_PARSER;
+	}
+
+	public String getInstallerPrefix() {
+		return "net.fabricmc:fabric-installer:";
+	}
+
+	public Function<String, MavenUrlVersion> getMavenUrlVersionBuilder() {
+		return MavenUrlVersion::new;
+	}
+
+	public MinecraftLauncherMeta launcherMeta;
 }

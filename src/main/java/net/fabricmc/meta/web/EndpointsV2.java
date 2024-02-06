@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Legacy Fabric
+ * Copyright (c) 2021-2024 Legacy Fabric
  * Copyright (c) 2019 FabricMC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,6 +22,7 @@ import io.javalin.http.Context;
 import net.fabricmc.meta.FabricMeta;
 import net.fabricmc.meta.utils.MinecraftLauncherMeta;
 import net.fabricmc.meta.web.models.*;
+import net.legacyfabric.meta.web.LegacyEndpointsV2;
 import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
@@ -58,18 +59,16 @@ public class EndpointsV2 {
 		WebServer.jsonGet("/v2/versions/loader", context -> withLimitSkip(context, FabricMeta.database.getLoader()));
 		WebServer.jsonGet("/v2/versions/loader/:game_version", context -> withLimitSkip(context, EndpointsV2.getLoaderInfoAll(context)));
 		WebServer.jsonGet("/v2/versions/loader/:game_version/:loader_version", EndpointsV2::getLoaderInfo);
-		WebServer.jsonGet("/v2/meta", () -> MetaServerInfo.INSTANCE);
 
 		WebServer.jsonGet("/v2/versions/installer", context -> withLimitSkip(context, FabricMeta.database.installer));
 
-		WebServer.stringGet("/v2/manifest/:game_version", EndpointsV2::getVersionManifest);
-		WebServer.jsonGet("/v2/versions/manifest", context -> FabricMeta.database.launcherMeta);
+		LegacyEndpointsV2.setup();
 
 		ProfileHandler.setup();
 		ServerBootstrap.setup();
 	}
 
-	private static <T> List<T> withLimitSkip(Context context, List<T> list) {
+	protected static <T> List<T> withLimitSkip(Context context, List<T> list) {
 		if(list == null){
 			return Collections.emptyList();
 		}
@@ -91,30 +90,6 @@ public class EndpointsV2 {
 		}
 		return versionList.stream().filter(t -> t.test(context.pathParam("game_version"))).collect(Collectors.toList());
 
-	}
-
-	private static String getVersionManifest(Context context) {
-		if (!context.pathParamMap().containsKey("game_version")) {
-			return null;
-		}
-
-		String gameVersion = context.pathParam("game_version");
-
-		MinecraftLauncherMeta.Version version = FabricMeta.database.launcherMeta.getVersions().stream()
-				.filter(v -> Objects.equals(v.getId(), gameVersion))
-				.findFirst().orElse(null);
-
-		String json = null;
-
-		if (version != null) {
-			try {
-				json = IOUtils.toString(new URL(version.getUrl()), StandardCharsets.UTF_8);
-			} catch (IOException e) {
-
-			}
-		}
-
-		return json;
 	}
 	
 	private static Object getLoaderInfo(Context context) {

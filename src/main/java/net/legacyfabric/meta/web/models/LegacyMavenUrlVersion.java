@@ -1,6 +1,5 @@
 /*
  * Copyright (c) 2021-2024 Legacy Fabric
- * Copyright (c) 2019 FabricMC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,27 +14,18 @@
  * limitations under the License.
  */
 
-package net.fabricmc.meta.web.models;
+package net.legacyfabric.meta.web.models;
 
-import net.fabricmc.meta.data.VersionDatabase;
+import net.fabricmc.meta.web.models.MavenUrlVersion;
+import net.legacyfabric.meta.data.LegacyVersionDatabase;
 
-public class MavenUrlVersion extends MavenVersion {
-
-    public final String url;
-
-    public MavenUrlVersion(String maven) {
+public class LegacyMavenUrlVersion extends MavenUrlVersion {
+    public LegacyMavenUrlVersion(String maven) {
         super(maven);
-        String[] split = maven.split(":");
-        this.url = String.format("%s%s/%s/%s/%s-%s.jar", getMavenUrl(),
-                split[0].replaceAll("\\.", "/"),
-                split[1],
-                split[2],
-                split[1],
-                split[2]
-        );
     }
 
+    @Override
     public String getMavenUrl() {
-        return VersionDatabase.MAVEN_URL;
+        return LegacyVersionDatabase.MAVEN_URL;
     }
 }

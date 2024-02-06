@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2021-2024 Legacy Fabric
  * Copyright (c) 2019 FabricMC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -158,7 +159,7 @@ public class ServerBootstrap {
     }
 
     private static Path downloadInstallerJar(Path jar, String installerVersion) throws IOException {
-        final String url = String.format("https://maven.legacyfabric.net/net/legacyfabric/fabric-installer/%1$s/fabric-installer-%1$s-server.jar", installerVersion);
+        final String url = String.format(getInstallerURL(), installerVersion);
 
         System.out.println("Downloading: " + url);
         FileUtils.copyURLToFile(new URL(url), jar.toFile());
@@ -188,5 +189,9 @@ public class ServerBootstrap {
             return 120;
         }
         return 86400;
+    }
+
+    private static String getInstallerURL() {
+        return "https://maven.legacyfabric.net/net/legacyfabric/fabric-installer/%1$s/fabric-installer-%1$s-server.jar";
     }
 }

@@ -18,6 +18,7 @@ package net.fabricmc.meta;
 
 import net.fabricmc.meta.data.VersionDatabase;
 import net.fabricmc.meta.web.WebServer;
+import net.legacyfabric.meta.data.LegacyVersionDatabase;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
@@ -41,7 +42,7 @@ public class FabricMeta {
 
 	private static void update(){
 		try {
-			database = VersionDatabase.generate();
+			database = VersionDatabase.generate(new LegacyVersionDatabase());
 		} catch (IOException | XMLStreamException e) {
 			if(database == null){
 				throw new RuntimeException(e);

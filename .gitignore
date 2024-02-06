@@ -13,6 +13,7 @@
 !/gradlew
 !/gradlew.bat
 !/LF-HEADER
+!/LF-ONLY-HEADER
 !/HEADER
 !/LICENSE
 !/README.md

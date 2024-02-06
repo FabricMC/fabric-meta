@@ -1,5 +1,4 @@
 /*
- * Copyright (c) 2021-2022 Legacy Fabric
  * Copyright (c) 2019 FabricMC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,6 +31,7 @@ import java.net.URL;
 public class LoaderMeta {
 
 	public static final File BASE_DIR = new File("metadata");
+	public static final String MAVEN_URL = "https://maven.fabricmc.net/";
 
 	public static JsonObject getMeta(LoaderInfoBase loaderInfo){
 		String loaderMaven = loaderInfo.getLoader().getMaven();
@@ -42,7 +42,7 @@ public class LoaderMeta {
 		File launcherMetaFile = new File(BASE_DIR, path + "/" + filename);
 		if(!launcherMetaFile.exists()){
 			try {
-				String url = String.format("%s%s/%s", VersionDatabase.UPSTREAM_MAVEN_URL, path, filename);
+				String url = String.format("%s%s/%s", MAVEN_URL, path, filename);
 				System.out.println("Downloading " + url);
 				FileUtils.copyURLToFile(new URL(url), launcherMetaFile);
 			} catch (IOException e) {
@@ -52,7 +52,8 @@ public class LoaderMeta {
 		}
 
 		try {
-			return WebServer.GSON.fromJson(new FileReader(launcherMetaFile), JsonObject.class);
+			JsonObject jsonObject = WebServer.GSON.fromJson(new FileReader(launcherMetaFile), JsonObject.class);
+			return jsonObject;
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 			return null;

@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2021-2024 Legacy Fabric
  * Copyright (c) 2019 FabricMC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -44,8 +45,8 @@ public class MinecraftLauncherMeta {
 		return GSON.fromJson(json, MinecraftLauncherMeta.class);
 	}
 
-	public static MinecraftLauncherMeta getMissingMeta() throws IOException {
-		String url = "https://raw.githubusercontent.com/Legacy-Fabric/manifests/master/manifest.json";
+	public static MinecraftLauncherMeta getExperimentalMeta() throws IOException {
+		String url = "https://maven.fabricmc.net/net/minecraft/experimental_versions.json";
 		String json = IOUtils.toString(new URL(url), StandardCharsets.UTF_8);
 		return GSON.fromJson(json, MinecraftLauncherMeta.class);
 	}
@@ -53,6 +54,7 @@ public class MinecraftLauncherMeta {
 	public static MinecraftLauncherMeta getAllMeta() throws IOException {
 		List<Version> versions = new ArrayList<>();
 		versions.addAll(getMeta().versions);
+//		versions.addAll(getExperimentalMeta().versions);
 		versions.addAll(getMissingMeta().versions);
 
 		// Order by release time
@@ -76,6 +78,12 @@ public class MinecraftLauncherMeta {
 
 	public List<Version> getVersions() {
 		return Collections.unmodifiableList(versions);
+	}
+
+	public static MinecraftLauncherMeta getMissingMeta() throws IOException {
+		String url = "https://raw.githubusercontent.com/Legacy-Fabric/manifests/master/manifest.json";
+		String json = IOUtils.toString(new URL(url), StandardCharsets.UTF_8);
+		return GSON.fromJson(json, MinecraftLauncherMeta.class);
 	}
 
 	public static class Version {
