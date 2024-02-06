@@ -5,12 +5,13 @@ plugins {
 	id 'application'
 	id 'maven-publish'
 	id 'org.cadixdev.licenser' version '0.6.1'
-	id "com.github.gmazzo.buildconfig" version "5.2.0"
+	id 'eclipse'
+    id "com.github.gmazzo.buildconfig" version "5.2.0"
 }
 
 def legacyVersion = "1.7.6"
 group 'net.legacyfabric'
-version '1.5.2'
+version '1.5.3'
 
 version = legacyVersion + "+fabricmc." + project.version
 

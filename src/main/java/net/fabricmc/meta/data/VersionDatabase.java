@@ -17,14 +17,8 @@
 
 package net.fabricmc.meta.data;
 
-import net.fabricmc.meta.utils.MinecraftLauncherMeta;
-import net.fabricmc.meta.utils.PomParser;
-import net.fabricmc.meta.web.models.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.impl.SimpleLoggerFactory;
+import static net.fabricmc.meta.utils.Reference.LOCAL_FABRIC_MAVEN_URL;
 
-import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,13 +27,24 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class VersionDatabase {
-	public static final String MAVEN_URL = "https://maven.fabricmc.net/";
+import javax.xml.stream.XMLStreamException;
 
-	public static final PomParser MAPPINGS_PARSER = new PomParser(MAVEN_URL + "net/fabricmc/yarn/maven-metadata.xml");
-	public static final PomParser INTERMEDIARY_PARSER = new PomParser(MAVEN_URL + "net/fabricmc/intermediary/maven-metadata.xml");
-	public static final PomParser LOADER_PARSER = new PomParser(MAVEN_URL + "net/fabricmc/fabric-loader/maven-metadata.xml");
-	public static final PomParser INSTALLER_PARSER = new PomParser(MAVEN_URL + "net/fabricmc/fabric-installer/maven-metadata.xml");
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import net.fabricmc.meta.utils.MinecraftLauncherMeta;
+import net.fabricmc.meta.utils.PomParser;
+import net.fabricmc.meta.web.models.BaseVersion;
+import net.fabricmc.meta.web.models.MavenBuildGameVersion;
+import net.fabricmc.meta.web.models.MavenBuildVersion;
+import net.fabricmc.meta.web.models.MavenUrlVersion;
+import net.fabricmc.meta.web.models.MavenVersion;
+
+public class VersionDatabase {
+	public static final PomParser MAPPINGS_PARSER = new PomParser(LOCAL_FABRIC_MAVEN_URL + "net/fabricmc/yarn/maven-metadata.xml");
+	public static final PomParser INTERMEDIARY_PARSER = new PomParser(LOCAL_FABRIC_MAVEN_URL + "net/fabricmc/intermediary/maven-metadata.xml");
+	public static final PomParser LOADER_PARSER = new PomParser(LOCAL_FABRIC_MAVEN_URL + "net/fabricmc/fabric-loader/maven-metadata.xml");
+	public static final PomParser INSTALLER_PARSER = new PomParser(LOCAL_FABRIC_MAVEN_URL + "net/fabricmc/fabric-installer/maven-metadata.xml");
 
 	private static final ArrayList<String> incorrectVersions = new ArrayList<>();
 	private static final Logger LOGGER = LoggerFactory.getLogger(VersionDatabase.class);
