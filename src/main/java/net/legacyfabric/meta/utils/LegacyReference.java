@@ -24,7 +24,7 @@ public class LegacyReference {
      *
      * <p>This shouldn't be directly accessed by this meta server instance!
      */
-    public static final String LEGACY_FABRIC_MAVEN_URL = "https://repo.legacyfabric.net/repository/legacyfabric/";
+    public static final String LEGACY_FABRIC_MAVEN_URL = "https://maven.legacyfabric.net/";
 
     /**
      * Legacy Fabric maven url to access from this meta server instance.
