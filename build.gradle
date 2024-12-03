@@ -88,7 +88,7 @@ publishing {
 	repositories {
 		if (ENV.MAVEN_PUBLISH_CREDENTIALS) {
 			maven {
-				url "https://maven.legacyfabric.net"
+				url "https://repo.legacyfabric.net/legacyfabric/"
 				credentials {
 					username ENV.MAVEN_PUBLISH_CREDENTIALS.split(":")[0]
 					password ENV.MAVEN_PUBLISH_CREDENTIALS.split(":")[1]
