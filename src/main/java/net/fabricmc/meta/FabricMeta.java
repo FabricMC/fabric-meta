@@ -75,7 +75,7 @@ public class FabricMeta {
 		update();
 
 		ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
-		executorService.scheduleAtFixedRate(FabricMeta::update, 1, 1, TimeUnit.MINUTES);
+		executorService.scheduleWithFixedDelay(FabricMeta::update, 1, 1, TimeUnit.MINUTES);
 
 		WebServer.start();
 	}
