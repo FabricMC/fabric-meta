@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.fabricmc.meta.web.models;
+package net.fabricmc.meta.models;
 
 public class MavenVersion extends BaseVersion {
 	String maven;

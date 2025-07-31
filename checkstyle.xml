@@ -156,7 +156,7 @@
 
 		<!--<module name="InvalidJavadocPosition"/>-->
 		<module name="JavadocParagraph"/>
-		<module name="JavadocStyle"/>
+<!--		<module name="JavadocStyle"/>-->
 		<module name="AtclauseOrder">
 			<property name="tagOrder" value="@param,@return,@throws,@deprecated"/>
 		</module>

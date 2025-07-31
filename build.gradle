@@ -22,14 +22,14 @@ repositories {
 
 dependencies {
 	implementation 'com.google.code.gson:gson:2.10.1'
-	implementation 'io.javalin:javalin:5.6.3'
+	implementation 'io.javalin:javalin:6.0.0-beta.3'
 	implementation 'org.slf4j:slf4j-simple:2.0.9'
 	implementation 'commons-io:commons-io:2.15.1'
 	implementation 'org.jetbrains:annotations:24.1.0'
 
 	testImplementation 'org.junit.jupiter:junit-jupiter:5.9.2'
 	testImplementation "org.junit.jupiter:junit-jupiter-params:5.9.2"
-	testImplementation 'io.javalin:javalin-testtools:5.6.3'
+	testImplementation 'io.javalin:javalin-testtools:6.0.0-beta.3'
 
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }

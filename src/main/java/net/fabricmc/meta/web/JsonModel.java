@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 FabricMC
+ * Copyright (c) 2023 FabricMC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,30 +14,8 @@
  * limitations under the License.
  */
 
-package net.fabricmc.meta.web.models;
+package net.fabricmc.meta.web;
 
-public class MavenBuildVersion extends MavenVersion {
-	String separator;
-	int build;
-
-	public MavenBuildVersion(String maven) {
-		super(maven);
-		String version = maven.split(":")[2];
-
-		if (version.contains("+build.")) {
-			separator = "+build.";
-		} else {
-			separator = ".";
-		}
-
-		build = Integer.parseInt(version.substring(version.lastIndexOf(".") + 1));
-	}
-
-	public String getSeparator() {
-		return separator;
-	}
-
-	public int getBuild() {
-		return build;
-	}
+// A marker interface for all records that are serialized to JSON as part of the public api.
+public interface JsonModel {
 }

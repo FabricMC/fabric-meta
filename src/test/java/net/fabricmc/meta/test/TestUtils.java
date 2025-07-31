@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 FabricMC
+ * Copyright (c) 2023 FabricMC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,17 @@
  * limitations under the License.
  */
 
-package net.fabricmc.meta.web.models;
+package net.fabricmc.meta.test;
 
-public interface LoaderInfoBase {
-	MavenBuildVersion getLoader();
+import io.javalin.Javalin;
+
+import net.fabricmc.meta.FabricMeta;
+import net.fabricmc.meta.web.CacheHandler;
+import net.fabricmc.meta.web.WebServer;
+
+public class TestUtils {
+	public static Javalin createServer() {
+		CacheHandler cacheHandler = new CacheHandler();
+		return new WebServer(() -> FabricMeta.database, cacheHandler).createServer();
+	}
 }

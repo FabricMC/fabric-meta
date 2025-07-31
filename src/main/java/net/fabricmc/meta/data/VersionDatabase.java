@@ -30,13 +30,13 @@ import javax.xml.stream.XMLStreamException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import net.fabricmc.meta.models.BaseVersion;
+import net.fabricmc.meta.models.MavenBuildGameVersion;
+import net.fabricmc.meta.models.MavenBuildVersion;
+import net.fabricmc.meta.models.MavenUrlVersion;
+import net.fabricmc.meta.models.MavenVersion;
 import net.fabricmc.meta.utils.MinecraftLauncherMeta;
 import net.fabricmc.meta.utils.PomParser;
-import net.fabricmc.meta.web.models.BaseVersion;
-import net.fabricmc.meta.web.models.MavenBuildGameVersion;
-import net.fabricmc.meta.web.models.MavenBuildVersion;
-import net.fabricmc.meta.web.models.MavenUrlVersion;
-import net.fabricmc.meta.web.models.MavenVersion;
 
 public class VersionDatabase {
 	public static final PomParser MAPPINGS_PARSER = new PomParser(LOCAL_FABRIC_MAVEN_URL + "net/fabricmc/yarn/maven-metadata.xml");
@@ -63,10 +63,8 @@ public class VersionDatabase {
 		database.intermediary = INTERMEDIARY_PARSER.getMeta(MavenVersion::new, "net.fabricmc:intermediary:");
 		database.loader = LOADER_PARSER.getMeta(MavenBuildVersion::new, "net.fabricmc:fabric-loader:", list -> {
 			for (BaseVersion version : list) {
-				if (isPublicLoaderVersion(version)) {
-					version.setStable(true);
-					break;
-				}
+				version.setStable(true);
+				break;
 			}
 		});
 		database.installer = INSTALLER_PARSER.getMeta(MavenUrlVersion::new, "net.fabricmc:fabric-installer:");
@@ -114,14 +112,6 @@ public class VersionDatabase {
 	}
 
 	public List<MavenBuildVersion> getLoader() {
-		return loader.stream().filter(VersionDatabase::isPublicLoaderVersion).collect(Collectors.toList());
-	}
-
-	private static boolean isPublicLoaderVersion(BaseVersion version) {
-		return true;
-	}
-
-	public List<MavenBuildVersion> getAllLoader() {
 		return Collections.unmodifiableList(loader);
 	}
 }

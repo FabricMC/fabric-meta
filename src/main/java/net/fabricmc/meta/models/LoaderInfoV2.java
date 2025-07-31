@@ -14,32 +14,41 @@
  * limitations under the License.
  */
 
-package net.fabricmc.meta.web.models;
+package net.fabricmc.meta.models;
 
 import com.google.gson.JsonObject;
 import org.jetbrains.annotations.Nullable;
 
 import net.fabricmc.meta.utils.LoaderMeta;
 
-public class LoaderInfoV1 implements LoaderInfoBase {
+public class LoaderInfoV2 implements LoaderInfoBase {
 	MavenBuildVersion loader;
-	MavenBuildGameVersion mappings;
+	MavenVersion intermediary;
 
 	@Nullable
 	JsonObject launcherMeta;
 
-	public LoaderInfoV1(MavenBuildVersion loader, MavenBuildGameVersion mappings) {
+	public LoaderInfoV2(MavenBuildVersion loader, MavenVersion intermediary) {
 		this.loader = loader;
-		this.mappings = mappings;
+		this.intermediary = intermediary;
 	}
 
-	public LoaderInfoV1 populateMeta() {
-		launcherMeta = LoaderMeta.getMeta(this);
+	public LoaderInfoV2 populateMeta() {
+		launcherMeta = LoaderMeta.getMeta(getLoader().getMaven());
 		return this;
 	}
 
 	@Override
 	public MavenBuildVersion getLoader() {
 		return loader;
+	}
+
+	public MavenVersion getIntermediary() {
+		return intermediary;
+	}
+
+	@Nullable
+	public JsonObject getLauncherMeta() {
+		return launcherMeta;
 	}
 }
