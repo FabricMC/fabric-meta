@@ -36,7 +36,7 @@ import net.fabricmc.meta.web.WebServer;
 
 // Tests that the local response matches the remote response of the version in prod
 public class ComparisonTests {
-	private static final String REMOTE_FABRIC_META_URL = "https://meta.fabricmc.net";
+	private static final String REMOTE_FABRIC_META_URL = "https://meta.legacyfabric.net";
 
 	@BeforeAll
 	static void beforeAll() {
@@ -94,12 +94,12 @@ public class ComparisonTests {
 	}
 
 	private static String getRemoteEndpoint(String endpoint) throws Exception {
-			var httpClient = java.net.http.HttpClient.newHttpClient();
-			HttpRequest request = HttpRequest.newBuilder()
-					.uri(URI.create(REMOTE_FABRIC_META_URL + endpoint))
-					.build();
-			HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-			assertEquals(200, response.statusCode());
-			return response.body();
+		var httpClient = java.net.http.HttpClient.newHttpClient();
+		HttpRequest request = HttpRequest.newBuilder()
+				.uri(URI.create(REMOTE_FABRIC_META_URL + endpoint))
+				.build();
+		HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+		assertEquals(200, response.statusCode());
+		return response.body();
 	}
 }

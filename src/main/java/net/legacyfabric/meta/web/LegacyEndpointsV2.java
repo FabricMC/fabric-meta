@@ -56,7 +56,7 @@ public class LegacyEndpointsV2 extends EndpointsV2 {
 			try {
 				json = IOUtils.toString(new URL(version.getUrl()), StandardCharsets.UTF_8);
 			} catch (IOException e) {
-
+				e.printStackTrace();
 			}
 		}
 

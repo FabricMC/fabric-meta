@@ -56,7 +56,7 @@ public class MinecraftLauncherMeta {
 	public static MinecraftLauncherMeta getAllMeta() throws IOException {
 		List<Version> versions = new ArrayList<>();
 		versions.addAll(getMeta().versions);
-//		versions.addAll(getExperimentalMeta().versions);
+		//		versions.addAll(getExperimentalMeta().versions);
 		versions.addAll(getMissingMeta().versions);
 
 		// Order by release time

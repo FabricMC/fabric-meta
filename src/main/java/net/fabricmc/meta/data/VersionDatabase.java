@@ -126,7 +126,6 @@ public class VersionDatabase {
 		return Collections.unmodifiableList(loader);
 	}
 
-
 	// LegacyFabric extensions
 	public PomParser getMappingsParser() {
 		return MAPPINGS_PARSER;
