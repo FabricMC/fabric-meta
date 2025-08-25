@@ -1,0 +1,16 @@
+{
+  "formatVersion": 1,
+  "+libraries": [
+    {
+      "name": "net.legacyfabric:intermediary:${minecraft_version}",
+      "url": "https://maven.legacyfabric.net/"
+    }
+  ],
+  "+traits": [
+    "noapplet"
+  ],
+  "minecraftArguments": "${auth_player_name} ${auth_session} --gameDir ${game_directory} --assetsDir ${game_assets}",
+  "name": "Intermediary Mappings",
+  "uid": "net.fabricmc.intermediary",
+  "version": "${minecraft_version}"
+}

@@ -1,0 +1,12 @@
+{
+  "formatVersion": 1,
+  "+libraries": [
+    {
+      "name": "net.legacyfabric:intermediary:${minecraft_version}",
+      "url": "https://maven.legacyfabric.net/"
+    }
+  ],
+  "name": "Intermediary Mappings",
+  "uid": "net.fabricmc.intermediary",
+  "version": "${minecraft_version}"
+}
