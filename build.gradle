@@ -1,8 +1,5 @@
-//file:noinspection GroovyAssignabilityCheck
-//file:noinspection GroovyAccessibility
 plugins {
     id 'java'
-//	id 'application'
 	id 'maven-publish'
 	id 'checkstyle'
 	id 'eclipse'
@@ -10,7 +7,7 @@ plugins {
     id "com.diffplug.spotless" version "6.23.3"
 }
 
-def legacyVersion = "1.7.8"
+def legacyVersion = "1.8.0"
 group 'net.legacyfabric'
 version '1.5.3'
 
@@ -67,8 +64,6 @@ jar {
 	duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 
-//mainClassName = 'net.fabricmc.meta.FabricMeta'
-
 tasks.withType(JavaCompile).configureEach {
 	it.options.encoding = "UTF-8"
 
@@ -81,25 +76,31 @@ spotless {
 	java {
 		licenseHeaderFile(rootProject.file("HEADER"))
 		removeUnusedImports()
-		importOrder('java', 'javax', '', 'net.fabricmc')
+		importOrder('java', 'javax', '', 'net.fabricmc', 'net.legacyfabric')
 		indentWithTabs()
 		trimTrailingWhitespace()
+        targetExclude("**/BuildConstants.java")
 	}
+    format("mixed", com.diffplug.gradle.spotless.JavaExtension) {
+        licenseHeaderFile(rootProject.file("LF-HEADER"))
+        removeUnusedImports()
+        importOrder('java', 'javax', '', 'net.fabricmc', 'net.legacyfabric')
+        indentWithTabs()
+        trimTrailingWhitespace()
+        target('**/VersionDatabase.java', '**/MinecraftLauncherMeta.java','**/EndpointsV2.java',
+                '**/ProfileHandler.java', '**/MavenUrlVersion.java', '**/ServerBootstrap.java')
+        targetExclude("**/BuildConstants.java")
+    }
+    format("legacyFabric", com.diffplug.gradle.spotless.JavaExtension) {
+        licenseHeaderFile(rootProject.file("LF-ONLY-HEADER"))
+        removeUnusedImports()
+        importOrder('java', 'javax', '', 'net.fabricmc', 'net.legacyfabric')
+        indentWithTabs()
+        trimTrailingWhitespace()
+        target('**/legacyfabric/**')
+        targetExclude("**/BuildConstants.java")
+    }
 }
-
-//license {
-//    matching(excludes: ['**/BuildConstants.java'], includes: ['**/legacyfabric/**']) {
-//        header = file("LF-ONLY-HEADER")
-//    }
-//    matching(includes: ['**/VersionDatabase.java', '**/MinecraftLauncherMeta.java','**/EndpointsV2.java',
-//                        '**/ProfileHandler.java', '**/MavenUrlVersion.java', '**/ServerBootstrap.java'
-//    ]) {
-//        header = file('LF-HEADER')
-//    }
-//    header file('HEADER')
-//    include '**/*.java'
-//    exclude '**/BuildConstants.java'
-//}
 
 checkstyle {
 	configFile = file('checkstyle.xml')

@@ -16,34 +16,35 @@
 
 package net.legacyfabric.meta.web;
 
-import io.javalin.core.util.Header;
-import io.javalin.http.Context;
-import net.fabricmc.meta.web.WebServer;
-
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import io.javalin.http.Context;
+import io.javalin.http.Header;
+
+import net.fabricmc.meta.web.WebServer;
+
 public class LegacyWebServer extends WebServer {
-    public static void stringGet(String route, Supplier<String> supplier) {
-        javalin.get(route, ctx -> {
-            String object = supplier.get();
-            handleString(ctx, object);
-        });
-    }
+	public static void stringGet(String route, Supplier<String> supplier) {
+		javalin.get(route, ctx -> {
+			String object = supplier.get();
+			handleString(ctx, object);
+		});
+	}
 
-    public static void stringGet(String route, Function<Context, String> supplier) {
-        javalin.get(route, ctx -> {
-            String object = supplier.apply(ctx);
-            handleString(ctx, object);
-        });
-    }
+	public static void stringGet(String route, Function<Context, String> supplier) {
+		javalin.get(route, ctx -> {
+			String object = supplier.apply(ctx);
+			handleString(ctx, object);
+		});
+	}
 
-    public static void handleString(Context ctx, String string) {
-        if (string == null) {
-            string = "";
-            ctx.status(400);
-        }
+	public static void handleString(Context ctx, String string) {
+		if (string == null) {
+			string = "";
+			ctx.status(400);
+		}
 
-        ctx.contentType("application/json").header(Header.CACHE_CONTROL, "public, max-age=60").result(string);
-    }
+		ctx.contentType("application/json").header(Header.CACHE_CONTROL, "public, max-age=60").result(string);
+	}
 }

@@ -16,49 +16,50 @@
 
 package net.legacyfabric.meta.web;
 
+import java.io.IOException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.Objects;
+
 import io.javalin.http.Context;
+import org.apache.commons.io.IOUtils;
+
 import net.fabricmc.meta.FabricMeta;
 import net.fabricmc.meta.utils.MinecraftLauncherMeta;
 import net.fabricmc.meta.web.EndpointsV2;
 import net.fabricmc.meta.web.WebServer;
 
 import net.legacyfabric.meta.BuildConstants;
-import org.apache.commons.io.IOUtils;
-
-import java.io.IOException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.util.Objects;
 
 public class LegacyEndpointsV2 extends EndpointsV2 {
-    public static void setup() {
-        WebServer.jsonGet("/v2/meta", () -> BuildConstants.VERSION);
+	public static void setup() {
+		WebServer.jsonGet("/v2/meta", () -> BuildConstants.VERSION);
 
-        LegacyWebServer.stringGet("/v2/manifest/:game_version", LegacyEndpointsV2::getVersionManifest);
-        WebServer.jsonGet("/v2/versions/manifest", context -> FabricMeta.database.launcherMeta);
-    }
+		LegacyWebServer.stringGet("/v2/manifest/{game_version}", LegacyEndpointsV2::getVersionManifest);
+		WebServer.jsonGet("/v2/versions/manifest", context -> FabricMeta.database.launcherMeta);
+	}
 
-    private static String getVersionManifest(Context context) {
-        if (!context.pathParamMap().containsKey("game_version")) {
-            return null;
-        }
+	private static String getVersionManifest(Context context) {
+		if (!context.pathParamMap().containsKey("game_version")) {
+			return null;
+		}
 
-        String gameVersion = context.pathParam("game_version");
+		String gameVersion = context.pathParam("game_version");
 
-        MinecraftLauncherMeta.Version version = FabricMeta.database.launcherMeta.getVersions().stream()
-                .filter(v -> Objects.equals(v.getId(), gameVersion))
-                .findFirst().orElse(null);
+		MinecraftLauncherMeta.Version version = FabricMeta.database.launcherMeta.getVersions().stream()
+				.filter(v -> Objects.equals(v.getId(), gameVersion))
+				.findFirst().orElse(null);
 
-        String json = null;
+		String json = null;
 
-        if (version != null) {
-            try {
-                json = IOUtils.toString(new URL(version.getUrl()), StandardCharsets.UTF_8);
-            } catch (IOException e) {
+		if (version != null) {
+			try {
+				json = IOUtils.toString(new URL(version.getUrl()), StandardCharsets.UTF_8);
+			} catch (IOException e) {
 
-            }
-        }
+			}
+		}
 
-        return json;
-    }
+		return json;
+	}
 }

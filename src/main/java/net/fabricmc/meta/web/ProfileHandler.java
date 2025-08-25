@@ -34,13 +34,12 @@ import java.util.zip.ZipOutputStream;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.fabricmc.meta.data.VersionDatabase;
-import net.legacyfabric.meta.data.LegacyVersionDatabase;
-import net.legacyfabric.meta.utils.LegacyReference;
 import org.apache.commons.io.IOUtils;
 
 import net.fabricmc.meta.utils.Reference;
 import net.fabricmc.meta.web.models.LoaderInfoV2;
+
+import net.legacyfabric.meta.utils.LegacyReference;
 
 public class ProfileHandler {
 	private static final Executor EXECUTOR = Executors.newFixedThreadPool(2);

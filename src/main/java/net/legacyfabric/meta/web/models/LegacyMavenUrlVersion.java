@@ -17,16 +17,16 @@
 package net.legacyfabric.meta.web.models;
 
 import net.fabricmc.meta.web.models.MavenUrlVersion;
-import net.legacyfabric.meta.data.LegacyVersionDatabase;
+
 import net.legacyfabric.meta.utils.LegacyReference;
 
 public class LegacyMavenUrlVersion extends MavenUrlVersion {
-    public LegacyMavenUrlVersion(String maven) {
-        super(maven);
-    }
+	public LegacyMavenUrlVersion(String maven) {
+		super(maven);
+	}
 
-    @Override
-    public String getMavenUrl() {
-        return LegacyReference.LEGACY_FABRIC_MAVEN_URL;
-    }
+	@Override
+	public String getMavenUrl() {
+		return LegacyReference.LEGACY_FABRIC_MAVEN_URL;
+	}
 }

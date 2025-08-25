@@ -48,12 +48,12 @@ public class ComparisonTests {
 				// V1
 				"/v1/versions",
 				"/v1/versions/game",
-				"/v1/versions/game/1.14.4",
+				"/v1/versions/game/1.13.2",
 				"/v1/versions/mappings",
-				"/v1/versions/mappings/1.16.5",
+				"/v1/versions/mappings/1.12.2",
 				"/v1/versions/loader",
-				"/v1/versions/loader/1.20.4",
-				"/v1/versions/loader/1.20.4/0.15.2",
+				"/v1/versions/loader/1.8.9",
+				"/v1/versions/loader/1.8.9/0.15.2",
 
 				// V2
 				"/v2/versions",
@@ -61,18 +61,18 @@ public class ComparisonTests {
 				"/v2/versions/game/yarn",
 				"/v2/versions/game/intermediary",
 				"/v2/versions/yarn",
-				"/v2/versions/yarn/1.20.4",
+				"/v2/versions/yarn/1.8.9",
 				"/v2/versions/intermediary",
-				"/v2/versions/intermediary/1.20.4",
+				"/v2/versions/intermediary/1.8.9",
 				"/v2/versions/loader",
 				"/v2/versions/loader?limit=5",
 				"/v2/versions/loader?limit=5&skip=5",
 				// Disabled as this forces all the load metadata to be downloaded, timing out the test.
-				//"/v2/versions/loader/1.20.4",
-				"/v2/versions/loader/1.20.4/0.15.2",
+				//"/v2/versions/loader/1.8.9",
+				"/v2/versions/loader/1.8.9/0.15.2",
 				"/v2/versions/installer"
 				// Disabled as this includes the release time, and is not stable
-				//"/v2/versions/loader/1.20.4/0.15.2/profile/json"
+				//"/v2/versions/loader/1.8.9/0.15.2/profile/json"
 		).map(Arguments::of);
 	}
 
@@ -94,13 +94,12 @@ public class ComparisonTests {
 	}
 
 	private static String getRemoteEndpoint(String endpoint) throws Exception {
-		try (var httpClient = java.net.http.HttpClient.newHttpClient()) {
+			var httpClient = java.net.http.HttpClient.newHttpClient();
 			HttpRequest request = HttpRequest.newBuilder()
 					.uri(URI.create(REMOTE_FABRIC_META_URL + endpoint))
 					.build();
 			HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 			assertEquals(200, response.statusCode());
 			return response.body();
-		}
 	}
 }

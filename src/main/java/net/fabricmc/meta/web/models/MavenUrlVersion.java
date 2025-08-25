@@ -34,7 +34,7 @@ public class MavenUrlVersion extends MavenVersion {
 				);
 	}
 
-    public String getMavenUrl() {
-        return Reference.FABRIC_MAVEN_URL;
-    }
+	public String getMavenUrl() {
+		return Reference.FABRIC_MAVEN_URL;
+	}
 }

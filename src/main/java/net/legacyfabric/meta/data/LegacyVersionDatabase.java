@@ -16,59 +16,60 @@
 
 package net.legacyfabric.meta.data;
 
+import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import net.fabricmc.meta.data.VersionDatabase;
 import net.fabricmc.meta.utils.PomParser;
 import net.fabricmc.meta.web.models.BaseVersion;
 import net.fabricmc.meta.web.models.MavenBuildVersion;
 import net.fabricmc.meta.web.models.MavenUrlVersion;
+
 import net.legacyfabric.meta.utils.LegacyReference;
 import net.legacyfabric.meta.web.models.LegacyMavenUrlVersion;
 
-import java.util.List;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
 public class LegacyVersionDatabase extends VersionDatabase {
-    public static final PomParser MAPPINGS_PARSER = new PomParser(LegacyReference.LOCAL_LEGACY_FABRIC_MAVEN_URL + "net/legacyfabric/yarn/maven-metadata.xml");
-    public static final PomParser INTERMEDIARY_PARSER = new PomParser(LegacyReference.LOCAL_LEGACY_FABRIC_MAVEN_URL + "net/legacyfabric/intermediary/maven-metadata.xml");
-    public static final PomParser INSTALLER_PARSER = new PomParser(LegacyReference.LOCAL_LEGACY_FABRIC_MAVEN_URL + "net/legacyfabric/fabric-installer/maven-metadata.xml");
+	public static final PomParser MAPPINGS_PARSER = new PomParser(LegacyReference.LOCAL_LEGACY_FABRIC_MAVEN_URL + "net/legacyfabric/yarn/maven-metadata.xml");
+	public static final PomParser INTERMEDIARY_PARSER = new PomParser(LegacyReference.LOCAL_LEGACY_FABRIC_MAVEN_URL + "net/legacyfabric/intermediary/maven-metadata.xml");
+	public static final PomParser INSTALLER_PARSER = new PomParser(LegacyReference.LOCAL_LEGACY_FABRIC_MAVEN_URL + "net/legacyfabric/fabric-installer/maven-metadata.xml");
 
-    public PomParser getMappingsParser() {
-        return MAPPINGS_PARSER;
-    }
+	public PomParser getMappingsParser() {
+		return MAPPINGS_PARSER;
+	}
 
-    public String getMappingsPrefix() {
-        return "net.legacyfabric:yarn:";
-    }
+	public String getMappingsPrefix() {
+		return "net.legacyfabric:yarn:";
+	}
 
-    public PomParser getIntermediaryParser() {
-        return INTERMEDIARY_PARSER;
-    }
+	public PomParser getIntermediaryParser() {
+		return INTERMEDIARY_PARSER;
+	}
 
-    public String getIntermediaryPrefix() {
-        return "net.legacyfabric:intermediary:";
-    }
+	public String getIntermediaryPrefix() {
+		return "net.legacyfabric:intermediary:";
+	}
 
-    public PomParser getInstallerParser() {
-        return INSTALLER_PARSER;
-    }
+	public PomParser getInstallerParser() {
+		return INSTALLER_PARSER;
+	}
 
-    public String getInstallerPrefix() {
-        return "net.legacyfabric:fabric-installer:";
-    }
+	public String getInstallerPrefix() {
+		return "net.legacyfabric:fabric-installer:";
+	}
 
-    @Override
-    public Function<String, MavenUrlVersion> getMavenUrlVersionBuilder() {
-        return LegacyMavenUrlVersion::new;
-    }
+	@Override
+	public Function<String, MavenUrlVersion> getMavenUrlVersionBuilder() {
+		return LegacyMavenUrlVersion::new;
+	}
 
-    public List<MavenBuildVersion> getLoader() {
-        return loader.stream().filter(LegacyVersionDatabase::isPublicLoaderVersion).collect(Collectors.toList());
-    }
+	public List<MavenBuildVersion> getLoader() {
+		return loader.stream().filter(LegacyVersionDatabase::isPublicLoaderVersion).collect(Collectors.toList());
+	}
 
-    private static boolean isPublicLoaderVersion(BaseVersion version) {
-        String[] ver = version.getVersion().split("\\.");
-        return Integer.parseInt(ver[1]) >= 13
-                || Integer.parseInt(ver[0]) > 0;
-    }
+	private static boolean isPublicLoaderVersion(BaseVersion version) {
+		String[] ver = version.getVersion().split("\\.");
+		return Integer.parseInt(ver[1]) >= 13
+				|| Integer.parseInt(ver[0]) > 0;
+	}
 }

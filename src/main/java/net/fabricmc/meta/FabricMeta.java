@@ -30,13 +30,14 @@ import java.util.concurrent.TimeUnit;
 
 import com.google.gson.stream.JsonReader;
 import org.jetbrains.annotations.VisibleForTesting;
-import net.legacyfabric.meta.data.LegacyVersionDatabase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.fabricmc.meta.data.VersionDatabase;
 import net.fabricmc.meta.utils.Reference;
 import net.fabricmc.meta.web.WebServer;
+
+import net.legacyfabric.meta.data.LegacyVersionDatabase;
 
 public class FabricMeta {
 	public static volatile VersionDatabase database;

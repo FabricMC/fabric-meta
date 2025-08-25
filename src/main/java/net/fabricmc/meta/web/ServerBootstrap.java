@@ -39,12 +39,12 @@ import io.javalin.http.Context;
 import io.javalin.http.Handler;
 import io.javalin.http.Header;
 import io.javalin.http.InternalServerErrorResponse;
-import net.legacyfabric.meta.utils.LegacyReference;
 import org.apache.commons.io.FileUtils;
 
 import net.fabricmc.meta.FabricMeta;
-import net.fabricmc.meta.utils.Reference;
 import net.fabricmc.meta.web.models.BaseVersion;
+
+import net.legacyfabric.meta.utils.LegacyReference;
 
 public class ServerBootstrap {
 	private static final Path CACHE_DIR = Paths.get("metadata", "installer");
@@ -199,7 +199,7 @@ public class ServerBootstrap {
 		return 86400;
 	}
 
-    private static String getInstallerURL() {
-        return LegacyReference.LOCAL_LEGACY_FABRIC_MAVEN_URL + "net/legacyfabric/fabric-installer/%1$s/fabric-installer-%1$s-server.jar";
-    }
+	private static String getInstallerURL() {
+		return LegacyReference.LOCAL_LEGACY_FABRIC_MAVEN_URL + "net/legacyfabric/fabric-installer/%1$s/fabric-installer-%1$s-server.jar";
+	}
 }

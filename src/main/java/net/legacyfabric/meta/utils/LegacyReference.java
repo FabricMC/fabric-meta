@@ -19,17 +19,17 @@ package net.legacyfabric.meta.utils;
 import net.fabricmc.meta.FabricMeta;
 
 public class LegacyReference {
-    /**
-     * Legacy Fabric maven url to expose to the user.
-     *
-     * <p>This shouldn't be directly accessed by this meta server instance!
-     */
-    public static final String LEGACY_FABRIC_MAVEN_URL = "https://maven.legacyfabric.net/";
+	/**
+	 * Legacy Fabric maven url to expose to the user.
+	 *
+	 * <p>This shouldn't be directly accessed by this meta server instance!
+	 */
+	public static final String LEGACY_FABRIC_MAVEN_URL = "https://maven.legacyfabric.net/";
 
-    /**
-     * Legacy Fabric maven url to access from this meta server instance.
-     *
-     * <p>This is not to be included in any output data!
-     */
-    public static final String LOCAL_LEGACY_FABRIC_MAVEN_URL = FabricMeta.getConfig().getOrDefault("localLegacyFabricMavenUrl", LEGACY_FABRIC_MAVEN_URL);
+	/**
+	 * Legacy Fabric maven url to access from this meta server instance.
+	 *
+	 * <p>This is not to be included in any output data!
+	 */
+	public static final String LOCAL_LEGACY_FABRIC_MAVEN_URL = FabricMeta.getConfig().getOrDefault("localLegacyFabricMavenUrl", LEGACY_FABRIC_MAVEN_URL);
 }
