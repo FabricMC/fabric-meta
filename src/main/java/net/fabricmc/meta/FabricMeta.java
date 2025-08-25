@@ -29,6 +29,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import com.google.gson.stream.JsonReader;
+import org.jetbrains.annotations.VisibleForTesting;
 import net.legacyfabric.meta.data.LegacyVersionDatabase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,22 +76,32 @@ public class FabricMeta {
 		update();
 
 		ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
-		executorService.scheduleAtFixedRate(FabricMeta::update, 1, 1, TimeUnit.MINUTES);
+		executorService.scheduleWithFixedDelay(FabricMeta::update, 1, 1, TimeUnit.MINUTES);
 
 		WebServer.start();
 	}
 
-	private static void update(){
+	private static void update() {
 		try {
 			database = VersionDatabase.generate(new LegacyVersionDatabase());
 			updateHeartbeat();
 		} catch (Throwable t) {
-			if (database == null){
+			if (database == null) {
 				throw new RuntimeException(t);
 			} else {
 				LOGGER.warn("update failed", t);
 			}
 		}
+	}
+
+	@VisibleForTesting
+	public static void setupForTesting() {
+		if (configInitialized) {
+			return;
+		}
+
+		configInitialized = true;
+		update();
 	}
 
 	private static void updateHeartbeat() {
@@ -99,8 +110,8 @@ public class FabricMeta {
 		try {
 			HttpURLConnection conn = (HttpURLConnection) heartbeatUrl.openConnection();
 			conn.setRequestMethod("HEAD");
-			conn.setConnectTimeout(500);
-			conn.setReadTimeout(500);
+			conn.setConnectTimeout(2000);
+			conn.setReadTimeout(5000);
 
 			int status = conn.getResponseCode();
 

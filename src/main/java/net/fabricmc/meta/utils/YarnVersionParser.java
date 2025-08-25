@@ -17,7 +17,6 @@
 package net.fabricmc.meta.utils;
 
 public class YarnVersionParser {
-
 	private String mappingsVersion;
 	private String minecraftVersion;
 

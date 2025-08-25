@@ -17,7 +17,6 @@
 package net.fabricmc.meta.web.models;
 
 public class MavenVersion extends BaseVersion {
-
 	String maven;
 
 	public MavenVersion(String maven, boolean stable) {

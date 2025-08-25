@@ -2,11 +2,12 @@
 //file:noinspection GroovyAccessibility
 plugins {
     id 'java'
-	id 'application'
+//	id 'application'
 	id 'maven-publish'
-	id 'org.cadixdev.licenser' version '0.6.1'
+	id 'checkstyle'
 	id 'eclipse'
     id "com.github.gmazzo.buildconfig" version "5.2.0"
+    id "com.diffplug.spotless" version "6.23.3"
 }
 
 def legacyVersion = "1.7.8"
@@ -18,20 +19,35 @@ version = legacyVersion + "+fabricmc." + project.version
 def ENV = System.getenv()
 version = version + (ENV.GITHUB_ACTIONS ? "" : "+local")
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
-
-archivesBaseName = "fabric-meta"
+base {
+	archivesName = "fabric-meta"
+}
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-	implementation group: 'com.google.code.gson', name: 'gson', version: '2.8.9'
-	implementation group: 'io.javalin', name: 'javalin', version: '3.13.11'
-	implementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.32'
-	implementation group: 'commons-io', name: 'commons-io', version: '2.8.0'
+	implementation 'com.google.code.gson:gson:2.10.1'
+	implementation 'io.javalin:javalin:5.6.3'
+	implementation 'org.slf4j:slf4j-simple:2.0.9'
+	implementation 'commons-io:commons-io:2.15.1'
+	implementation 'org.jetbrains:annotations:24.1.0'
+
+	testImplementation 'org.junit.jupiter:junit-jupiter:5.9.2'
+	testImplementation "org.junit.jupiter:junit-jupiter-params:5.9.2"
+	testImplementation 'io.javalin:javalin-testtools:5.6.3'
+
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+java {
+	sourceCompatibility = 21
+	targetCompatibility = 21
+}
+
+test {
+	useJUnitPlatform()
 }
 
 buildConfig {
@@ -51,35 +67,50 @@ jar {
 	duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 
-mainClassName = 'net.fabricmc.meta.FabricMeta'
+//mainClassName = 'net.fabricmc.meta.FabricMeta'
 
 tasks.withType(JavaCompile).configureEach {
 	it.options.encoding = "UTF-8"
 
-	if (JavaVersion.current().isJava9Compatible()) {
-		it.options.release = 8
+	it.options.release = 21
+}
+
+spotless {
+	lineEndings = com.diffplug.spotless.LineEnding.UNIX
+
+	java {
+		licenseHeaderFile(rootProject.file("HEADER"))
+		removeUnusedImports()
+		importOrder('java', 'javax', '', 'net.fabricmc')
+		indentWithTabs()
+		trimTrailingWhitespace()
 	}
 }
 
-license {
-	matching(excludes: ['**/BuildConstants.java'], includes: ['**/legacyfabric/**']) {
-		header = file("LF-ONLY-HEADER")
-	}
-	matching(includes: ['**/VersionDatabase.java', '**/MinecraftLauncherMeta.java','**/EndpointsV2.java',
-						'**/ProfileHandler.java', '**/MavenUrlVersion.java', '**/ServerBootstrap.java'
-	]) {
-		header = file('LF-HEADER')
-	}
-	header file('HEADER')
-	include '**/*.java'
-	exclude '**/BuildConstants.java'
+//license {
+//    matching(excludes: ['**/BuildConstants.java'], includes: ['**/legacyfabric/**']) {
+//        header = file("LF-ONLY-HEADER")
+//    }
+//    matching(includes: ['**/VersionDatabase.java', '**/MinecraftLauncherMeta.java','**/EndpointsV2.java',
+//                        '**/ProfileHandler.java', '**/MavenUrlVersion.java', '**/ServerBootstrap.java'
+//    ]) {
+//        header = file('LF-HEADER')
+//    }
+//    header file('HEADER')
+//    include '**/*.java'
+//    exclude '**/BuildConstants.java'
+//}
+
+checkstyle {
+	configFile = file('checkstyle.xml')
+	toolVersion = "10.12.1"
 }
 
 publishing {
 	publications {
 		maven(MavenPublication) {
 			groupId project.group
-			artifactId project.archivesBaseName
+			artifactId project.base.archivesName.get()
 			version project.version
 
 			artifact jar
