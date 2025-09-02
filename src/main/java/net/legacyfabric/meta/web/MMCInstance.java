@@ -118,7 +118,10 @@ public class MMCInstance {
 		files.add(new FileEntry("instance.cfg"));
 		files.add(new FileEntry("mmc-pack.json"));
 
-		if (lwjgl == LWJGLVersions.LWJGL2) files.add(new FileEntry("patches/org.lwjgl.lwjgl.json"));
+		if (lwjgl == LWJGLVersions.LWJGL2) {
+			files.add(new FileEntry("patches/org.lwjgl.lwjgl.json"));
+			files.add(new FileEntry("patches/org.lwjgl.json"));
+		}
 
 		String intermediaryPatch = switch (infoV2.getIntermediary().getVersion()) {
 		case "1.6.4" -> "patches/net.fabricmc.intermediary.pre-1.7.json";
