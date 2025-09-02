@@ -38,6 +38,7 @@ public class LegacyEndpointsV2 extends EndpointsV2 {
 		LegacyWebServer.stringGet("/v2/manifest/{game_version}", LegacyEndpointsV2::getVersionManifest);
 		WebServer.jsonGet("/v2/versions/manifest", context -> FabricMeta.database.launcherMeta);
 		MMCInstance.setup();
+		YarnDiff.setup();
 	}
 
 	private static String getVersionManifest(Context context) {
