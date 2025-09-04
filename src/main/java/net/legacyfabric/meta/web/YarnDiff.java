@@ -122,7 +122,8 @@ public class YarnDiff {
 							namedSource,
 							fieldMapping.getName(targetNamespace),
 							targetField.getName(targetNamespace),
-							fieldMapping.getDesc(targetNamespace)
+							fieldMapping.getDesc(targetNamespace),
+							targetField.getDesc(targetNamespace)
 					));
 				}
 			}
@@ -135,12 +136,14 @@ public class YarnDiff {
 
 				if (targetField == null) continue;
 
-				if (!Objects.equals(fieldMapping.getName(targetNamespace), targetField.getName(targetNamespace))) {
+				if (!Objects.equals(fieldMapping.getName(targetNamespace), targetField.getName(targetNamespace)) ||
+						!Objects.equals(fieldMapping.getDesc(targetNamespace), targetField.getDesc(targetNamespace))) {
 					diff.methods.add(new MappingsDiff.ClassEntry(
 							namedSource,
 							fieldMapping.getName(targetNamespace),
 							targetField.getName(targetNamespace),
-							fieldMapping.getDesc(targetNamespace)
+							fieldMapping.getDesc(targetNamespace),
+							targetField.getDesc(targetNamespace)
 					));
 				}
 			}
