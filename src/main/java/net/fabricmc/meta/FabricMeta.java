@@ -72,17 +72,17 @@ public class FabricMeta {
 
 		LOGGER.info("Starting with local maven {}", Reference.LOCAL_FABRIC_MAVEN_URL);
 
-		update();
+		update(true);
 
 		ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
-		executorService.scheduleWithFixedDelay(FabricMeta::update, 1, 1, TimeUnit.MINUTES);
+		executorService.scheduleWithFixedDelay(() -> update(false), 1, 1, TimeUnit.MINUTES);
 
 		WebServer.start();
 	}
 
-	private static void update() {
+	private static void update(boolean initial) {
 		try {
-			database = VersionDatabase.generate();
+			database = VersionDatabase.generate(initial);
 			updateHeartbeat();
 		} catch (Throwable t) {
 			if (database == null) {
@@ -100,7 +100,7 @@ public class FabricMeta {
 		}
 
 		configInitialized = true;
-		update();
+		update(false);
 	}
 
 	private static void updateHeartbeat() {

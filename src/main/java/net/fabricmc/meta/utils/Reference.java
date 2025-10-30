@@ -32,4 +32,9 @@ public final class Reference {
 	 * <p>This is not to be included in any output data!
 	 */
 	public static final String LOCAL_FABRIC_MAVEN_URL = FabricMeta.getConfig().getOrDefault("localFabricMavenUrl", FABRIC_MAVEN_URL);
+
+	/**
+	 * Url to the MC metadata json listing all the game versions.
+	 */
+	public static final String MC_METADATA_URL = "https://piston-meta.mojang.com/mc/game/version_manifest.json";
 }

@@ -56,8 +56,8 @@ public class VersionDatabase {
 	private VersionDatabase() {
 	}
 
-	public static VersionDatabase generate() throws IOException, XMLStreamException {
-		long start = System.currentTimeMillis();
+	public static VersionDatabase generate(boolean initial) throws IOException, XMLStreamException {
+		long start = System.nanoTime();
 		VersionDatabase database = new VersionDatabase();
 		database.mappings = MAPPINGS_PARSER.getMeta(MavenBuildGameVersion::new, "net.fabricmc:yarn:");
 		database.intermediary = INTERMEDIARY_PARSER.getMeta(MavenVersion::new, "net.fabricmc:intermediary:");
@@ -70,17 +70,17 @@ public class VersionDatabase {
 			}
 		});
 		database.installer = INSTALLER_PARSER.getMeta(MavenUrlVersion::new, "net.fabricmc:fabric-installer:");
-		database.loadMcData();
-		LOGGER.info("DB update took {} ms", (System.currentTimeMillis() - start));
+		database.loadMcData(initial);
+		LOGGER.info("DB update took {} ms", (System.nanoTime() - start) / 1_000_000);
 		return database;
 	}
 
-	private void loadMcData() throws IOException {
+	private void loadMcData(boolean initial) throws IOException {
 		if (mappings == null || intermediary == null) {
 			throw new RuntimeException("Mappings are null");
 		}
 
-		MinecraftLauncherMeta launcherMeta = MinecraftLauncherMeta.getAllMeta();
+		MinecraftLauncherMeta launcherMeta = MinecraftLauncherMeta.getAllMeta(initial);
 
 		//Sorts in the order of minecraft release dates
 		intermediary = new ArrayList<>(intermediary);
