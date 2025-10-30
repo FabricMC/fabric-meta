@@ -19,6 +19,9 @@ package net.fabricmc.meta.utils;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -26,10 +29,18 @@ import java.util.List;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonParseException;
 import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import net.fabricmc.meta.data.VersionDatabase;
 
 public class MinecraftLauncherMeta {
-	public static final Gson GSON = new GsonBuilder().create();
+	// cache to allow meta to start up even while mc's servers are flaky
+	private static final Path MC_VERSIONS_CACHE = Paths.get("cache", "version_manifest.json");
+	private static final Gson GSON = new GsonBuilder().create();
+	private static final Logger LOGGER = LoggerFactory.getLogger(VersionDatabase.class);
 
 	List<Version> versions;
 
@@ -40,10 +51,31 @@ public class MinecraftLauncherMeta {
 		this.versions = versions;
 	}
 
-	public static MinecraftLauncherMeta getMeta() throws IOException {
-		String url = "https://piston-meta.mojang.com/mc/game/version_manifest.json";
-		String json = IOUtils.toString(new URL(url), StandardCharsets.UTF_8);
-		return GSON.fromJson(json, MinecraftLauncherMeta.class);
+	public static MinecraftLauncherMeta getMeta(boolean allowCache) throws IOException {
+		String cachedJson = Files.exists(MC_VERSIONS_CACHE) ? Files.readString(MC_VERSIONS_CACHE) : null;
+		String url = Reference.MC_METADATA_URL;
+
+		try {
+			String json = IOUtils.toString(new URL(url), StandardCharsets.UTF_8);
+			MinecraftLauncherMeta ret = GSON.fromJson(json, MinecraftLauncherMeta.class);
+			if (ret.versions.isEmpty()) throw new IOException("received empty version list");
+
+			// success, update cache if changed
+			if (!json.equals(cachedJson)) {
+				Files.createDirectories(MC_VERSIONS_CACHE.toAbsolutePath().getParent());
+				Files.writeString(MC_VERSIONS_CACHE, json);
+			}
+
+			return ret;
+		} catch (IOException | JsonParseException e) {
+			if (allowCache && cachedJson != null) {
+				LOGGER.warn("Error retrieving MC metadata, using local cache: {}", e.toString());
+
+				return GSON.fromJson(cachedJson, MinecraftLauncherMeta.class);
+			}
+
+			throw e;
+		}
 	}
 
 	public static MinecraftLauncherMeta getExperimentalMeta() throws IOException {
@@ -52,9 +84,9 @@ public class MinecraftLauncherMeta {
 		return GSON.fromJson(json, MinecraftLauncherMeta.class);
 	}
 
-	public static MinecraftLauncherMeta getAllMeta() throws IOException {
+	public static MinecraftLauncherMeta getAllMeta(boolean allowCache) throws IOException {
 		List<Version> versions = new ArrayList<>();
-		versions.addAll(getMeta().versions);
+		versions.addAll(getMeta(allowCache).versions);
 		versions.addAll(getExperimentalMeta().versions);
 
 		// Order by release time
