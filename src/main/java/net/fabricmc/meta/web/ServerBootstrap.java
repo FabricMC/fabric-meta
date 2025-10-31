@@ -19,7 +19,6 @@ package net.fabricmc.meta.web;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
@@ -167,7 +166,7 @@ public class ServerBootstrap {
 		final String url = String.format(Reference.LOCAL_FABRIC_MAVEN_URL+"net/fabricmc/fabric-installer/%1$s/fabric-installer-%1$s-server.jar", installerVersion);
 
 		System.out.println("Downloading: " + url);
-		FileUtils.copyURLToFile(new URL(url), jar.toFile());
+		FileUtils.copyURLToFile(URI.create(url).toURL(), jar.toFile());
 		return jar;
 	}
 
