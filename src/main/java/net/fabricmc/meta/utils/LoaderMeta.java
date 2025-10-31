@@ -20,7 +20,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.net.URL;
+import java.net.URI;
 
 import com.google.gson.JsonObject;
 import org.apache.commons.io.FileUtils;
@@ -43,7 +43,7 @@ public class LoaderMeta {
 			try {
 				String url = String.format("%s%s/%s", Reference.LOCAL_FABRIC_MAVEN_URL, path, filename);
 				System.out.println("Downloading " + url);
-				FileUtils.copyURLToFile(new URL(url), launcherMetaFile);
+				FileUtils.copyURLToFile(URI.create(url).toURL(), launcherMetaFile);
 			} catch (IOException e) {
 				e.printStackTrace();
 				return null;

@@ -49,7 +49,7 @@ public class EndpointsV2 {
 		WebServer.jsonGet("/v2/versions/yarn/{game_version}", context -> withLimitSkip(context, filter(context, FabricMeta.database.mappings)));
 
 		WebServer.jsonGet("/v2/versions/intermediary", () -> FabricMeta.database.intermediary);
-		WebServer.jsonGet("/v2/versions/intermediary/{game_version}", context -> filter(context, FabricMeta.database.intermediary));
+		WebServer.jsonGet("/v2/versions/intermediary/{game_version}", EndpointsV2::getIntermediaryInfo);
 
 		WebServer.jsonGet("/v2/versions/loader", context -> withLimitSkip(context, FabricMeta.database.getLoader()));
 		WebServer.jsonGet("/v2/versions/loader/{game_version}", context -> withLimitSkip(context, EndpointsV2.getLoaderInfoAll(context)));
@@ -86,6 +86,17 @@ public class EndpointsV2 {
 		return versionList.stream().filter(t -> t.test(context.pathParam("game_version"))).collect(Collectors.toList());
 	}
 
+	private static List<?> getIntermediaryInfo(Context context) {
+		if (!context.pathParamMap().containsKey("game_version")) {
+			return Collections.emptyList();
+		}
+
+		String gameVersion = context.pathParam("game_version");
+		MavenVersion mappings = FabricMeta.database.getIntermediary(gameVersion, true);
+
+		return mappings != null ? Collections.singletonList(mappings) : Collections.emptyList();
+	}
+
 	private static Object getLoaderInfo(Context context) {
 		if (!context.pathParamMap().containsKey("game_version")) {
 			return null;
@@ -102,9 +113,7 @@ public class EndpointsV2 {
 				.filter(mavenBuildVersion -> loaderVersion.equals(mavenBuildVersion.getVersion()))
 				.findFirst().orElse(null);
 
-		MavenVersion mappings = FabricMeta.database.intermediary.stream()
-				.filter(t -> t.test(gameVersion))
-				.findFirst().orElse(null);
+		MavenVersion mappings = FabricMeta.database.getIntermediary(gameVersion, true);
 
 		if (loader == null) {
 			context.status(400);
@@ -126,9 +135,7 @@ public class EndpointsV2 {
 
 		String gameVersion = context.pathParam("game_version");
 
-		MavenVersion mappings = FabricMeta.database.intermediary.stream()
-				.filter(t -> t.test(gameVersion))
-				.findFirst().orElse(null);
+		MavenVersion mappings = FabricMeta.database.getIntermediary(gameVersion, true);
 
 		if (mappings == null) {
 			return Collections.emptyList();

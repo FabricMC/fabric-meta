@@ -17,6 +17,7 @@
 package net.fabricmc.meta.utils;
 
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
@@ -24,7 +25,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -48,7 +51,7 @@ public class PomParser {
 	private void load() throws IOException, XMLStreamException {
 		versions.clear();
 
-		URL url = new URL(path);
+		URL url = URI.create(path).toURL();
 		URLConnection conn = url.openConnection();
 		conn.setConnectTimeout(3000);
 		conn.setReadTimeout(3000);
@@ -97,11 +100,13 @@ public class PomParser {
 
 		if (Files.exists(unstableVersionsPath)) {
 			// Read a file containing a new line separated list of versions that should not be marked as stable.
-			List<String> unstableVersions = Files.readAllLines(unstableVersionsPath);
-			list.stream()
-					.filter(v -> !unstableVersions.contains(v.getVersion()))
-					.findFirst()
-					.ifPresent(v -> v.setStable(true));
+			Set<String> unstableVersions = new HashSet<>(Files.readAllLines(unstableVersionsPath));
+
+			for (T e : list) {
+				if (!unstableVersions.contains(e.getVersion())) {
+					e.setStable(true);
+				}
+			}
 		} else {
 			stableIdentifier.process(list);
 		}

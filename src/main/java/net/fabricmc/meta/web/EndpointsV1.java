@@ -45,7 +45,7 @@ public class EndpointsV1 {
 		WebServer.jsonGet("/v1/versions/loader/{game_version}/{loader_version}", EndpointsV1::getLoaderInfo);
 	}
 
-	private static <T extends Predicate<String>> List filter(Context context, List<T> versionList) {
+	private static <T extends Predicate<String>> List<T> filter(Context context, List<T> versionList) {
 		if (!context.pathParamMap().containsKey("game_version")) {
 			return Collections.emptyList();
 		}

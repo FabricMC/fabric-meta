@@ -18,6 +18,7 @@ package net.fabricmc.meta;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -28,16 +29,25 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonReader;
 import org.jetbrains.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.fabricmc.meta.data.VersionDatabase;
+import net.fabricmc.meta.utils.McObfuscationChecker;
 import net.fabricmc.meta.utils.Reference;
 import net.fabricmc.meta.web.WebServer;
 
 public class FabricMeta {
+	public static Path CACHE_DIR = Paths.get("cache");
+	public static Path DATA_DIR = Paths.get("data");
+
+	public static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+	public static final McObfuscationChecker MC_OBFUSCATION_CHECKER = new McObfuscationChecker();
+
 	public static volatile VersionDatabase database;
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(VersionDatabase.class);
@@ -61,7 +71,7 @@ public class FabricMeta {
 				String heartbeatUrlString = config.get("heartbeatUrl");
 
 				if (heartbeatUrlString != null) {
-					heartbeatUrl = new URL(heartbeatUrlString);
+					heartbeatUrl = URI.create(heartbeatUrlString).toURL();
 				}
 			} catch (IOException | IllegalStateException e) {
 				throw new RuntimeException("malformed config in "+configFile, e);
@@ -83,6 +93,7 @@ public class FabricMeta {
 	private static void update(boolean initial) {
 		try {
 			database = VersionDatabase.generate(initial);
+			FabricMeta.MC_OBFUSCATION_CHECKER.save();
 			updateHeartbeat();
 		} catch (Throwable t) {
 			if (database == null) {

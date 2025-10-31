@@ -17,6 +17,7 @@
 package net.fabricmc.meta.utils;
 
 import net.fabricmc.meta.FabricMeta;
+import net.fabricmc.meta.web.models.MavenVersion;
 
 public final class Reference {
 	/**
@@ -37,4 +38,6 @@ public final class Reference {
 	 * Url to the MC metadata json listing all the game versions.
 	 */
 	public static final String MC_METADATA_URL = "https://piston-meta.mojang.com/mc/game/version_manifest.json";
+
+	public static final MavenVersion NOOP_INTERMEDIARY_VERSION = new MavenVersion("net.fabricmc:intermediary:0.0.0", true);
 }

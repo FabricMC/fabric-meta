@@ -22,7 +22,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.xml.stream.XMLStreamException;
@@ -31,7 +35,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.fabricmc.meta.utils.MinecraftLauncherMeta;
+import net.fabricmc.meta.utils.MinecraftLauncherMeta.Version;
 import net.fabricmc.meta.utils.PomParser;
+import net.fabricmc.meta.utils.Reference;
 import net.fabricmc.meta.web.models.BaseVersion;
 import net.fabricmc.meta.web.models.MavenBuildGameVersion;
 import net.fabricmc.meta.web.models.MavenBuildVersion;
@@ -39,12 +45,12 @@ import net.fabricmc.meta.web.models.MavenUrlVersion;
 import net.fabricmc.meta.web.models.MavenVersion;
 
 public class VersionDatabase {
-	public static final PomParser MAPPINGS_PARSER = new PomParser(LOCAL_FABRIC_MAVEN_URL + "net/fabricmc/yarn/maven-metadata.xml");
-	public static final PomParser INTERMEDIARY_PARSER = new PomParser(LOCAL_FABRIC_MAVEN_URL + "net/fabricmc/intermediary/maven-metadata.xml");
-	public static final PomParser LOADER_PARSER = new PomParser(LOCAL_FABRIC_MAVEN_URL + "net/fabricmc/fabric-loader/maven-metadata.xml");
-	public static final PomParser INSTALLER_PARSER = new PomParser(LOCAL_FABRIC_MAVEN_URL + "net/fabricmc/fabric-installer/maven-metadata.xml");
+	private static final PomParser MAPPINGS_PARSER = new PomParser(LOCAL_FABRIC_MAVEN_URL + "net/fabricmc/yarn/maven-metadata.xml");
+	private static final PomParser INTERMEDIARY_PARSER = new PomParser(LOCAL_FABRIC_MAVEN_URL + "net/fabricmc/intermediary/maven-metadata.xml");
+	private static final PomParser LOADER_PARSER = new PomParser(LOCAL_FABRIC_MAVEN_URL + "net/fabricmc/fabric-loader/maven-metadata.xml");
+	private static final PomParser INSTALLER_PARSER = new PomParser(LOCAL_FABRIC_MAVEN_URL + "net/fabricmc/fabric-installer/maven-metadata.xml");
 
-	private static final ArrayList<String> incorrectVersions = new ArrayList<>();
+	private static final Set<String> incorrectIntermediaryVersions = new HashSet<>();
 	private static final Logger LOGGER = LoggerFactory.getLogger(VersionDatabase.class);
 
 	public List<BaseVersion> game;
@@ -82,35 +88,57 @@ public class VersionDatabase {
 
 		MinecraftLauncherMeta launcherMeta = MinecraftLauncherMeta.getAllMeta(initial);
 
-		//Sorts in the order of minecraft release dates
-		intermediary = new ArrayList<>(intermediary);
-		intermediary.sort(Comparator.comparingInt(o -> launcherMeta.getIndex(o.getVersion())));
-		intermediary.forEach(version -> version.setStable(true));
+		List<MavenVersion> newIntermediary = new ArrayList<>();
+		Map<String, MavenVersion> intermediaryIndex = new HashMap<>();
 
-		// Remove entries that do not match a valid mc version.
-		intermediary.removeIf(o -> {
-			if (launcherMeta.getVersions().stream().noneMatch(version -> version.getId().equals(o.getVersion()))) {
+		for (MavenVersion v : intermediary) {
+			// Skip entries that do not match a valid mc version.
+			if (launcherMeta.getVersion(v.getVersion()) == null) {
 				// only print unmatched versions once so that it doesn't spam the console with "Removing ..." messages
-				if (incorrectVersions.stream().noneMatch(o.getVersion()::equals)) {
-					LOGGER.warn("Removing {} as it doesn't match a valid mc version", o.getVersion());
-					incorrectVersions.add(o.getVersion());
+				if (incorrectIntermediaryVersions.add(v.getVersion())) {
+					LOGGER.warn("Removing intermediary for {} as it doesn't match a valid mc version", v.getVersion());
 				}
 
-				return true;
+				continue;
 			}
 
-			return false;
-		});
-
-		List<String> minecraftVersions = new ArrayList<>();
-
-		for (MavenVersion gameVersion : intermediary) {
-			if (!minecraftVersions.contains(gameVersion.getVersion())) {
-				minecraftVersions.add(gameVersion.getVersion());
-			}
+			v.setStable(true);
+			newIntermediary.add(v);
+			intermediaryIndex.put(v.getVersion(), v);
 		}
 
-		game = minecraftVersions.stream().map(s -> new BaseVersion(s, launcherMeta.isStable(s))).collect(Collectors.toList());
+		//Sorts in the order of minecraft release dates
+		newIntermediary.sort(Comparator.comparingInt(o -> launcherMeta.getIndex(o.getVersion())));
+		intermediary = newIntermediary;
+
+		game = new ArrayList<>(intermediary.size());
+
+		for (Version version : launcherMeta.getVersions()) {
+			if (!version.obfuscated()
+					|| intermediaryIndex.containsKey(version.id())) {
+				game.add(new BaseVersion(version.id(), version.isStable()));
+			}
+		}
+	}
+
+	BaseVersion getGame(String version) {
+		for (BaseVersion v : game) {
+			if (v.test(version)) return v;
+		}
+
+		return null;
+	}
+
+	public MavenVersion getIntermediary(String version, boolean substituteForUnobf) {
+		for (MavenVersion v : intermediary) {
+			if (v.test(version)) return v;
+		}
+
+		if (substituteForUnobf && getGame(version) != null) {
+			return Reference.NOOP_INTERMEDIARY_VERSION;
+		}
+
+		return null;
 	}
 
 	public List<MavenBuildVersion> getLoader() {
