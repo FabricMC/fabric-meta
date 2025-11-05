@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -37,6 +38,9 @@ import net.fabricmc.meta.FabricMeta;
 import net.fabricmc.meta.data.VersionDatabase;
 
 public class MinecraftLauncherMeta {
+	// version manifest "type" variants to sort above the other ones (typically from fabric's exp release manifest)
+	private static final Set<String> HIGH_PRIORITY_TYPES = Set.of("release", "snapshot");
+
 	private static final String EXTRA_META_URL = System.getProperty("extraMcMetaUrl");
 	private static final Logger LOGGER = LoggerFactory.getLogger(VersionDatabase.class);
 
@@ -119,8 +123,10 @@ public class MinecraftLauncherMeta {
 			versions.addAll(getMeta(EXTRA_META_URL, false, false));
 		}
 
-		// Order by release time
-		versions.sort(Comparator.comparing(Version::releaseTime).reversed());
+		// Order by type priority, then release time
+		versions.sort(Comparator
+				.<Version>comparingInt(v -> HIGH_PRIORITY_TYPES.contains(v.type()) ? 0 : 1)
+				.thenComparing(Comparator.comparing(Version::releaseTime).reversed()));
 
 		return new MinecraftLauncherMeta(versions);
 	}
