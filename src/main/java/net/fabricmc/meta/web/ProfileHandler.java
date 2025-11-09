@@ -35,47 +35,46 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.apache.commons.io.IOUtils;
 
+import net.fabricmc.meta.utils.LoaderMeta;
 import net.fabricmc.meta.utils.Reference;
-import net.fabricmc.meta.web.models.LoaderInfoV2;
+import net.fabricmc.meta.web.EndpointsV2.ProfileEnvironment;
 
 public class ProfileHandler {
 	private static final Executor EXECUTOR = Executors.newFixedThreadPool(2);
 	private static final DateFormat ISO_8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
 
 	public static void setup() {
-		EndpointsV2.fileDownload("profile", "json", ProfileHandler::getJsonFileName, ProfileHandler::profileJson);
-		EndpointsV2.fileDownload("profile", "zip", ProfileHandler::getZipFileName, ProfileHandler::profileZip);
+		EndpointsV2.fileDownload("client", "json", ProfileHandler::getFileName, ProfileHandler::profileJson);
+		EndpointsV2.fileDownload("client", "zip", ProfileHandler::getFileName, ProfileHandler::profileZip);
 
-		EndpointsV2.fileDownload("server", "json", ProfileHandler::getJsonFileName, ProfileHandler::serverJson);
+		EndpointsV2.fileDownload("server", "json", ProfileHandler::getFileName, ProfileHandler::profileJson);
 	}
 
-	private static String getJsonFileName(LoaderInfoV2 info) {
-		return getJsonFileName(info, "json");
+	private static String getFileName(ProfileEnvironment env) {
+		return String.format("%s.%s", getName(env), env.ext());
 	}
 
-	private static String getZipFileName(LoaderInfoV2 info) {
-		return getJsonFileName(info, "zip");
+	private static String getName(ProfileEnvironment env) {
+		String loaderVersion = env.loader().getVersion();
+
+		if (env.game().version().obfuscated()) {
+			return String.format("fabric-loader-%s-%s", loaderVersion, env.game().intermediary().getVersion());
+		} else {
+			return String.format("fabric-loader-%s", loaderVersion);
+		}
 	}
 
-	private static String getJsonFileName(LoaderInfoV2 info, String ext) {
-		return String.format("fabric-loader-%s-%s.%s", info.getLoader().getVersion(), info.getIntermediary().getVersion(), ext);
+	private static CompletableFuture<InputStream> profileJson(ProfileEnvironment env) {
+		return CompletableFuture.supplyAsync(() -> getProfileJsonStream(env), EXECUTOR);
 	}
 
-	private static CompletableFuture<InputStream> profileJson(LoaderInfoV2 info) {
-		return CompletableFuture.supplyAsync(() -> getProfileJsonStream(info, "client"), EXECUTOR);
+	private static CompletableFuture<InputStream> profileZip(ProfileEnvironment env) {
+		return profileJson(env)
+				.thenApply(inputStream -> packageZip(env, inputStream));
 	}
 
-	private static CompletableFuture<InputStream> serverJson(LoaderInfoV2 info) {
-		return CompletableFuture.supplyAsync(() -> getProfileJsonStream(info, "server"), EXECUTOR);
-	}
-
-	private static CompletableFuture<InputStream> profileZip(LoaderInfoV2 info) {
-		return profileJson(info)
-				.thenApply(inputStream -> packageZip(info, inputStream));
-	}
-
-	private static InputStream packageZip(LoaderInfoV2 info, InputStream profileJson) {
-		String profileName = String.format("fabric-loader-%s-%s", info.getLoader().getVersion(), info.getIntermediary().getVersion());
+	private static InputStream packageZip(ProfileEnvironment env, InputStream profileJson) {
+		String profileName = getName(env);
 
 		try {
 			ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -98,32 +97,36 @@ public class ProfileHandler {
 		}
 	}
 
-	private static InputStream getProfileJsonStream(LoaderInfoV2 info, String side) {
-		JsonObject jsonObject = buildProfileJson(info, side);
+	private static InputStream getProfileJsonStream(ProfileEnvironment env) {
+		JsonObject jsonObject = buildProfileJson(env);
 		return new ByteArrayInputStream(jsonObject.toString().getBytes());
 	}
 
 	//This is based of the installer code.
-	private static JsonObject buildProfileJson(LoaderInfoV2 info, String side) {
-		JsonObject launcherMeta = info.getLauncherMeta();
+	private static JsonObject buildProfileJson(ProfileEnvironment env) {
+		JsonObject launcherMeta = LoaderMeta.getMeta(env.loader());
 
-		String profileName = String.format("fabric-loader-%s-%s", info.getLoader().getVersion(), info.getIntermediary().getVersion());
+		String profileName = getName(env);
 
 		JsonObject librariesObject = launcherMeta.get("libraries").getAsJsonObject();
 		// Build the libraries array with the existing libs + loader and intermediary
 		JsonArray libraries = (JsonArray) librariesObject.get("common");
-		libraries.add(formatLibrary(info.getIntermediary().getMaven(), Reference.FABRIC_MAVEN_URL));
-		libraries.add(formatLibrary(info.getLoader().getMaven(), Reference.FABRIC_MAVEN_URL));
 
-		if (librariesObject.has(side)) {
-			libraries.addAll(librariesObject.get(side).getAsJsonArray());
+		if (env.game().version().obfuscated()) {
+			libraries.add(formatLibrary(env.game().intermediary().getMaven(), Reference.FABRIC_MAVEN_URL));
+		}
+
+		libraries.add(formatLibrary(env.loader().getMaven(), Reference.FABRIC_MAVEN_URL));
+
+		if (librariesObject.has(env.side())) {
+			libraries.addAll(librariesObject.get(env.side()).getAsJsonArray());
 		}
 
 		String currentTime = ISO_8601.format(new Date());
 
 		JsonObject profile = new JsonObject();
 		profile.addProperty("id", profileName);
-		profile.addProperty("inheritsFrom", info.getIntermediary().getVersion());
+		profile.addProperty("inheritsFrom", env.game().version().id());
 		profile.addProperty("releaseTime", currentTime);
 		profile.addProperty("time", currentTime);
 		profile.addProperty("type", "release");
@@ -132,7 +135,7 @@ public class ProfileHandler {
 		String mainClass;
 
 		if (mainClassElement.isJsonObject()) {
-			mainClass = mainClassElement.getAsJsonObject().get(side).getAsString();
+			mainClass = mainClassElement.getAsJsonObject().get(env.side()).getAsString();
 		} else {
 			mainClass = mainClassElement.getAsString();
 		}
@@ -144,7 +147,7 @@ public class ProfileHandler {
 		// I believe this is required to stop the launcher from complaining
 		arguments.add("game", new JsonArray());
 
-		if (side.equals("client")) {
+		if (env.side().equals("client")) {
 			// add '-DFabricMcEmu= net.minecraft.client.main.Main ' to emulate vanilla MC presence for programs that check the process command line (discord, nvidia hybrid gpu, ..)
 			JsonArray jvmArgs = new JsonArray();
 			jvmArgs.add("-DFabricMcEmu= net.minecraft.client.main.Main ");

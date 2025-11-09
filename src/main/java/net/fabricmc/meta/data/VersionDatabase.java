@@ -39,6 +39,7 @@ import net.fabricmc.meta.utils.MinecraftLauncherMeta.Version;
 import net.fabricmc.meta.utils.PomParser;
 import net.fabricmc.meta.utils.Reference;
 import net.fabricmc.meta.web.models.BaseVersion;
+import net.fabricmc.meta.web.models.LegacyDbDump;
 import net.fabricmc.meta.web.models.MavenBuildGameVersion;
 import net.fabricmc.meta.web.models.MavenBuildVersion;
 import net.fabricmc.meta.web.models.MavenUrlVersion;
@@ -53,20 +54,20 @@ public class VersionDatabase {
 	private static final Set<String> incorrectIntermediaryVersions = new HashSet<>();
 	private static final Logger LOGGER = LoggerFactory.getLogger(VersionDatabase.class);
 
-	public List<BaseVersion> game;
-	public List<MavenBuildGameVersion> mappings;
-	public List<MavenVersion> intermediary;
+	private Map<String, GameVersionData> gameVersionIndex;
+	private List<BaseVersion> gameModels;
+	private List<MavenVersion> intermediaries;
+	private List<MavenBuildGameVersion> yarns;
 	private List<MavenBuildVersion> loader;
 	public List<MavenUrlVersion> installer;
 
-	private VersionDatabase() {
-	}
+	private VersionDatabase() { }
 
 	public static VersionDatabase generate(boolean initial) throws IOException, XMLStreamException {
 		long start = System.nanoTime();
 		VersionDatabase database = new VersionDatabase();
-		database.mappings = MAPPINGS_PARSER.getMeta(MavenBuildGameVersion::new, "net.fabricmc:yarn:");
-		database.intermediary = INTERMEDIARY_PARSER.getMeta(MavenVersion::new, "net.fabricmc:intermediary:");
+		database.yarns = MAPPINGS_PARSER.getMeta(MavenBuildGameVersion::new, "net.fabricmc:yarn:");
+		database.intermediaries = INTERMEDIARY_PARSER.getMeta(MavenVersion::new, "net.fabricmc:intermediary:");
 		database.loader = LOADER_PARSER.getMeta(MavenBuildVersion::new, "net.fabricmc:fabric-loader:", list -> {
 			for (BaseVersion version : list) {
 				if (isPublicLoaderVersion(version)) {
@@ -82,7 +83,7 @@ public class VersionDatabase {
 	}
 
 	private void loadMcData(boolean initial) throws IOException {
-		if (mappings == null || intermediary == null) {
+		if (yarns == null || intermediaries == null) {
 			throw new RuntimeException("Mappings are null");
 		}
 
@@ -91,7 +92,7 @@ public class VersionDatabase {
 		List<MavenVersion> newIntermediary = new ArrayList<>();
 		Map<String, MavenVersion> intermediaryIndex = new HashMap<>();
 
-		for (MavenVersion v : intermediary) {
+		for (MavenVersion v : intermediaries) {
 			// Skip entries that do not match a valid mc version.
 			if (launcherMeta.getVersion(v.getVersion()) == null) {
 				// only print unmatched versions once so that it doesn't spam the console with "Removing ..." messages
@@ -109,33 +110,59 @@ public class VersionDatabase {
 
 		//Sorts in the order of minecraft release dates
 		newIntermediary.sort(Comparator.comparingInt(o -> launcherMeta.getIndex(o.getVersion())));
-		intermediary = newIntermediary;
+		intermediaries = newIntermediary;
 
-		game = new ArrayList<>(intermediary.size());
+		Map<String, List<MavenBuildGameVersion>> yarnIndex = new HashMap<>();
+
+		for (MavenBuildGameVersion v : yarns) {
+			yarnIndex.computeIfAbsent(v.getGameVersion(), ignore -> new ArrayList<>()).add(v);
+		}
+
+		gameVersionIndex = new HashMap<>(launcherMeta.getVersions().size());
+		gameModels = new ArrayList<>(launcherMeta.getVersions().size());
 
 		for (Version version : launcherMeta.getVersions()) {
-			if (!version.obfuscated()
-					|| intermediaryIndex.containsKey(version.id())) {
-				game.add(new BaseVersion(version.id(), version.isStable()));
+			MavenVersion intermediary = intermediaryIndex.get(version.id());
+
+			if (intermediary == null && !version.obfuscated()) {
+				intermediary = Reference.NOOP_INTERMEDIARY_VERSION;
+			}
+
+			if (intermediary != null) {
+				BaseVersion exposedModel = new BaseVersion(version.id(), version.isStable());
+				List<MavenBuildGameVersion> versionYarns = yarnIndex.getOrDefault(version.id(), Collections.emptyList());
+				gameVersionIndex.put(version.id(), new GameVersionData(version, gameModels.size(), exposedModel, intermediary, versionYarns));
+				gameModels.add(exposedModel);
 			}
 		}
 	}
 
-	BaseVersion getGame(String version) {
-		for (BaseVersion v : game) {
-			if (v.test(version)) return v;
-		}
-
-		return null;
+	public GameVersionData getGameData(String version) {
+		return gameVersionIndex.get(version);
 	}
 
-	public MavenVersion getIntermediary(String version, boolean substituteForUnobf) {
-		for (MavenVersion v : intermediary) {
-			if (v.test(version)) return v;
-		}
+	public List<BaseVersion> getGameModels() {
+		return gameModels;
+	}
 
-		if (substituteForUnobf && getGame(version) != null) {
-			return Reference.NOOP_INTERMEDIARY_VERSION;
+	public record GameVersionData(Version version, int index,
+			BaseVersion exposedModel,
+			MavenVersion intermediary, // Reference.NOOP_INTERMEDIARY_VERSION for unobf
+			List<MavenBuildGameVersion> yarn) { }
+
+	public List<MavenVersion> getIntermediaryModels() {
+		return intermediaries;
+	}
+
+	public List<MavenBuildGameVersion> getYarnModels() {
+		return yarns;
+	}
+
+	public MavenBuildVersion getLoader(String version) {
+		for (MavenBuildVersion v : loader) {
+			if (v.getVersion().equals(version)) {
+				return v;
+			}
 		}
 
 		return null;
@@ -150,6 +177,10 @@ public class VersionDatabase {
 	}
 
 	public List<MavenBuildVersion> getAllLoader() {
-		return Collections.unmodifiableList(loader);
+		return loader;
+	}
+
+	public LegacyDbDump createLegacyDbDump() {
+		return new LegacyDbDump(gameModels, yarns, intermediaries, loader, installer);
 	}
 }

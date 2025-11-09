@@ -34,7 +34,7 @@ public class LoaderInfoV2 implements LoaderInfoBase {
 	}
 
 	public LoaderInfoV2 populateMeta() {
-		launcherMeta = LoaderMeta.getMeta(this);
+		launcherMeta = LoaderMeta.getMeta(loader);
 		return this;
 	}
 

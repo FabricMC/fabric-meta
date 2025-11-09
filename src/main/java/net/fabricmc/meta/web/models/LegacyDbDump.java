@@ -16,30 +16,24 @@
 
 package net.fabricmc.meta.web.models;
 
-import com.google.gson.JsonObject;
-import org.jetbrains.annotations.Nullable;
+import java.util.List;
 
-import net.fabricmc.meta.utils.LoaderMeta;
+public class LegacyDbDump {
+	public final List<BaseVersion> game;
+	public final List<MavenBuildGameVersion> mappings;
+	public final List<MavenVersion> intermediary;
+	public final List<MavenBuildVersion> loader;
+	public final List<MavenUrlVersion> installer;
 
-public class LoaderInfoV1 implements LoaderInfoBase {
-	MavenBuildVersion loader;
-	MavenBuildGameVersion mappings;
-
-	@Nullable
-	JsonObject launcherMeta;
-
-	public LoaderInfoV1(MavenBuildVersion loader, MavenBuildGameVersion mappings) {
-		this.loader = loader;
+	public LegacyDbDump(List<BaseVersion> game,
+			List<MavenBuildGameVersion> mappings,
+			List<MavenVersion> intermediary,
+			List<MavenBuildVersion> loader,
+			List<MavenUrlVersion> installer) {
+		this.game = game;
 		this.mappings = mappings;
-	}
-
-	public LoaderInfoV1 populateMeta() {
-		launcherMeta = LoaderMeta.getMeta(loader);
-		return this;
-	}
-
-	@Override
-	public MavenBuildVersion getLoader() {
-		return loader;
+		this.intermediary = intermediary;
+		this.loader = loader;
+		this.installer = installer;
 	}
 }

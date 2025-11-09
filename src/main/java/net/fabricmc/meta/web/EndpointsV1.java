@@ -19,8 +19,6 @@ package net.fabricmc.meta.web;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import io.javalin.http.Context;
 
@@ -32,70 +30,38 @@ import net.fabricmc.meta.web.models.MavenBuildVersion;
 @SuppressWarnings("Duplicates")
 public class EndpointsV1 {
 	public static void setup() {
-		WebServer.jsonGet("/v1/versions", () -> FabricMeta.database);
+		WebServer.jsonGet("/v1/versions", () -> FabricMeta.database.createLegacyDbDump());
 
-		WebServer.jsonGet("/v1/versions/game", () -> FabricMeta.database.game);
-		WebServer.jsonGet("/v1/versions/game/{game_version}", context -> filter(context, FabricMeta.database.game));
+		WebServer.jsonGet("/v1/versions/game", () -> FabricMeta.database.getGameModels());
+		WebServer.jsonGet("/v1/versions/game/{game_version}", context -> ContextUtil.toList(ContextUtil.getGameModel(context)));
 
-		WebServer.jsonGet("/v1/versions/mappings", () -> FabricMeta.database.mappings);
-		WebServer.jsonGet("/v1/versions/mappings/{game_version}", context -> filter(context, FabricMeta.database.mappings));
+		WebServer.jsonGet("/v1/versions/mappings", () -> FabricMeta.database.getYarnModels());
+		WebServer.jsonGet("/v1/versions/mappings/{game_version}", ContextUtil::getYarn);
 
 		WebServer.jsonGet("/v1/versions/loader", () -> FabricMeta.database.getLoader());
 		WebServer.jsonGet("/v1/versions/loader/{game_version}", EndpointsV1::getLoaderInfoAll);
 		WebServer.jsonGet("/v1/versions/loader/{game_version}/{loader_version}", EndpointsV1::getLoaderInfo);
 	}
 
-	private static <T extends Predicate<String>> List<T> filter(Context context, List<T> versionList) {
-		if (!context.pathParamMap().containsKey("game_version")) {
-			return Collections.emptyList();
-		}
-
-		return versionList.stream().filter(t -> t.test(context.pathParam("game_version"))).collect(Collectors.toList());
-	}
-
 	private static Object getLoaderInfo(Context context) {
-		if (!context.pathParamMap().containsKey("game_version")) {
-			return null;
-		}
-
-		if (!context.pathParamMap().containsKey("loader_version")) {
-			return null;
-		}
-
-		String gameVersion = context.pathParam("game_version");
-		String loaderVersion = context.pathParam("loader_version");
-
-		MavenBuildVersion loader = FabricMeta.database.getAllLoader().stream()
-				.filter(mavenBuildVersion -> loaderVersion.equals(mavenBuildVersion.getVersion()))
-				.findFirst().orElse(null);
-
-		MavenBuildGameVersion mappings = FabricMeta.database.mappings.stream()
-				.filter(t -> t.test(gameVersion))
-				.findFirst().orElse(null);
+		MavenBuildVersion loader = ContextUtil.getLoader(context);
+		MavenBuildGameVersion mappings = ContextUtil.getFirstYarn(context);
 
 		if (loader == null) {
 			context.status(400);
-			return "no loader version found for " + gameVersion;
+			return "no loader version found for " + ContextUtil.getLoaderRaw(context);
 		}
 
 		if (mappings == null) {
 			context.status(400);
-			return "no mappings version found for " + gameVersion;
+			return "no mappings version found for " + ContextUtil.getGameRaw(context);
 		}
 
 		return new LoaderInfoV1(loader, mappings).populateMeta();
 	}
 
 	private static Object getLoaderInfoAll(Context context) {
-		if (!context.pathParamMap().containsKey("game_version")) {
-			return null;
-		}
-
-		String gameVersion = context.pathParam("game_version");
-
-		MavenBuildGameVersion mappings = FabricMeta.database.mappings.stream()
-				.filter(t -> t.test(gameVersion))
-				.findFirst().orElse(null);
+		MavenBuildGameVersion mappings = ContextUtil.getFirstYarn(context);
 
 		if (mappings == null) {
 			return Collections.emptyList();

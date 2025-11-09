@@ -18,11 +18,13 @@ package net.fabricmc.meta.web;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -30,25 +32,25 @@ import io.javalin.http.Context;
 import io.javalin.http.Header;
 
 import net.fabricmc.meta.FabricMeta;
+import net.fabricmc.meta.data.VersionDatabase.GameVersionData;
 import net.fabricmc.meta.web.models.BaseVersion;
 import net.fabricmc.meta.web.models.LoaderInfoV2;
 import net.fabricmc.meta.web.models.MavenBuildGameVersion;
 import net.fabricmc.meta.web.models.MavenBuildVersion;
-import net.fabricmc.meta.web.models.MavenVersion;
 
 @SuppressWarnings("Duplicates")
 public class EndpointsV2 {
 	public static void setup() {
-		WebServer.jsonGet("/v2/versions", () -> FabricMeta.database);
+		WebServer.jsonGet("/v2/versions", () -> FabricMeta.database.createLegacyDbDump());
 
-		WebServer.jsonGet("/v2/versions/game", () -> FabricMeta.database.game);
-		WebServer.jsonGet("/v2/versions/game/yarn", () -> compatibleGameVersions(FabricMeta.database.mappings, MavenBuildGameVersion::getGameVersion, v -> new BaseVersion(v.getGameVersion(), v.isStable())));
-		WebServer.jsonGet("/v2/versions/game/intermediary", () -> compatibleGameVersions(FabricMeta.database.intermediary, BaseVersion::getVersion, v -> new BaseVersion(v.getVersion(), v.isStable())));
+		WebServer.jsonGet("/v2/versions/game", () -> FabricMeta.database.getGameModels());
+		WebServer.jsonGet("/v2/versions/game/yarn", () -> toBaseVersion(FabricMeta.database.getYarnModels(), MavenBuildGameVersion::getGameVersion, v -> new BaseVersion(v.getGameVersion(), v.isStable())));
+		WebServer.jsonGet("/v2/versions/game/intermediary", () -> toBaseVersion(FabricMeta.database.getIntermediaryModels(), BaseVersion::getVersion, v -> new BaseVersion(v.getVersion(), v.isStable())));
 
-		WebServer.jsonGet("/v2/versions/yarn", context -> withLimitSkip(context, FabricMeta.database.mappings));
-		WebServer.jsonGet("/v2/versions/yarn/{game_version}", context -> withLimitSkip(context, filter(context, FabricMeta.database.mappings)));
+		WebServer.jsonGet("/v2/versions/yarn", context -> withLimitSkip(context, FabricMeta.database.getYarnModels()));
+		WebServer.jsonGet("/v2/versions/yarn/{game_version}", context -> withLimitSkip(context, ContextUtil.getYarn(context)));
 
-		WebServer.jsonGet("/v2/versions/intermediary", () -> FabricMeta.database.intermediary);
+		WebServer.jsonGet("/v2/versions/intermediary", () -> FabricMeta.database.getIntermediaryModels());
 		WebServer.jsonGet("/v2/versions/intermediary/{game_version}", EndpointsV2::getIntermediaryInfo);
 
 		WebServer.jsonGet("/v2/versions/loader", context -> withLimitSkip(context, FabricMeta.database.getLoader()));
@@ -78,116 +80,108 @@ public class EndpointsV2 {
 		return listStream.collect(Collectors.toList());
 	}
 
-	private static <T extends Predicate<String>> List<T> filter(Context context, List<T> versionList) {
-		if (!context.pathParamMap().containsKey("game_version")) {
-			return Collections.emptyList();
-		}
-
-		return versionList.stream().filter(t -> t.test(context.pathParam("game_version"))).collect(Collectors.toList());
-	}
-
 	private static List<?> getIntermediaryInfo(Context context) {
-		if (!context.pathParamMap().containsKey("game_version")) {
-			return Collections.emptyList();
-		}
+		GameVersionData data = ContextUtil.getGame(context);
+		if (data == null) return Collections.emptyList();
 
-		String gameVersion = context.pathParam("game_version");
-		MavenVersion mappings = FabricMeta.database.getIntermediary(gameVersion, true);
-
-		return mappings != null ? Collections.singletonList(mappings) : Collections.emptyList();
+		return ContextUtil.toList(data.intermediary());
 	}
 
 	private static Object getLoaderInfo(Context context) {
-		if (!context.pathParamMap().containsKey("game_version")) {
-			return null;
-		}
-
-		if (!context.pathParamMap().containsKey("loader_version")) {
-			return null;
-		}
-
-		String gameVersion = context.pathParam("game_version");
-		String loaderVersion = context.pathParam("loader_version");
-
-		MavenBuildVersion loader = FabricMeta.database.getAllLoader().stream()
-				.filter(mavenBuildVersion -> loaderVersion.equals(mavenBuildVersion.getVersion()))
-				.findFirst().orElse(null);
-
-		MavenVersion mappings = FabricMeta.database.getIntermediary(gameVersion, true);
+		MavenBuildVersion loader = ContextUtil.getLoader(context);
 
 		if (loader == null) {
 			context.status(400);
-			return "no loader version found for " + gameVersion;
+			return "no loader version found for " + ContextUtil.getLoaderRaw(context);
 		}
 
-		if (mappings == null) {
+		GameVersionData game = ContextUtil.getGame(context);
+
+		if (game == null) {
 			context.status(400);
-			return "no mappings version found for " + gameVersion;
+			return "no mappings version found for " + ContextUtil.getGameRaw(context); // wording due to legacy compat
 		}
 
-		return new LoaderInfoV2(loader, mappings).populateMeta();
+		return new LoaderInfoV2(loader, game.intermediary()).populateMeta();
 	}
 
 	private static List<?> getLoaderInfoAll(Context context) {
-		if (!context.pathParamMap().containsKey("game_version")) {
-			return null;
-		}
+		GameVersionData game = ContextUtil.getGame(context);
 
-		String gameVersion = context.pathParam("game_version");
-
-		MavenVersion mappings = FabricMeta.database.getIntermediary(gameVersion, true);
-
-		if (mappings == null) {
-			return Collections.emptyList();
+		if (game == null) {
+			context.status(400);
+			return List.of();
 		}
 
 		List<LoaderInfoV2> infoList = new ArrayList<>();
 
 		for (MavenBuildVersion loader : FabricMeta.database.getLoader()) {
-			infoList.add(new LoaderInfoV2(loader, mappings).populateMeta());
+			infoList.add(new LoaderInfoV2(loader, game.intermediary()).populateMeta());
 		}
 
 		return infoList;
 	}
 
-	private static <T extends BaseVersion> List<BaseVersion> compatibleGameVersions(List<T> list, Function<T, String> gameVersionSupplier, Function<T, BaseVersion> baseVersionSupplier) {
-		List<BaseVersion> versions = new ArrayList<>();
-		Predicate<String> contains = s -> versions.stream().anyMatch(baseVersion -> baseVersion.getVersion().equals(s));
+	private static <T extends BaseVersion> Collection<BaseVersion> toBaseVersion(List<T> list, Function<T, String> gameVersionSupplier, Function<T, BaseVersion> baseVersionSupplier) {
+		Map<String, BaseVersion> ret = new LinkedHashMap<>(list.size());
 
 		for (T entry : list) {
-			if (!contains.test(gameVersionSupplier.apply(entry))) {
-				versions.add(baseVersionSupplier.apply(entry));
+			String version = gameVersionSupplier.apply(entry);
+
+			if (!ret.containsKey(version)) {
+				ret.put(version, new BaseVersion(version, entry.isStable()));
 			}
 		}
 
-		return versions;
+		return ret.values();
 	}
 
-	public static void fileDownload(String path, String ext, Function<LoaderInfoV2, String> fileNameFunction, Function<LoaderInfoV2, CompletableFuture<InputStream>> streamSupplier) {
+	public static void fileDownload(String side, String ext,
+			Function<ProfileEnvironment, String> fileNameFunction,
+			Function<ProfileEnvironment, CompletableFuture<InputStream>> streamSupplier) {
+		String path = switch (side) {
+		case "client" -> "profile";
+		case "server" -> "server";
+		default -> throw new IllegalArgumentException(side);
+		};
+
 		WebServer.javalin.get("/v2/versions/loader/{game_version}/{loader_version}/" + path + "/" + ext, ctx -> {
-			Object obj = getLoaderInfo(ctx);
+			MavenBuildVersion loader = ContextUtil.getLoader(ctx);
 
-			if (obj instanceof String) {
-				ctx.result((String) obj);
-			} else if (obj instanceof LoaderInfoV2) {
-				LoaderInfoV2 versionInfo = (LoaderInfoV2) obj;
-
-				if (ext.equals("zip")) {
-					//Set the filename to download
-					ctx.header(Header.CONTENT_DISPOSITION, String.format("attachment; filename=\"%s\"", fileNameFunction.apply(versionInfo)));
-
-					ctx.contentType("application/zip");
-				} else {
-					ctx.contentType("application/json");
-				}
-
-				//Cache for a day
-				ctx.header(Header.CACHE_CONTROL, "public, max-age=86400");
-
-				ctx.future(() -> streamSupplier.apply(versionInfo).thenApply(ctx::result));
-			} else {
-				ctx.result("An internal error occurred");
+			if (loader == null) {
+				finishWithError(ctx, "no loader version found for " + ContextUtil.getLoaderRaw(ctx));
+				return;
 			}
+
+			GameVersionData game = ContextUtil.getGame(ctx);
+
+			if (game == null) {
+				finishWithError(ctx, "no mappings version found for " + ContextUtil.getGameRaw(ctx)); // wording due to legacy compat
+				return;
+			}
+
+			ProfileEnvironment subCtx = new ProfileEnvironment(game, loader, side, ext);
+
+			if (ext.equals("zip")) {
+				//Set the filename to download
+				ctx.header(Header.CONTENT_DISPOSITION, String.format("attachment; filename=\"%s\"", fileNameFunction.apply(subCtx)));
+
+				ctx.contentType("application/zip");
+			} else {
+				ctx.contentType("application/json");
+			}
+
+			//Cache for a day
+			ctx.header(Header.CACHE_CONTROL, "public, max-age=86400");
+
+			ctx.future(() -> streamSupplier.apply(subCtx).thenApply(ctx::result));
 		});
 	}
+
+	private static void finishWithError(Context context, String msg) {
+		context.status(400);
+		context.result(msg);
+	}
+
+	record ProfileEnvironment(GameVersionData game, MavenBuildVersion loader, String side, String ext) { }
 }
