@@ -16,16 +16,28 @@
 
 package net.fabricmc.meta.web.models;
 
+import org.jetbrains.annotations.Nullable;
+
 public class MavenVersion extends BaseVersion {
 	String maven;
+	String url;
+	String md5;
+	String sha1;
+	String sha256;
+	String sha512;
 
-	public MavenVersion(String maven, boolean stable) {
+	public MavenVersion(String maven, String url, @Nullable String md5, @Nullable String sha1, @Nullable String sha256, @Nullable String sha512, boolean stable) {
 		super(maven.split(":")[2], stable);
 		this.maven = maven;
+		this.url = url;
+		this.md5 = md5;
+		this.sha1 = sha1;
+		this.sha256 = sha256;
+		this.sha512 = sha512;
 	}
 
-	public MavenVersion(String maven) {
-		this(maven, false);
+	public MavenVersion(String maven, String url, @Nullable String md5, @Nullable String sha1, @Nullable String sha256, @Nullable String sha512) {
+		this(maven, url, md5, sha1, sha256, sha512, false);
 	}
 
 	public String getMaven() {

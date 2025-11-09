@@ -18,11 +18,13 @@ package net.fabricmc.meta.web.models;
 
 import net.fabricmc.meta.utils.YarnVersionParser;
 
+import org.jetbrains.annotations.Nullable;
+
 public class MavenBuildGameVersion extends MavenBuildVersion {
 	String gameVersion;
 
-	public MavenBuildGameVersion(String maven) {
-		super(maven);
+	public MavenBuildGameVersion(String maven, String url, @Nullable String md5, @Nullable String sha1, @Nullable String sha256, @Nullable String sha512) {
+		super(maven, url, md5, sha1, sha256, sha512);
 		gameVersion = new YarnVersionParser(maven.split(":")[2]).getMinecraftVersion();
 	}
 

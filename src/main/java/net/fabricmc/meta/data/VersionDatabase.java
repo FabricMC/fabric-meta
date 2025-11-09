@@ -35,14 +35,13 @@ import net.fabricmc.meta.utils.PomParser;
 import net.fabricmc.meta.web.models.BaseVersion;
 import net.fabricmc.meta.web.models.MavenBuildGameVersion;
 import net.fabricmc.meta.web.models.MavenBuildVersion;
-import net.fabricmc.meta.web.models.MavenUrlVersion;
 import net.fabricmc.meta.web.models.MavenVersion;
 
 public class VersionDatabase {
-	public static final PomParser MAPPINGS_PARSER = new PomParser(LOCAL_FABRIC_MAVEN_URL + "net/fabricmc/yarn/maven-metadata.xml");
-	public static final PomParser INTERMEDIARY_PARSER = new PomParser(LOCAL_FABRIC_MAVEN_URL + "net/fabricmc/intermediary/maven-metadata.xml");
-	public static final PomParser LOADER_PARSER = new PomParser(LOCAL_FABRIC_MAVEN_URL + "net/fabricmc/fabric-loader/maven-metadata.xml");
-	public static final PomParser INSTALLER_PARSER = new PomParser(LOCAL_FABRIC_MAVEN_URL + "net/fabricmc/fabric-installer/maven-metadata.xml");
+	public static final PomParser MAPPINGS_PARSER = new PomParser(LOCAL_FABRIC_MAVEN_URL + "net/fabricmc/yarn/maven-metadata.xml", "net.fabricmc:yarn:", false);
+	public static final PomParser INTERMEDIARY_PARSER = new PomParser(LOCAL_FABRIC_MAVEN_URL + "net/fabricmc/intermediary/maven-metadata.xml", "net.fabricmc:intermediary:", false);
+	public static final PomParser LOADER_PARSER = new PomParser(LOCAL_FABRIC_MAVEN_URL + "net/fabricmc/fabric-loader/maven-metadata.xml", "net.fabricmc:fabric-loader:", true);
+	public static final PomParser INSTALLER_PARSER = new PomParser(LOCAL_FABRIC_MAVEN_URL + "net/fabricmc/fabric-installer/maven-metadata.xml", "net.fabricmc:fabric-installer:", false);
 
 	private static final ArrayList<String> incorrectVersions = new ArrayList<>();
 	private static final Logger LOGGER = LoggerFactory.getLogger(VersionDatabase.class);
@@ -51,7 +50,7 @@ public class VersionDatabase {
 	public List<MavenBuildGameVersion> mappings;
 	public List<MavenVersion> intermediary;
 	private List<MavenBuildVersion> loader;
-	public List<MavenUrlVersion> installer;
+	public List<MavenVersion> installer;
 
 	private VersionDatabase() {
 	}
@@ -59,9 +58,9 @@ public class VersionDatabase {
 	public static VersionDatabase generate(boolean initial) throws IOException, XMLStreamException {
 		long start = System.nanoTime();
 		VersionDatabase database = new VersionDatabase();
-		database.mappings = MAPPINGS_PARSER.getMeta(MavenBuildGameVersion::new, "net.fabricmc:yarn:");
-		database.intermediary = INTERMEDIARY_PARSER.getMeta(MavenVersion::new, "net.fabricmc:intermediary:");
-		database.loader = LOADER_PARSER.getMeta(MavenBuildVersion::new, "net.fabricmc:fabric-loader:", list -> {
+		database.mappings = MAPPINGS_PARSER.getMeta(MavenBuildGameVersion::new);
+		database.intermediary = INTERMEDIARY_PARSER.getMeta(MavenVersion::new);
+		database.loader = LOADER_PARSER.getMeta(MavenBuildVersion::new, list -> {
 			for (BaseVersion version : list) {
 				if (isPublicLoaderVersion(version)) {
 					version.setStable(true);
@@ -69,7 +68,7 @@ public class VersionDatabase {
 				}
 			}
 		});
-		database.installer = INSTALLER_PARSER.getMeta(MavenUrlVersion::new, "net.fabricmc:fabric-installer:");
+		database.installer = INSTALLER_PARSER.getMeta(MavenVersion::new);
 		database.loadMcData(initial);
 		LOGGER.info("DB update took {} ms", (System.nanoTime() - start) / 1_000_000);
 		return database;

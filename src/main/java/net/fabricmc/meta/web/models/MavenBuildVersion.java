@@ -16,12 +16,14 @@
 
 package net.fabricmc.meta.web.models;
 
+import org.jetbrains.annotations.Nullable;
+
 public class MavenBuildVersion extends MavenVersion {
 	String separator;
 	int build;
 
-	public MavenBuildVersion(String maven) {
-		super(maven);
+	public MavenBuildVersion(String maven, String url, @Nullable String md5, @Nullable String sha1, @Nullable String sha256, @Nullable String sha512) {
+		super(maven, url, md5, sha1, sha256, sha512);
 		String version = maven.split(":")[2];
 
 		if (version.contains("+build.")) {
