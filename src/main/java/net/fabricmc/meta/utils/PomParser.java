@@ -83,10 +83,10 @@ public class PomParser {
 						split[2]
 					);
 
-					CompletableFuture<String> md5 = this.loadHashes ? CompletableFuture.supplyAsync(() -> loadHash(url + ".md5", 32)) : CompletableFuture.completedFuture(null);
-					CompletableFuture<String> sha1 = this.loadHashes ? CompletableFuture.supplyAsync(() -> loadHash(url + ".sha1", 40)) : CompletableFuture.completedFuture(null);
-					CompletableFuture<String> sha256 = this.loadHashes ? CompletableFuture.supplyAsync(() -> loadHash(url + ".sha256", 64)) : CompletableFuture.completedFuture(null);
-					CompletableFuture<String> sha512 = this.loadHashes ? CompletableFuture.supplyAsync(() -> loadHash(url + ".sha512", 128)) : CompletableFuture.completedFuture(null);
+					CompletableFuture<String> md5 = this.loadHashes ? CompletableFuture.supplyAsync(() -> loadHash(versionUrl + ".md5", 32)) : CompletableFuture.completedFuture(null);
+					CompletableFuture<String> sha1 = this.loadHashes ? CompletableFuture.supplyAsync(() -> loadHash(versionUrl + ".sha1", 40)) : CompletableFuture.completedFuture(null);
+					CompletableFuture<String> sha256 = this.loadHashes ? CompletableFuture.supplyAsync(() -> loadHash(versionUrl + ".sha256", 64)) : CompletableFuture.completedFuture(null);
+					CompletableFuture<String> sha512 = this.loadHashes ? CompletableFuture.supplyAsync(() -> loadHash(versionUrl + ".sha512", 128)) : CompletableFuture.completedFuture(null);
 
 					versions.add(new FullVersion(version, versionUrl, md5.join(), sha1.join(), sha256.join(), sha512.join()));
 				}
