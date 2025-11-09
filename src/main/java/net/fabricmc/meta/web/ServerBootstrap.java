@@ -60,7 +60,7 @@ public class ServerBootstrap {
 			}
 
 			final String installerVersion = getAndValidateVersion(ctx, FabricMeta.database.installer, "installer_version");
-			final String gameVersion = getAndValidateVersion(ctx, FabricMeta.database.game, "game_version");
+			final String gameVersion = getAndValidateVersion(ctx, FabricMeta.database.getGameModels(), "game_version");
 			final String loaderVersion = getAndValidateVersion(ctx, FabricMeta.database.getAllLoader(), "loader_version");
 
 			validateLoaderVersion(loaderVersion);

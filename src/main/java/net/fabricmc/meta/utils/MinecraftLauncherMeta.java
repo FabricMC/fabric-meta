@@ -23,6 +23,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HexFormat;
@@ -38,8 +39,10 @@ import net.fabricmc.meta.FabricMeta;
 import net.fabricmc.meta.data.VersionDatabase;
 
 public class MinecraftLauncherMeta {
+	private static final boolean EMULATE_OLD = false; // temporary to make comparison tests happy
+
 	// version manifest "type" variants to sort above the other ones (typically from fabric's exp release manifest)
-	private static final Set<String> HIGH_PRIORITY_TYPES = Set.of("release", "snapshot");
+	private static final Set<String> HIGH_PRIORITY_TYPES = EMULATE_OLD ? Collections.emptySet() : Set.of("release", "snapshot");
 
 	private static final String EXTRA_META_URL = System.getProperty("extraMcMetaUrl");
 	private static final Logger LOGGER = LoggerFactory.getLogger(VersionDatabase.class);
@@ -95,6 +98,7 @@ public class MinecraftLauncherMeta {
 			byte[] hash = version.sha1() != null ? HexFormat.of().parseHex(version.sha1()) : null;
 			OffsetDateTime time = OffsetDateTime.parse(version.releaseTime());
 			boolean obfuscated = FabricMeta.MC_OBFUSCATION_CHECKER.isObfuscated(version.id(), version.url(), hash, time);
+			if (EMULATE_OLD && !obfuscated) continue;
 
 			ret.add(new Version(version.id(),
 					version.type(),

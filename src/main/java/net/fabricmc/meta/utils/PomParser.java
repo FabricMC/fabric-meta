@@ -105,6 +105,7 @@ public class PomParser {
 			for (T e : list) {
 				if (!unstableVersions.contains(e.getVersion())) {
 					e.setStable(true);
+					break;
 				}
 			}
 		} else {
