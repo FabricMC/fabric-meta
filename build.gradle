@@ -40,7 +40,7 @@ java {
 }
 
 test {
-	useJUnitPlatform()
+	//useJUnitPlatform()
 }
 
 jar {
