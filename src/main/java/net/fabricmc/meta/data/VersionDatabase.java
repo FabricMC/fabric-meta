@@ -108,10 +108,6 @@ public class VersionDatabase {
 			intermediaryIndex.put(v.getVersion(), v);
 		}
 
-		//Sorts in the order of minecraft release dates
-		newIntermediary.sort(Comparator.comparingInt(o -> launcherMeta.getIndex(o.getVersion())));
-		intermediaries = newIntermediary;
-
 		Map<String, List<MavenBuildGameVersion>> yarnIndex = new HashMap<>();
 
 		for (MavenBuildGameVersion v : yarns) {
@@ -124,8 +120,11 @@ public class VersionDatabase {
 		for (Version version : launcherMeta.getVersions()) {
 			MavenVersion intermediary = intermediaryIndex.get(version.id());
 
-			if (intermediary == null && !version.obfuscated()) {
+			if (intermediary == null && !version.obfuscated()) { // assign noop intermediaries to the per-version data and add version to intermediary list
 				intermediary = Reference.NOOP_INTERMEDIARY_VERSION;
+
+				MavenVersion versionIntermediary = new MavenVersion("net.fabricmc:intermediary:".concat(version.id()), true);
+				newIntermediary.add(versionIntermediary);
 			}
 
 			if (intermediary != null) {
@@ -135,6 +134,10 @@ public class VersionDatabase {
 				gameModels.add(exposedModel);
 			}
 		}
+
+		//Sorts in the order of minecraft release dates
+		newIntermediary.sort(Comparator.comparingInt(o -> launcherMeta.getIndex(o.getVersion())));
+		intermediaries = newIntermediary;
 	}
 
 	public GameVersionData getGameData(String version) {
