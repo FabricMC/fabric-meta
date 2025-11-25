@@ -60,7 +60,7 @@ public class ProfileHandler {
 		if (env.game().version().obfuscated()) {
 			return String.format("fabric-loader-%s-%s", loaderVersion, env.game().intermediary().getVersion());
 		} else {
-			return String.format("fabric-loader-%s", loaderVersion);
+			return String.format("fabric-loader-%s-%s", loaderVersion, env.game().version().id());
 		}
 	}
 
