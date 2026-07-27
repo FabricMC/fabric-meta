@@ -16,6 +16,8 @@
 
 package net.fabricmc.meta.web;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -29,6 +31,9 @@ import io.javalin.plugin.bundled.CorsPluginConfig;
 public class WebServer {
 	public static Javalin javalin;
 	public static Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+
+	private static final int MAX_CACHE_SIZE = Runtime.getRuntime().availableProcessors();
+	private static final Deque<StringBuilder> SB_CACHE = new ArrayDeque<>(MAX_CACHE_SIZE);
 
 	public static Javalin create() {
 		if (javalin != null) {
@@ -72,7 +77,30 @@ public class WebServer {
 			ctx.status(400);
 		}
 
-		String response = GSON.toJson(object);
-		ctx.contentType("application/json").header(Header.CACHE_CONTROL, "public, max-age=60").result(response);
+		// cache string builder to reduce allocation/resizing pressure
+		StringBuilder sb;
+
+		synchronized (SB_CACHE) {
+			sb = SB_CACHE.pollLast();
+
+			if (sb == null) {
+				sb = new StringBuilder(10_000);
+			} else {
+				sb.setLength(0);
+			}
+		}
+
+		try {
+			GSON.toJson(object, sb);
+			String response = sb.toString();
+
+			ctx.contentType("application/json").header(Header.CACHE_CONTROL, "public, max-age=60").result(response);
+		} finally {
+			synchronized (SB_CACHE) {
+				if (SB_CACHE.size() < MAX_CACHE_SIZE) {
+					SB_CACHE.addLast(sb);
+				}
+			}
+		}
 	}
 }
