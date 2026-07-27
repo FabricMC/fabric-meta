@@ -145,7 +145,7 @@ public class EndpointsV2 {
 		default -> throw new IllegalArgumentException(side);
 		};
 
-		WebServer.javalin.get("/v2/versions/loader/{game_version}/{loader_version}/" + path + "/" + ext, ctx -> {
+		WebServer.routes.get("/v2/versions/loader/{game_version}/{loader_version}/" + path + "/" + ext, ctx -> {
 			MavenBuildVersion loader = ContextUtil.getLoader(ctx);
 
 			if (loader == null) {
