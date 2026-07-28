@@ -32,6 +32,8 @@ public class WebServer {
 	public static Javalin javalin;
 	public static Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
+	private static final String CACHE_CONTROL = "public, max-age=60";
+	private static final String CLOUDFLARE_CACHE_CONTROL = "public, max-age=60, stale-while-revalidate=60, stale-if-error=86400";
 	private static final int MAX_CACHE_SIZE = Runtime.getRuntime().availableProcessors();
 	private static final Deque<StringBuilder> SB_CACHE = new ArrayDeque<>(MAX_CACHE_SIZE);
 
@@ -94,7 +96,10 @@ public class WebServer {
 			GSON.toJson(object, sb);
 			String response = sb.toString();
 
-			ctx.contentType("application/json").header(Header.CACHE_CONTROL, "public, max-age=60").result(response);
+			ctx.contentType("application/json")
+					.header(Header.CACHE_CONTROL, CACHE_CONTROL)
+					.header("Cloudflare-CDN-Cache-Control", CLOUDFLARE_CACHE_CONTROL)
+					.result(response);
 		} finally {
 			synchronized (SB_CACHE) {
 				if (SB_CACHE.size() < MAX_CACHE_SIZE) {
