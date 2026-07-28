@@ -68,8 +68,8 @@ public class EndpointsV2 {
 			return Collections.emptyList();
 		}
 
-		int limit = context.queryParamAsClass("limit", Integer.class).check(i -> i >= 0, "limit must be larger than one").getOrDefault(0);
-		int skip = context.queryParamAsClass("skip", Integer.class).check(i -> i >= 0, "skip must be larger than one").getOrDefault(0);
+		int limit = context.queryParamAsClass("limit", Integer.class).check(i -> i == null || i >= 0, "limit must be larger than one").getOrDefault(0);
+		int skip = context.queryParamAsClass("skip", Integer.class).check(i -> i == null || i >= 0, "skip must be larger than one").getOrDefault(0);
 
 		Stream<T> listStream = list.stream().skip(skip);
 
