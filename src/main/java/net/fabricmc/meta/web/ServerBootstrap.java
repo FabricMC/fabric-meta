@@ -49,7 +49,7 @@ public class ServerBootstrap {
 
 	public static void setup() {
 		// http://localhost:5555/v2/versions/loader/1.17.1/0.12.0/0.8.0/server/jar
-		WebServer.javalin.get("/v2/versions/loader/{game_version}/{loader_version}/{installer_version}/server/jar", boostrapHandler());
+		WebServer.routes.get("/v2/versions/loader/{game_version}/{loader_version}/{installer_version}/server/jar", boostrapHandler());
 	}
 
 	private static Handler boostrapHandler() {

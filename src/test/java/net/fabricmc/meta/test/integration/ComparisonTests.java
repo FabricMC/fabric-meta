@@ -25,7 +25,7 @@ import java.util.stream.Stream;
 
 import io.javalin.testtools.HttpClient;
 import io.javalin.testtools.JavalinTest;
-import okhttp3.Response;
+import io.javalin.testtools.Response;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;

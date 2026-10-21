@@ -24,13 +24,16 @@ import java.util.function.Supplier;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.javalin.Javalin;
+import io.javalin.config.RoutesConfig;
 import io.javalin.http.Context;
 import io.javalin.http.Header;
 import io.javalin.plugin.bundled.CorsPluginConfig;
 
 public class WebServer {
-	public static Javalin javalin;
 	public static Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+
+	private static Javalin javalin;
+	static RoutesConfig routes;
 
 	private static final int MAX_CACHE_SIZE = Runtime.getRuntime().availableProcessors();
 	private static final Deque<StringBuilder> SB_CACHE = new ArrayDeque<>(MAX_CACHE_SIZE);
@@ -41,13 +44,13 @@ public class WebServer {
 		}
 
 		javalin = Javalin.create(config -> {
-			config.plugins.enableRouteOverview("/");
-			config.showJavalinBanner = false;
-			config.plugins.enableCors(cors -> cors.add(CorsPluginConfig::anyHost));
+			config.bundledPlugins.enableRouteOverview("/");
+			config.startup.showJavalinBanner = false;
+			config.bundledPlugins.enableCors(cors -> cors.addRule(CorsPluginConfig.CorsRule::anyHost));
+			routes = config.routes;
+			EndpointsV1.setup();
+			EndpointsV2.setup();
 		});
-
-		EndpointsV1.setup();
-		EndpointsV2.setup();
 
 		return javalin;
 	}
@@ -58,14 +61,14 @@ public class WebServer {
 	}
 
 	public static <T> void jsonGet(String route, Supplier<T> supplier) {
-		javalin.get(route, ctx -> {
+		routes.get(route, ctx -> {
 			T object = supplier.get();
 			handleJson(ctx, object);
 		});
 	}
 
 	public static <T> void jsonGet(String route, Function<Context, T> supplier) {
-		javalin.get(route, ctx -> {
+		routes.get(route, ctx -> {
 			T object = supplier.apply(ctx);
 			handleJson(ctx, object);
 		});

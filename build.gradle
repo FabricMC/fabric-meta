@@ -22,14 +22,14 @@ repositories {
 
 dependencies {
 	implementation 'com.google.code.gson:gson:2.10.1'
-	implementation 'io.javalin:javalin:5.6.3'
+	implementation 'io.javalin:javalin:7.2.3'
 	implementation 'org.slf4j:slf4j-simple:2.0.9'
 	implementation 'commons-io:commons-io:2.15.1'
 	implementation 'org.jetbrains:annotations:24.1.0'
 
 	testImplementation 'org.junit.jupiter:junit-jupiter:5.9.2'
 	testImplementation "org.junit.jupiter:junit-jupiter-params:5.9.2"
-	testImplementation 'io.javalin:javalin-testtools:5.6.3'
+	testImplementation 'io.javalin:javalin-testtools:7.2.3'
 
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
@@ -40,7 +40,18 @@ java {
 }
 
 test {
-	//useJUnitPlatform()
+	useJUnitPlatform()
+	exclude 'net/fabricmc/meta/test/integration/**'
+}
+
+tasks.register('integrationTest', Test) {
+	group = 'verification'
+	description = 'Compares local endpoints against the live production API.'
+	testClassesDirs = sourceSets.test.output.classesDirs
+	classpath = sourceSets.test.runtimeClasspath
+	useJUnitPlatform()
+	include 'net/fabricmc/meta/test/integration/**'
+	shouldRunAfter test
 }
 
 jar {

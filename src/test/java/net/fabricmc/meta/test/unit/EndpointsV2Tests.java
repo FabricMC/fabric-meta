@@ -19,7 +19,7 @@ package net.fabricmc.meta.test.unit;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import io.javalin.testtools.JavalinTest;
-import okhttp3.Response;
+import io.javalin.testtools.Response;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 

@@ -23,7 +23,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import io.javalin.testtools.JavalinTest;
-import okhttp3.Response;
+import io.javalin.testtools.Response;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -47,7 +47,7 @@ public class ServerBootstrapTests {
 			Response response = client.get("/v2/versions/loader/stable/stable/stable/server/jar");
 			assertEquals(200, response.code());
 			Path jarFile = tempDir.resolve("server.jar");
-			Files.copy(response.body().byteStream(), jarFile);
+			Files.writeString(jarFile, response.body().string());
 			assertTrue(Files.size(jarFile) > 0);
 		});
 	}
