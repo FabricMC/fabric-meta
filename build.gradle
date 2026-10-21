@@ -40,7 +40,18 @@ java {
 }
 
 test {
-	//useJUnitPlatform()
+	useJUnitPlatform()
+	exclude 'net/fabricmc/meta/test/integration/**'
+}
+
+tasks.register('integrationTest', Test) {
+	group = 'verification'
+	description = 'Compares local endpoints against the live production API.'
+	testClassesDirs = sourceSets.test.output.classesDirs
+	classpath = sourceSets.test.runtimeClasspath
+	useJUnitPlatform()
+	include 'net/fabricmc/meta/test/integration/**'
+	shouldRunAfter test
 }
 
 jar {
