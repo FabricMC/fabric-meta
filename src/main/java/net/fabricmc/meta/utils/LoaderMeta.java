@@ -25,7 +25,6 @@ import java.net.URI;
 import com.google.gson.JsonObject;
 import org.apache.commons.io.FileUtils;
 
-import net.fabricmc.meta.web.WebServer;
 import net.fabricmc.meta.web.models.MavenBuildVersion;
 
 public class LoaderMeta {
@@ -51,7 +50,7 @@ public class LoaderMeta {
 		}
 
 		try {
-			JsonObject jsonObject = WebServer.GSON.fromJson(new FileReader(launcherMetaFile), JsonObject.class);
+			JsonObject jsonObject = Util.GSON.fromJson(new FileReader(launcherMetaFile), JsonObject.class);
 			return jsonObject;
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();

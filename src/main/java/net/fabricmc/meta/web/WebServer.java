@@ -16,27 +16,25 @@
 
 package net.fabricmc.meta.web;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import io.javalin.Javalin;
 import io.javalin.config.RoutesConfig;
 import io.javalin.http.Context;
 import io.javalin.http.Header;
+import io.javalin.http.HttpResponseException;
+import io.javalin.http.NotFoundResponse;
 import io.javalin.plugin.bundled.CorsPluginConfig;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
+import net.fabricmc.meta.utils.Util;
 
 public class WebServer {
-	public static Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-
 	private static Javalin javalin;
 	static RoutesConfig routes;
-
-	private static final int MAX_CACHE_SIZE = Runtime.getRuntime().availableProcessors();
-	private static final Deque<StringBuilder> SB_CACHE = new ArrayDeque<>(MAX_CACHE_SIZE);
 
 	public static Javalin create() {
 		if (javalin != null) {
@@ -63,11 +61,16 @@ public class WebServer {
 
 	public static void get(String route, String mimeType, Function<Context, String> supplier) {
 		routes.get(route, ctx -> {
-			String result = supplier.apply(ctx);
+			String result;
 
-			if (result == null) {
-				ctx.status(404);
-				result = "not found";
+			try {
+				result = supplier.apply(ctx);
+
+				if (result == null) {
+					throw new NotFoundResponse();
+				}
+			} catch (Throwable t) {
+				result = formatException(t, mimeType);
 			}
 
 			ctx.contentType(mimeType).header(Header.CACHE_CONTROL, "public, max-age=60").result(result);
@@ -75,49 +78,58 @@ public class WebServer {
 	}
 
 	public static <T> void jsonGet(String route, Supplier<T> supplier) {
-		routes.get(route, ctx -> {
-			T object = supplier.get();
-			handleJson(ctx, object);
-		});
+		get(route, "application/json", ctx -> handleJson(supplier.get()));
 	}
 
 	public static <T> void jsonGet(String route, Function<Context, T> supplier) {
-		routes.get(route, ctx -> {
-			T object = supplier.apply(ctx);
-			handleJson(ctx, object);
-		});
+		get(route, "application/json", ctx -> handleJson(supplier.apply(ctx)));
 	}
 
-	private static void handleJson(Context ctx, Object object) {
-		if (object == null) {
-			object = new Object();
-			ctx.status(400);
+	private static String handleJson(Object object) {
+		if (object == null) return null;
+
+		return Util.serializeJson(object);
+	}
+
+	private static String formatException(Throwable exc, String mimeType) {
+		int status;
+
+		if (exc instanceof HttpResponseException e) {
+			status = e.getStatus();
+		} else {
+			status = 500;
+			exc.printStackTrace();
 		}
 
-		// cache string builder to reduce allocation/resizing pressure
-		StringBuilder sb;
-
-		synchronized (SB_CACHE) {
-			sb = SB_CACHE.pollLast();
-
-			if (sb == null) {
-				sb = new StringBuilder(10_000);
-			} else {
-				sb.setLength(0);
-			}
-		}
+		String message = exc.getMessage();
+		if (message == null || message.isEmpty()) message = exc.getClass().getName();
 
 		try {
-			GSON.toJson(object, sb);
-			String response = sb.toString();
-
-			ctx.contentType("application/json").header(Header.CACHE_CONTROL, "public, max-age=60").result(response);
-		} finally {
-			synchronized (SB_CACHE) {
-				if (SB_CACHE.size() < MAX_CACHE_SIZE) {
-					SB_CACHE.addLast(sb);
-				}
-			}
+			return switch (mimeType) {
+			case "application/json" -> Util.serializeJson(Map.of("status", status, "message", message));
+			case "text/xml" -> createXmlError(status, message);
+			default -> message;
+			};
+		} catch (Exception e) {
+			e.printStackTrace();
+			return message;
 		}
+	}
+
+	private static String createXmlError(int status, String message) {
+		Document doc = Util.createXmlDocument();
+
+		Element error = doc.createElement("error");
+		doc.appendChild(error);
+
+		Element statusElem = doc.createElement("status");
+		statusElem.setTextContent(Integer.toString(status));
+		error.appendChild(statusElem);
+
+		Element messageElem = doc.createElement("message");
+		messageElem.setTextContent(message);
+		error.appendChild(messageElem);
+
+		return Util.serializeXml(doc);
 	}
 }

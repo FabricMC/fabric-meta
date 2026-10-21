@@ -1,19 +1,26 @@
+/*
+ * Copyright (c) 2026 FabricMC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package net.fabricmc.meta.web;
-
-import java.io.StringWriter;
-
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import io.javalin.http.BadRequestResponse;
 import io.javalin.http.Context;
+import io.javalin.http.NotFoundResponse;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -21,6 +28,7 @@ import net.fabricmc.meta.FabricMeta;
 import net.fabricmc.meta.data.VersionDatabase.GameVersionData;
 import net.fabricmc.meta.utils.LoaderMeta;
 import net.fabricmc.meta.utils.Reference;
+import net.fabricmc.meta.utils.Util;
 import net.fabricmc.meta.web.models.MavenBuildVersion;
 
 final class McUpdater {
@@ -28,8 +36,8 @@ final class McUpdater {
 		GameVersionData game = ContextUtil.getGame(context);
 		MavenBuildVersion loader = ContextUtil.getLoader(context);
 
-		if (game == null) throw new IllegalArgumentException("unknown game version: " + ContextUtil.getGameRaw(context));
-		if (loader == null) throw new IllegalArgumentException("unknown loader version: " + ContextUtil.getLoaderRaw(context));
+		if (game == null) throw new NotFoundResponse("unknown game version: " + ContextUtil.getGameRaw(context));
+		if (loader == null) throw new NotFoundResponse("unknown loader version: " + ContextUtil.getLoaderRaw(context));
 
 		return handle(game, loader);
 	}
@@ -48,16 +56,16 @@ final class McUpdater {
 
 			if (pos < 0) {
 				pos = yarn.lastIndexOf('.'); // 19w13b.1
-				if (pos < 0) throw new IllegalArgumentException("invalid yarn version: " + yarn);
+				if (pos < 0) throw new BadRequestResponse("invalid yarn version: " + yarn);
 			}
 
 			gameVersion = yarn.substring(0, pos);
 		} else {
-			throw new IllegalArgumentException("can't determine mc version");
+			throw new BadRequestResponse("can't determine game version without intermediary or yarn versions being provided");
 		}
 
 		GameVersionData game = FabricMeta.database.getGameData(gameVersion);
-		if (game == null) throw new IllegalArgumentException("unknown game version: " + gameVersion);
+		if (game == null) throw new NotFoundResponse("unknown game version: " + gameVersion);
 
 		MavenBuildVersion loader;
 
@@ -65,7 +73,7 @@ final class McUpdater {
 			loader = FabricMeta.database.getLatestPublicLoader();
 		} else {
 			loader = FabricMeta.database.getLoader(loaderRaw);
-			if (loader == null) throw new IllegalArgumentException("unknown loader version: " + loaderRaw);
+			if (loader == null) throw new NotFoundResponse("unknown loader version: " + loaderRaw);
 		}
 
 		return handle(game, loader);
@@ -73,26 +81,12 @@ final class McUpdater {
 
 	private static String handle(GameVersionData game, MavenBuildVersion loaderVersion) {
 		JsonObject loaderMeta = LoaderMeta.getMeta(loaderVersion);
-		if (loaderMeta == null) throw new IllegalArgumentException("invalid loader version: " + loaderVersion);
+		if (loaderMeta == null) throw new NotFoundResponse("invalid loader version: " + loaderVersion);
 
-		try {
-			Document doc = DocumentBuilderFactory.newInstance()
-					.newDocumentBuilder()
-					.newDocument();
+		Document doc = Util.createXmlDocument();
+		populateDocument(game, loaderVersion, loaderMeta, doc);
 
-			populateDocument(game, loaderVersion, loaderMeta, doc);
-
-			Transformer transformer = TransformerFactory.newInstance().newTransformer();
-			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-			transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-
-			StringWriter writer = new StringWriter();
-			transformer.transform(new DOMSource(doc), new StreamResult(writer));
-
-			return writer.toString();
-		} catch (TransformerException | ParserConfigurationException e) {
-			throw new RuntimeException(e);
-		}
+		return Util.serializeXml(doc);
 	}
 
 	private static void populateDocument(GameVersionData game, MavenBuildVersion loaderVersion, JsonObject loaderJson, Document doc) {
