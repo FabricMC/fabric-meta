@@ -43,4 +43,9 @@ public class BaseVersion implements Predicate<String> {
 	public boolean test(String s) {
 		return version.equals(s);
 	}
+
+	@Override
+	public String toString() {
+		return version;
+	}
 }

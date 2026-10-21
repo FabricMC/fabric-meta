@@ -175,6 +175,14 @@ public class VersionDatabase {
 		return loader.stream().filter(VersionDatabase::isPublicLoaderVersion).collect(Collectors.toList());
 	}
 
+	public MavenBuildVersion getLatestPublicLoader() {
+		for (MavenBuildVersion version : loader) {
+			if (isPublicLoaderVersion(version)) return version;
+		}
+
+		return null;
+	}
+
 	private static boolean isPublicLoaderVersion(BaseVersion version) {
 		return true;
 	}

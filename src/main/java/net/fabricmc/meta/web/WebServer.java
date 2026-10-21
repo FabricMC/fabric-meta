@@ -50,6 +50,7 @@ public class WebServer {
 			routes = config.routes;
 			EndpointsV1.setup();
 			EndpointsV2.setup();
+			MiscEndpoints.setup();
 		});
 
 		return javalin;
@@ -58,6 +59,19 @@ public class WebServer {
 	public static void start() {
 		assert javalin == null;
 		create().start(5555);
+	}
+
+	public static void get(String route, String mimeType, Function<Context, String> supplier) {
+		routes.get(route, ctx -> {
+			String result = supplier.apply(ctx);
+
+			if (result == null) {
+				ctx.status(404);
+				result = "not found";
+			}
+
+			ctx.contentType(mimeType).header(Header.CACHE_CONTROL, "public, max-age=60").result(result);
+		});
 	}
 
 	public static <T> void jsonGet(String route, Supplier<T> supplier) {
