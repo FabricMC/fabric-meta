@@ -153,6 +153,7 @@ public class ProfileHandler {
 
 		if (!env.game().version().releaseTime().isBefore(FIRST_JAVA_17_RELEASE)) {
 			// Fix https://calif.io/java4shell/
+			jvmArgs.add("-XX:+UnlockDiagnosticVMOptions");
 			jvmArgs.add("-XX:-UseBASE64Intrinsics");
 		}
 
