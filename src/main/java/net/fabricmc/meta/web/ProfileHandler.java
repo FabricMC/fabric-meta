@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.OffsetDateTime;
 import java.util.Date;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
@@ -42,6 +43,7 @@ import net.fabricmc.meta.web.EndpointsV2.ProfileEnvironment;
 public class ProfileHandler {
 	private static final Executor EXECUTOR = Executors.newFixedThreadPool(2);
 	private static final DateFormat ISO_8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+	private static final OffsetDateTime FIRST_JAVA_17_RELEASE = OffsetDateTime.parse("2021-11-16T17:04:48Z"); // 1.18-pre2
 
 	public static void setup() {
 		EndpointsV2.fileDownload("client", "json", ProfileHandler::getFileName, ProfileHandler::profileJson);
@@ -147,10 +149,20 @@ public class ProfileHandler {
 		// I believe this is required to stop the launcher from complaining
 		arguments.add("game", new JsonArray());
 
+		JsonArray jvmArgs = new JsonArray();
+
+		if (!env.game().version().releaseTime().isBefore(FIRST_JAVA_17_RELEASE)) {
+			// Fix https://calif.io/java4shell/
+			jvmArgs.add("-XX:+UnlockDiagnosticVMOptions");
+			jvmArgs.add("-XX:-UseBASE64Intrinsics");
+		}
+
 		if (env.side().equals("client")) {
 			// add '-DFabricMcEmu= net.minecraft.client.main.Main ' to emulate vanilla MC presence for programs that check the process command line (discord, nvidia hybrid gpu, ..)
-			JsonArray jvmArgs = new JsonArray();
 			jvmArgs.add("-DFabricMcEmu= net.minecraft.client.main.Main ");
+		}
+
+		if (!jvmArgs.isEmpty()) {
 			arguments.add("jvm", jvmArgs);
 		}
 
